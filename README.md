@@ -1,5 +1,5 @@
 # Go2 机器狗实验指导书
-
+教材仓库：https://ztl3106742440-hub.github.io/go2-tutorial/
 面向本科小白的 Unitree Go2 + ROS2 二次开发实验教程。源文件为 Markdown，通过 [MkDocs-Material](https://squidfunk.github.io/mkdocs-material/) 构建为可交互的静态网站。
 
 ---
