@@ -1,0 +1,41 @@
+name: 💡 提建议
+description: 对教材结构、讲法、示例选择等有更好的想法
+title: "[Suggestion] "
+labels:
+  - suggestion
+body:
+  - type: markdown
+    attributes:
+      value: |
+        所有建议都欢迎!好想法我们会在后续章节里吸纳。
+
+  - type: input
+    id: page-url
+    attributes:
+      label: 相关页面 URL(可选)
+      description: 如果建议针对某一章,填上页面链接
+      placeholder: https://ztl3106742440-hub.github.io/go2-tutorial/...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: 建议类型
+      options:
+        - 新增章节 / 补充内容
+        - 调整讲解顺序 / 结构优化
+        - 代码示例替换 / 更贴近实际
+        - 配图 / 可视化改进
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: content
+    attributes:
+      label: 建议内容
+      description: 详细说一下你的想法
+      placeholder: 我觉得第 X 章可以加上 YYY,因为...
+    validations:
+      required: true

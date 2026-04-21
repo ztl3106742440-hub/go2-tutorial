@@ -1,0 +1,59 @@
+name: 💻 报告代码错误
+description: 教材里的代码/命令/配置跑不通或者行为不对
+title: "[Code] "
+labels:
+  - code-bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        代码问题请尽量贴出**实际报错**和**运行环境**,这样最容易复现。
+
+  - type: input
+    id: page-url
+    attributes:
+      label: 出现问题的页面 URL
+      description: 教材站点里哪个页面?(点反馈按钮时通常已经自动填好)
+      placeholder: https://ztl3106742440-hub.github.io/go2-tutorial/...
+    validations:
+      required: true
+
+  - type: input
+    id: code-location
+    attributes:
+      label: 代码所在位置
+      description: 具体是哪段代码块?比如 "步骤三第二个代码块 / L42 的 launch 命令"
+      placeholder: 步骤 X / 代码块位置
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+      description: 你按教材跑完,原本应该看到什么?
+      placeholder: 教材说应该能看到 /lf/sportmodestate 的输出
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际报错/行为
+      description: 真实跑出来是什么?贴 terminal 报错最好
+      placeholder: |
+        ```
+        [ERROR] ...
+        ```
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      description: Ubuntu / ROS2 / 硬件情况
+      placeholder: Ubuntu 22.04 + ROS2 Humble + Go2 EDU + 扩展坞
+    validations:
+      required: false

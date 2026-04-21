@@ -1,0 +1,49 @@
+name: 📝 报告内容错误
+description: 教材里某一段文字/逻辑/叙述有错或不清楚
+title: "[Docs] "
+labels:
+  - docs-bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你帮我们改进教材!请尽量详细描述遇到的问题,这样修起来最快。
+
+  - type: input
+    id: page-url
+    attributes:
+      label: 出现问题的页面 URL
+      description: 教材站点里哪个页面?(点反馈按钮时通常已经自动填好)
+      placeholder: https://ztl3106742440-hub.github.io/go2-tutorial/...
+    validations:
+      required: true
+
+  - type: input
+    id: section
+    attributes:
+      label: 章节/小节标题
+      description: 比如 "第 3 章 / 步骤二:定义按键映射"
+      placeholder: 第 X 章 / 小节标题
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 哪里错了?或者哪里读起来不清楚?
+      placeholder: |
+        例如:
+        - 第 X 章说 XXX,但实际上应该是 YYY
+        - 这段话和上一段矛盾
+        - 这里的图和文字对不上
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 修改建议(可选)
+      description: 如果你已经知道怎么改,直接写出来更好
+    validations:
+      required: false

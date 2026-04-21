@@ -110,6 +110,10 @@ plugins:
 # ---------- 额外 CSS/JS ----------
 extra_css:
   - assets/css/extra.css
+  - stylesheets/feedback.css
+
+extra_javascript:
+  - javascripts/feedback.js
 
 # ---------- 导航树 ----------
 # 章节标题使用中文,文件名保持英文数字编号
