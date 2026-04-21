@@ -1,0 +1,3020 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="面向本科小白的 Unitree Go2 + ROS2 二次开发实验教程">
+      
+      
+        <meta name="author" content="ztl">
+      
+      
+        <link rel="canonical" href="https://ztl3106742440-hub.github.io/go2-tutorial/01-foundation/01-install/">
+      
+      
+        <link rel="prev" href="../../00-overview/04-safety/">
+      
+      
+        <link rel="next" href="../02-messages/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>第 1 章 环境搭建 - Go2 机器狗实验指导书</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Go2 机器狗实验指导书" class="md-header__button md-logo" aria-label="Go2 机器狗实验指导书" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.41 4 16 6.41v.18L18.41 9H22v2h-4.41L16 9.41V12h-1a2 2 0 0 1-2-2V7.5H9.86c-.09.37-.24.72-.44 1.05L15.18 19H20a2 2 0 0 1 2 2v1H2v-1a2 2 0 0 1 2-2h6.61l-4.69-8.5a4.006 4.006 0 0 1-3.81-3A4 4 0 0 1 5 2.63c2.13-.55 4.31.73 4.86 2.87H13V3a2 2 0 0 1 2-2h1v2.59L17.59 2H22v2zM6 4.5a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Go2 机器狗实验指导书
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第 1 章 环境搭建
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到深色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到浅色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ztl3106742440-hub/go2-tutorial" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ztl3106742440-hub/go2-tutorial
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../00-overview/01-intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  开篇
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  基础篇 · 环境与通信
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-packages/03-keyboard/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  功能包开发
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-communication/07-topic/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  ROS2 通信机制实战
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-perception/10-lidar/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  进阶篇 · 感知与导航
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-interaction/16-voice/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  交互篇 · 语音与视觉
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-integration/18-orchestration/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  综合篇
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Go2 机器狗实验指导书" class="md-nav__button md-logo" aria-label="Go2 机器狗实验指导书" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.41 4 16 6.41v.18L18.41 9H22v2h-4.41L16 9.41V12h-1a2 2 0 0 1-2-2V7.5H9.86c-.09.37-.24.72-.44 1.05L15.18 19H20a2 2 0 0 1 2 2v1H2v-1a2 2 0 0 1 2-2h6.61l-4.69-8.5a4.006 4.006 0 0 1-3.81-3A4 4 0 0 1 5 2.63c2.13-.55 4.31.73 4.86 2.87H13V3a2 2 0 0 1 2-2h1v2.59L17.59 2H22v2zM6 4.5a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg>
+
+    </a>
+    Go2 机器狗实验指导书
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ztl3106742440-hub/go2-tutorial" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ztl3106742440-hub/go2-tutorial
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开篇
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    开篇
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/01-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教程简介与使用指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go2 硬件一图看懂
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/03-env/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发环境总览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/04-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实机安全红线
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    基础篇 · 环境与通信
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    基础篇 · 环境与通信
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 环境搭建
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 环境搭建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章你将学到
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景与原理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="背景与原理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ROS2 在这一章里到底扮演什么角色
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么这本书坚持把官方环境和教程工作空间分开
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cyclonedds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么还要单独提 CycloneDDS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么网络配置是环境搭建的一部分
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构总览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        环境准备
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        实现步骤
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="实现步骤">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2-humble" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤一：安装 ROS2 Humble
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unitree_ros2-go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤二：拉取 unitree_ros2 并安装 Go2 相关依赖
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cyclonedds_ws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤三：编译 cyclonedds_ws
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤四：把电脑和 Go2 放进同一网段
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setupsh-cyclonedds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤五：修改 setup.sh，把 CycloneDDS 绑到正确网卡
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤六：验证电脑和 Go2 已经能说上话
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unitree_go2_ws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤七：创建教程工作空间 unitree_go2_ws
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤八：写第一个状态订阅节点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_hello_py" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤九：注册入口并编译 go2_hello_py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤十：运行第一个教程节点
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译与运行
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果验证
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        常见问题
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="常见问题">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2-topic-list-go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ros2 topic list 看不到 Go2 相关话题
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ros2-topic-list-ros2-topic-echo-lfsportmodestate-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ros2 topic list 有话题，但 ros2 topic echo /lf/sportmodestate --once 一直没输出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_hello_py-unitree_go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译 go2_hello_py 时提示找不到 unitree_go
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ros2-run-go2_hello_py-hello_sport_state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ros2 run go2_hello_py hello_sport_state 提示找不到可执行入口
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cyclonedds_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译 CycloneDDS 时就报错
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章小结
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        下一步
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拓展阅读
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-messages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 认识 Go2 消息接口
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    功能包开发
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    功能包开发
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/03-keyboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 键盘控制节点
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/04-twist-bridge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 Twist 消息桥接
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/05-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 机器人可视化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/06-driver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 完整驱动包集成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ROS2 通信机制实战
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ROS2 通信机制实战
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/07-topic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 话题通信 — 巡航与位置获取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/08-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 服务通信 — 巡航启停
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/09-action/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 动作通信 — 导航任务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    进阶篇 · 感知与导航
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    进阶篇 · 感知与导航
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/10-lidar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 激光雷达原理与选型
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/11-slam-2d/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 2D SLAM 建图实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/12-nav2-baseline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 实机 Nav2 2D 基线
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/13-upgrade-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 升级动机与仿真环境搭建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/14-slam-3d-sim/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 仿真中的 3D SLAM 与 Nav2 升级
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/15-mid360/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 实机升级 — 外接 MID-360 方案
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交互篇 · 语音与视觉
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    交互篇 · 语音与视觉
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-interaction/16-voice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 16 章 语音交互系统
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-interaction/17-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 17 章 视觉与 VLM 应用
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    综合篇
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    综合篇
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-integration/18-orchestration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 18 章 任务编排 — 多模态联动
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-integration/19-future/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 19 章 未来方向 — RL 与具身智能
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章你将学到
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景与原理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="背景与原理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ROS2 在这一章里到底扮演什么角色
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么这本书坚持把官方环境和教程工作空间分开
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cyclonedds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么还要单独提 CycloneDDS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么网络配置是环境搭建的一部分
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构总览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        环境准备
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        实现步骤
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="实现步骤">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2-humble" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤一：安装 ROS2 Humble
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unitree_ros2-go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤二：拉取 unitree_ros2 并安装 Go2 相关依赖
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cyclonedds_ws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤三：编译 cyclonedds_ws
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤四：把电脑和 Go2 放进同一网段
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setupsh-cyclonedds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤五：修改 setup.sh，把 CycloneDDS 绑到正确网卡
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤六：验证电脑和 Go2 已经能说上话
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unitree_go2_ws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤七：创建教程工作空间 unitree_go2_ws
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤八：写第一个状态订阅节点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_hello_py" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤九：注册入口并编译 go2_hello_py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤十：运行第一个教程节点
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译与运行
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果验证
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        常见问题
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="常见问题">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2-topic-list-go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ros2 topic list 看不到 Go2 相关话题
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ros2-topic-list-ros2-topic-echo-lfsportmodestate-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ros2 topic list 有话题，但 ros2 topic echo /lf/sportmodestate --once 一直没输出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_hello_py-unitree_go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译 go2_hello_py 时提示找不到 unitree_go
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ros2-run-go2_hello_py-hello_sport_state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ros2 run go2_hello_py hello_sport_state 提示找不到可执行入口
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cyclonedds_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译 CycloneDDS 时就报错
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章小结
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        下一步
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拓展阅读
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="1">第 1 章 环境搭建<a class="headerlink" href="#1" title="锚点链接">&para;</a></h1>
+<div class="admonition info">
+<p class="admonition-title">参考教程说明</p>
+<p>本书<strong>第 1 到第 9 章</strong>(环境、消息、键盘、Twist 桥、可视化、驱动、话题、服务、动作)主要参考 B 站<strong>赵虚左</strong>老师的《Go2 开发指南》系列视频整理而来,按本书的代码约定和叙事顺序做了改写。</p>
+<p>如果你更习惯看视频,或者想在某一章听到原版讲解,可以对照观看:</p>
+<p><strong>【ROS2 理论与实践 _ 宇树机器人 Go2 开发指南】</strong> — <a href="https://www.bilibili.com/video/BV1vv5YzBEQH?vd_source=e826416e2d1ee7e81b4a504563d2d78e">https://www.bilibili.com/video/BV1vv5YzBEQH?vd_source=e826416e2d1ee7e81b4a504563d2d78e</a></p>
+<p>从第 10 章开始(感知与导航篇),本书主要基于作者自己的实机踩坑与仿真实验,不再对应视频课程。</p>
+</div>
+<blockquote>
+<p>开篇读完之后，这一章要解决的事很具体：把 Ubuntu 电脑和 Go2 真正连起来，并用你自己的第一个 ROS2 节点读到 <code>/lf/sportmodestate</code>。</p>
+</blockquote>
+<h2 id="_1">本章你将学到<a class="headerlink" href="#_1" title="锚点链接">&para;</a></h2>
+<ul>
+<li>为什么本书固定使用 Ubuntu 22.04、ROS2 Humble 和 CycloneDDS 这套组合</li>
+<li>怎样准备 <code>unitree_ros2</code> 官方环境，并知道它和你自己的工作空间怎么分工</li>
+<li>怎样把电脑和 Go2 放进同一网段，让 DDS 通信真正建立起来</li>
+<li>怎样创建 <code>unitree_go2_ws</code> 和第一个教程包 <code>go2_hello_py</code></li>
+<li>怎样编译并运行一个最小 Python 节点，让终端打印出 Go2 的实时姿态数据</li>
+</ul>
+<h2 id="_2">背景与原理<a class="headerlink" href="#_2" title="锚点链接">&para;</a></h2>
+<h3 id="ros2">ROS2 在这一章里到底扮演什么角色<a class="headerlink" href="#ros2" title="锚点链接">&para;</a></h3>
+<p>如果你把 Go2 开发想成“我写一个 Python 脚本，然后它就能动”，这章很容易看得乱。</p>
+<p>更准确的理解是：</p>
+<ul>
+<li><strong>Ubuntu 22.04</strong> 提供稳定的 Linux 开发环境</li>
+<li><strong>ROS2 Humble</strong> 提供节点、话题、消息、编译和运行的基础框架</li>
+<li><strong>Unitree 官方 <code>unitree_ros2</code> 仓库</strong> 提供 Go2 的消息定义、示例程序和环境脚本</li>
+<li><strong>你的教程工作空间 <code>unitree_go2_ws</code></strong> 才是后面真正写自己代码的地方</li>
+</ul>
+<p>这一章的任务，就是把这四层串起来。</p>
+<p>等它们串通之后，你后面写的控制节点、状态订阅节点、桥接节点，才不是“凭空运行”，而是挂在一套清晰的机器人软件栈上。</p>
+<h3 id="_3">为什么这本书坚持把官方环境和教程工作空间分开<a class="headerlink" href="#_3" title="锚点链接">&para;</a></h3>
+<p>第一次搭环境时，很多人会偷懒：直接把自己的代码也塞进 <code>unitree_ros2</code>，觉得少开一个目录更省事。</p>
+<p>短期看确实省事，长期看很容易变成灾难：</p>
+<ul>
+<li>你已经分不清哪些文件是官方仓库原有的，哪些是自己加的</li>
+<li>后面想升级官方仓库时不敢动</li>
+<li>章节里一旦要统一命名和目录结构，就会越来越乱</li>
+</ul>
+<p>所以本书明确分两层：</p>
+<table>
+<thead>
+<tr>
+<th>目录</th>
+<th>作用</th>
+<th>你在里面做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>~/unitree_ros2</code></td>
+<td>官方底座</td>
+<td>编译消息、加载环境脚本、参考官方示例</td>
+</tr>
+<tr>
+<td><code>~/unitree_go2_ws</code></td>
+<td>你的开发区</td>
+<td>创建包、写节点、练习和扩展本书代码</td>
+</tr>
+</tbody>
+</table>
+<p>这个分工你现在就要记住，因为后面很多“到底该改哪儿”的选择题，都是靠它做对的。</p>
+<h3 id="cyclonedds">为什么还要单独提 CycloneDDS<a class="headerlink" href="#cyclonedds" title="锚点链接">&para;</a></h3>
+<p>Go2 这条链路不是“只要装了 ROS2 就随便通”的。</p>
+<p>Unitree 的通信机制和 ROS2 的 DDS 层是对齐的，本书主线固定使用 CycloneDDS，就是为了让你和 Go2 使用同一种稳定的通信方式。</p>
+<p>你可能会在别的帖子里看到 Fast DDS、默认 DDS 或者别的折腾方案。先别急。</p>
+<p>对初学者来说，<strong>先把官方推荐链路跑通</strong>，比一上来就玩变体重要得多。</p>
+<div class="admonition note">
+<p class="admonition-title">关于 Humble 和 CycloneDDS 的一个现实提醒</p>
+<p>官方 README 提到在某些 Humble 环境里可以跳过单独编译 CycloneDDS。但结合现有项目材料和本书后续章节的环境约定，我们仍然统一按 <code>unitree_ros2/cyclonedds_ws</code> 这条链路来写。这样前后章节口径一致，读者也更容易排错。</p>
+</div>
+<h3 id="_4">为什么网络配置是环境搭建的一部分<a class="headerlink" href="#_4" title="锚点链接">&para;</a></h3>
+<p>很多第一次做机器人开发的人，会把网络理解成“先连上，剩下交给代码”。</p>
+<p>在 Go2 这里，这种想法不够。</p>
+<p>因为你的节点能不能看到 <code>/lf/sportmodestate</code>、<code>/lf/lowstate</code>、<code>/wirelesscontroller</code> 这些话题，首先取决于：</p>
+<ol>
+<li>电脑和 Go2 是否在同一网段</li>
+<li>你在 <code>setup.sh</code> 里写的网卡名是不是对的</li>
+<li>你是不是加载了正确的环境脚本</li>
+</ol>
+<p>也就是说，这一章的“环境搭建”不是边角料，它本身就是后面所有章节能否成立的前提。</p>
+<h2 id="_5">架构总览<a class="headerlink" href="#_5" title="锚点链接">&para;</a></h2>
+<p>先看整条链路的样子：</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph Laptop[Ubuntu 22.04 电脑]
+        A[ROS2 Humble]
+        B[unitree_ros2/cyclonedds_ws]
+        C[unitree_go2_ws]
+        D[setup.sh]
+        A --&gt; B
+        B --&gt; D
+        D --&gt; C
+    end
+
+    Laptop &lt;--&gt;|以太网 / 同一网段| E[Go2 本体]
+    E --&gt;|发布状态话题| F["/lf/sportmodestate&lt;br/&gt;/lf/lowstate&lt;br/&gt;/wirelesscontroller"]
+    C --&gt;|订阅 / 发布| F</code></pre>
+<p>这张图可以翻成一句人话：</p>
+<ol>
+<li>先把 ROS2 Humble 准备好</li>
+<li>再把 <code>unitree_ros2</code> 这套官方底座准备好</li>
+<li>再通过 <code>setup.sh</code> 把 CycloneDDS 和正确网卡绑起来</li>
+<li>最后在 <code>unitree_go2_ws</code> 里写你自己的节点</li>
+</ol>
+<p>你后面每次打开一个新终端，基本都在重复一件事：把这条链重新 source 回来。</p>
+<h2 id="_6">环境准备<a class="headerlink" href="#_6" title="锚点链接">&para;</a></h2>
+<p>开始前先确认下面这些前置条件：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>操作系统</td>
+<td>Ubuntu 22.04 LTS</td>
+</tr>
+<tr>
+<td>ROS2 版本</td>
+<td>Humble</td>
+</tr>
+<tr>
+<td>机器人</td>
+<td>Go2 EDU，能正常上电</td>
+</tr>
+<tr>
+<td>网络</td>
+<td>一根能稳定工作的有线网口或转接器</td>
+</tr>
+<tr>
+<td>硬盘空间</td>
+<td>至少留出 20GB 左右可用空间</td>
+</tr>
+<tr>
+<td>本章模式</td>
+<td>默认真机模式，不是仿真模式</td>
+</tr>
+</tbody>
+</table>
+<p>建议你额外准备两个习惯：</p>
+<ul>
+<li>每做完一段配置，就立刻做一次小验证</li>
+<li>不要在同一个终端里反复叠很多层不确定的环境</li>
+</ul>
+<p>这两件事会比你想象中更省时间。</p>
+<div class="admonition warning">
+<p class="admonition-title">本章默认你在真机模式下动手</p>
+<p>如果你暂时没有连 Go2，只是想先在本机练命令，可以先看完流程，再用 <code>setup_local.sh</code> 或 <code>setup_default.sh</code> 熟悉目录和命令。但本章真正的成功标准，仍然是看到真机的 <code>/lf/sportmodestate</code> 数据。</p>
+</div>
+<h2 id="_7">实现步骤<a class="headerlink" href="#_7" title="锚点链接">&para;</a></h2>
+<h3 id="ros2-humble">步骤一：安装 ROS2 Humble<a class="headerlink" href="#ros2-humble" title="锚点链接">&para;</a></h3>
+<p>如果你的系统还没装 ROS2 Humble，先把基础环境补齐。</p>
+<p>先准备系统语言环境和 ROS2 软件源：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 配置本地语言环境，避免后面某些依赖和工具链因为 locale 异常报错</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>locales<span class="w"> </span>software-properties-common<span class="w"> </span>curl
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>sudo<span class="w"> </span>locale-gen<span class="w"> </span>en_US<span class="w"> </span>en_US.UTF-8
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>sudo<span class="w"> </span>update-locale<span class="w"> </span><span class="nv">LC_ALL</span><span class="o">=</span>en_US.UTF-8<span class="w"> </span><span class="nv">LANG</span><span class="o">=</span>en_US.UTF-8
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANG</span><span class="o">=</span>en_US.UTF-8
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># 打开 universe 仓库，并写入 ROS2 的 apt 源</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>sudo<span class="w"> </span>add-apt-repository<span class="w"> </span>universe
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>sudo<span class="w"> </span>curl<span class="w"> </span>-sSL<span class="w"> </span>https://raw.githubusercontent.com/ros/rosdistro/master/ros.key<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span>-o<span class="w"> </span>/usr/share/keyrings/ros-archive-keyring.gpg
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [arch=</span><span class="k">$(</span>dpkg<span class="w"> </span>--print-architecture<span class="k">)</span><span class="s2"> signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="s2">http://packages.ros.org/ros2/ubuntu </span><span class="k">$(</span>.<span class="w"> </span>/etc/os-release<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$UBUNTU_CODENAME</span><span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/ros2.list<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+</span></code></pre></div>
+<p>然后安装 ROS2 Humble 和开发工具：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># 安装 ROS2 桌面版和常用开发工具</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>ros-humble-desktop<span class="w"> </span>ros-dev-tools
+</span></code></pre></div>
+<p>最后做一次最小验证：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 只加载 ROS2 基础环境，确认 ros2 命令可用</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">source</span><span class="w"> </span>/opt/ros/humble/setup.bash
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>ros2<span class="w"> </span>--help
+</span></code></pre></div>
+<p>如果你能看到 <code>ros2</code> 的帮助信息，说明系统级 ROS2 已经装好了。</p>
+<div class="admonition tip">
+<p class="admonition-title">已经装过 ROS2 的读者怎么做</p>
+<p>如果你已经确认自己装的是 Humble，而且 <code>source /opt/ros/humble/setup.bash</code> 后 <code>ros2 --help</code> 正常，就可以直接跳到下一步，不用重复安装。</p>
+</div>
+<h3 id="unitree_ros2-go2">步骤二：拉取 <code>unitree_ros2</code> 并安装 Go2 相关依赖<a class="headerlink" href="#unitree_ros2-go2" title="锚点链接">&para;</a></h3>
+<p>现在开始搭官方底座。</p>
+<p>先把仓库克隆到家目录：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 这个仓库里包含 Go2 的消息定义、环境脚本和示例程序</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">cd</span><span class="w"> </span>~
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/unitreerobotics/unitree_ros2
+</span></code></pre></div>
+<p>如果你本地已经有这个目录，就不要重复 clone 了，直接进入目录继续下面步骤。</p>
+<p>接着安装 Go2 这条链路最关键的两个依赖：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># rmw_cyclonedds_cpp: 让 ROS2 用 CycloneDDS 作为底层通信实现</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># rosidl-generator-dds-idl: 生成与 DDS 相关的消息描述文件</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span>ros-humble-rmw-cyclonedds-cpp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span>ros-humble-rosidl-generator-dds-idl
+</span></code></pre></div>
+<p>到这里为止，你只是把“官方环境需要的积木”备齐了，还没有真正把消息工作空间编译出来。</p>
+<h3 id="cyclonedds_ws">步骤三：编译 <code>cyclonedds_ws</code><a class="headerlink" href="#cyclonedds_ws" title="锚点链接">&para;</a></h3>
+<p>这一步容易踩坑，先记住一个规则：<strong>编译 <code>cyclonedds_ws</code> 之前，当前终端不要叠加别的 ROS2 工作空间环境。</strong></p>
+<p>最稳妥的做法，是重新开一个干净终端，先确认没有残留的 ROS2 叠加环境：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 理想情况应该输出 humble 或者为空；重点是不要叠了别的工作空间 install</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$ROS_DISTRO</span>
+</span></code></pre></div>
+<p>然后进入 <code>cyclonedds_ws</code> 的源码目录，准备 CycloneDDS 相关仓库：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 进入官方消息工作空间的 src 目录</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_ros2/cyclonedds_ws/src
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># 这两个仓库如果已经存在，就跳过 clone</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ros2/rmw_cyclonedds<span class="w"> </span>-b<span class="w"> </span>humble
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/eclipse-cyclonedds/cyclonedds<span class="w"> </span>-b<span class="w"> </span>releases/0.10.x
+</span></code></pre></div>
+<p>回到工作空间根目录，只编译 <code>cyclonedds</code> 包：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 先把 CycloneDDS 自身编出来，后面 setup.sh 会直接 source 它</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_ros2/cyclonedds_ws
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>cyclonedds
+</span></code></pre></div>
+<p>如果这一步报错，最常见的原因不是代码问题，而是终端里叠了不该叠的环境。</p>
+<p><code>colcon build</code> 成功后，再编译整个官方消息工作空间：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 这一步开始需要 ROS2 Humble 基础环境</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">source</span><span class="w"> </span>/opt/ros/humble/setup.bash
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_ros2/cyclonedds_ws
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>colcon<span class="w"> </span>build
+</span></code></pre></div>
+<p>这一步完成后，<code>unitree_go</code> 和 <code>unitree_api</code> 这些消息包才真正对你的系统可用。</p>
+<h3 id="go2">步骤四：把电脑和 Go2 放进同一网段<a class="headerlink" href="#go2" title="锚点链接">&para;</a></h3>
+<p>Go2 真机开发时，最常见的链路是：</p>
+<ul>
+<li>Go2 默认地址在 <code>192.168.123.*</code> 网段</li>
+<li>你的电脑要给连接 Go2 的那块网卡配置同网段地址</li>
+</ul>
+<p>先找出你准备用来连 Go2 的网卡名：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 看网卡列表，记住连接 Go2 的那块有线网卡名称</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>ip<span class="w"> </span>link<span class="w"> </span>show
+</span></code></pre></div>
+<p>如果你更习惯从 NetworkManager 视角看，也可以先列出现有连接：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># 查看当前有线连接配置名称</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>nmcli<span class="w"> </span>connection<span class="w"> </span>show
+</span></code></pre></div>
+<p>然后把连接 Go2 的那条有线连接切到手动 IP。</p>
+<p>下面示例里的连接名写成 <code>"Wired connection 1"</code>，你要替换成自己的实际连接名：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># 把连接 Go2 的有线连接改到 192.168.123.x 网段</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>sudo<span class="w"> </span>nmcli<span class="w"> </span>connection<span class="w"> </span>modify<span class="w"> </span><span class="s2">&quot;Wired connection 1&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span>ipv4.addresses<span class="w"> </span><span class="s2">&quot;192.168.123.99/24&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span>ipv4.method<span class="w"> </span>manual
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1"># 重新激活连接，让新配置立刻生效</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>sudo<span class="w"> </span>nmcli<span class="w"> </span>connection<span class="w"> </span>down<span class="w"> </span><span class="s2">&quot;Wired connection 1&quot;</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>sudo<span class="w"> </span>nmcli<span class="w"> </span>connection<span class="w"> </span>up<span class="w"> </span><span class="s2">&quot;Wired connection 1&quot;</span>
+</span></code></pre></div>
+<p>配置完成后，用 <code>ip addr</code> 检查结果：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># 把 enp111s0 替换成你的网卡名</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>ip<span class="w"> </span>addr<span class="w"> </span>show<span class="w"> </span>enp111s0
+</span></code></pre></div>
+<p>如果能看到 <code>192.168.123.99/24</code>，说明这一步已经对上了。</p>
+<div class="admonition warning">
+<p class="admonition-title">不要把日常上网配置和 Go2 静态 IP 长期混在一起</p>
+<p>如果你的电脑平时也会用同一个有线口连路由器、交换机或校园网，最好给 Go2 单独准备一条专用连接配置。否则你哪天切回正常上网环境时，很容易因为残留的静态 IP 把网络搞乱。</p>
+</div>
+<h3 id="setupsh-cyclonedds">步骤五：修改 <code>setup.sh</code>，把 CycloneDDS 绑到正确网卡<a class="headerlink" href="#setupsh-cyclonedds" title="锚点链接">&para;</a></h3>
+<p>网络进了同一网段还不够，你还要告诉 CycloneDDS：<strong>该走哪块网卡去发现 Go2。</strong></p>
+<p>打开 <code>setup.sh</code>：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># 这个脚本会统一加载 ROS2、官方消息工作空间和 CycloneDDS 配置</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>gedit<span class="w"> </span>~/unitree_ros2/setup.sh
+</span></code></pre></div>
+<p>把里面最关键的部分改成你自己的网卡名：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="ch">#!/bin/bash</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Setup unitree ros2 environment&quot;</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nb">source</span><span class="w"> </span>/opt/ros/humble/setup.bash
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/unitree_ros2/cyclonedds_ws/install/setup.bash
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">RMW_IMPLEMENTATION</span><span class="o">=</span>rmw_cyclonedds_cpp
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CYCLONEDDS_URI</span><span class="o">=</span><span class="s1">&#39;&lt;CycloneDDS&gt;&lt;Domain&gt;&lt;General&gt;&lt;Interfaces&gt;</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="s1">                            &lt;NetworkInterface name=&quot;enp111s0&quot; priority=&quot;default&quot; multicast=&quot;default&quot; /&gt;  # (1)!</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="s1">                        &lt;/Interfaces&gt;&lt;/General&gt;&lt;/Domain&gt;&lt;/CycloneDDS&gt;&#39;</span>
+</span></code></pre></div>
+<ol>
+<li>这里的 <code>enp111s0</code> 只是示例，必须替换成你真正连 Go2 的那块网卡名</li>
+</ol>
+<p>保存后，加载这个脚本：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># 后面每次要和 Go2 真机通信，基本都从这条命令开始</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span></code></pre></div>
+<p>你可以顺手检查两件事：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># 检查当前 ROS2 发行版</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$ROS_DISTRO</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># 检查当前 DDS 实现</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$RMW_IMPLEMENTATION</span>
+</span></code></pre></div>
+<p>理想输出应该分别是 <code>humble</code> 和 <code>rmw_cyclonedds_cpp</code>。</p>
+<h3 id="go2_1">步骤六：验证电脑和 Go2 已经能说上话<a class="headerlink" href="#go2_1" title="锚点链接">&para;</a></h3>
+<p>先做最朴素的网络连通性测试：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Go2 默认地址通常在 192.168.123.161</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>ping<span class="w"> </span><span class="m">192</span>.168.123.161
+</span></code></pre></div>
+<p>如果能收到回复，再去看 ROS2 话题：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># 先加载官方环境，再查看 Go2 是否已经在发布话题</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>ros2<span class="w"> </span>topic<span class="w"> </span>list
+</span></code></pre></div>
+<p>正常情况下，你应该能看到类似下面这些主题：</p>
+<ul>
+<li><code>/api/sport/request</code></li>
+<li><code>/lf/sportmodestate</code></li>
+<li><code>/lf/lowstate</code></li>
+<li><code>/wirelesscontroller</code></li>
+</ul>
+<p>再做一次关键验证：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># 抓一帧高层状态，证明 DDS 通信和消息定义都工作正常</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/lf/sportmodestate<span class="w"> </span>--once
+</span></code></pre></div>
+<p>如果这里已经能看到一帧状态数据，说明“电脑 ↔ Go2 ↔ ROS2 话题”这条主链已经打通了。</p>
+<h3 id="unitree_go2_ws">步骤七：创建教程工作空间 <code>unitree_go2_ws</code><a class="headerlink" href="#unitree_go2_ws" title="锚点链接">&para;</a></h3>
+<p>官方环境打通之后，开始准备你自己的开发区。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># 创建教程工作空间，后面全书的自定义包都放在这里</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/unitree_go2_ws/src
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws/src
+</span></code></pre></div>
+<p>本章我们先建一个最小 Python 包：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># 创建第一个教程包，用它来订阅 Go2 的高层状态</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>ros2<span class="w"> </span>pkg<span class="w"> </span>create<span class="w"> </span>go2_hello_py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">    </span>--build-type<span class="w"> </span>ament_python<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span>--dependencies<span class="w"> </span>rclpy<span class="w"> </span>unitree_go
+</span></code></pre></div>
+<p>这里的 <code>unitree_go</code> 就是我们前面辛苦准备官方底座的原因之一：没有它，你根本拿不到 <code>SportModeState</code> 这类消息类型。</p>
+<h3 id="_8">步骤八：写第一个状态订阅节点<a class="headerlink" href="#_8" title="锚点链接">&para;</a></h3>
+<p>现在在 <code>go2_hello_py/go2_hello_py/</code> 目录下创建 <code>hello_sport_state.py</code>，填入下面这段代码。</p>
+<p>接下来这段代码只做一件事：订阅 <code>/lf/sportmodestate</code>，每隔半秒打印一次位置、速度和偏航角速度。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>                                       <span class="c1"># ROS2 Python 客户端库，节点入口</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>                        <span class="c1"># 所有自定义 ROS2 节点的基类</span>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unitree_go.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">SportModeState</span>          <span class="c1"># Go2 高层运动状态消息</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">HelloSportState</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;hello_sport_state&quot;</span><span class="p">)</span>
+</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>
+</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_subscription</span><span class="p">(</span>  <span class="c1"># (1)!</span>
+</span><span id="__span-22-12"><a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>            <span class="n">SportModeState</span><span class="p">,</span>
+</span><span id="__span-22-13"><a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>            <span class="s2">&quot;/lf/sportmodestate&quot;</span><span class="p">,</span>
+</span><span id="__span-22-14"><a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">state_callback</span><span class="p">,</span>
+</span><span id="__span-22-15"><a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>            <span class="mi">10</span><span class="p">,</span>                                        <span class="c1"># (2)!</span>
+</span><span id="__span-22-16"><a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a>        <span class="p">)</span>
+</span><span id="__span-22-17"><a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a>
+</span><span id="__span-22-18"><a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">state_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">SportModeState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-22-19"><a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>        <span class="n">now_ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">nanoseconds</span>
+</span><span id="__span-22-20"><a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a>        <span class="k">if</span> <span class="n">now_ns</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">&lt;</span> <span class="mi">500_000_000</span><span class="p">:</span>    <span class="c1"># (3)!</span>
+</span><span id="__span-22-21"><a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a>            <span class="k">return</span>
+</span><span id="__span-22-22"><a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a>
+</span><span id="__span-22-23"><a id="__codelineno-22-23" name="__codelineno-22-23" href="#__codelineno-22-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">=</span> <span class="n">now_ns</span>
+</span><span id="__span-22-24"><a id="__codelineno-22-24" name="__codelineno-22-24" href="#__codelineno-22-24"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+</span><span id="__span-22-25"><a id="__codelineno-22-25" name="__codelineno-22-25" href="#__codelineno-22-25"></a>            <span class="sa">f</span><span class="s2">&quot;position=(</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), &quot;</span>
+</span><span id="__span-22-26"><a id="__codelineno-22-26" name="__codelineno-22-26" href="#__codelineno-22-26"></a>            <span class="sa">f</span><span class="s2">&quot;velocity=(</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">), &quot;</span>
+</span><span id="__span-22-27"><a id="__codelineno-22-27" name="__codelineno-22-27" href="#__codelineno-22-27"></a>            <span class="sa">f</span><span class="s2">&quot;yaw=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">yaw_speed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-22-28"><a id="__codelineno-22-28" name="__codelineno-22-28" href="#__codelineno-22-28"></a>        <span class="p">)</span>
+</span><span id="__span-22-29"><a id="__codelineno-22-29" name="__codelineno-22-29" href="#__codelineno-22-29"></a>
+</span><span id="__span-22-30"><a id="__codelineno-22-30" name="__codelineno-22-30" href="#__codelineno-22-30"></a>
+</span><span id="__span-22-31"><a id="__codelineno-22-31" name="__codelineno-22-31" href="#__codelineno-22-31"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-22-32"><a id="__codelineno-22-32" name="__codelineno-22-32" href="#__codelineno-22-32"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+</span><span id="__span-22-33"><a id="__codelineno-22-33" name="__codelineno-22-33" href="#__codelineno-22-33"></a>    <span class="n">node</span> <span class="o">=</span> <span class="n">HelloSportState</span><span class="p">()</span>
+</span><span id="__span-22-34"><a id="__codelineno-22-34" name="__codelineno-22-34" href="#__codelineno-22-34"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-22-35"><a id="__codelineno-22-35" name="__codelineno-22-35" href="#__codelineno-22-35"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</span><span id="__span-22-36"><a id="__codelineno-22-36" name="__codelineno-22-36" href="#__codelineno-22-36"></a>    <span class="k">finally</span><span class="p">:</span>
+</span><span id="__span-22-37"><a id="__codelineno-22-37" name="__codelineno-22-37" href="#__codelineno-22-37"></a>        <span class="n">node</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+</span><span id="__span-22-38"><a id="__codelineno-22-38" name="__codelineno-22-38" href="#__codelineno-22-38"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</span><span id="__span-22-39"><a id="__codelineno-22-39" name="__codelineno-22-39" href="#__codelineno-22-39"></a>
+</span><span id="__span-22-40"><a id="__codelineno-22-40" name="__codelineno-22-40" href="#__codelineno-22-40"></a>
+</span><span id="__span-22-41"><a id="__codelineno-22-41" name="__codelineno-22-41" href="#__codelineno-22-41"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span id="__span-22-42"><a id="__codelineno-22-42" name="__codelineno-22-42" href="#__codelineno-22-42"></a>    <span class="n">main</span><span class="p">()</span>
+</span></code></pre></div>
+<ol>
+<li>这里创建了一个订阅者，目标话题是 <code>/lf/sportmodestate</code></li>
+<li><code>10</code> 是队列深度。消息来得太快、节点来不及处理时，会优先保留较新的消息</li>
+<li><code>/lf/sportmodestate</code> 默认频率很高，这里主动限流到 0.5 秒打印一次，避免终端被刷爆</li>
+</ol>
+<p>这段代码看起来不长，但它已经同时验证了四件事：</p>
+<ul>
+<li>你自己的 Python 包能正确 import <code>rclpy</code></li>
+<li>你已经拿到了 <code>unitree_go</code> 的消息定义</li>
+<li>你的节点真的能订阅到 Go2 的高层状态</li>
+<li>终端里看到的输出，不是本地假数据，而是真机状态反馈</li>
+</ul>
+<h3 id="go2_hello_py">步骤九：注册入口并编译 <code>go2_hello_py</code><a class="headerlink" href="#go2_hello_py" title="锚点链接">&para;</a></h3>
+<p>只写 Python 文件还不够，你还要把它注册成可运行入口。</p>
+<p>打开 <code>go2_hello_py/setup.py</code>，把 <code>entry_points</code> 改成这样：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">entry_points</span><span class="o">=</span><span class="p">{</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>    <span class="s2">&quot;console_scripts&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>        <span class="s2">&quot;hello_sport_state = go2_hello_py.hello_sport_state:main&quot;</span><span class="p">,</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>    <span class="p">],</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="p">},</span>
+</span></code></pre></div>
+<p>然后回到工作空间根目录，按顺序加载环境并编译：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># 先加载官方 Go2 环境，再编译你自己的工作空间</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_hello_py
+</span></code></pre></div>
+<p>如果编译完成后没有报错，再加载你自己的工作空间：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># 把刚编译好的 go2_hello_py 包叠加到当前终端</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span></code></pre></div>
+<h3 id="_9">步骤十：运行第一个教程节点<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h3>
+<p>现在终于可以运行你自己的第一个 Go2 节点了：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># 运行 hello_sport_state 节点，终端会定期打印实时姿态数据</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-26-5"><a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_hello_py<span class="w"> </span>hello_sport_state
+</span></code></pre></div>
+<p>如果一切正常，你会在终端里看到持续刷新的日志，例如：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>[INFO] [hello_sport_state]: position=(0.12, -0.03, 0.31), velocity=(0.00, 0.00, -0.01), yaw=0.02
+</span></code></pre></div>
+<p>这就是本章最重要的里程碑：<strong>你已经不是只会列 Topic 了，而是写出了自己的 ROS2 节点，并且它真的从 Go2 上拿到了状态数据。</strong></p>
+<div class="admonition tip">
+<p class="admonition-title">为什么本章用 <code>/lf/sportmodestate</code>，而不是先用低频话题</p>
+<p>因为本章的目标不是“舒服地看日志”，而是直接证明最核心的高层状态流已经通了。我们在代码里自己做了打印限流，所以依然不会被 500Hz 消息刷爆终端。</p>
+</div>
+<h2 id="_10">编译与运行<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
+<p>如果你想从零重新跑一遍本章的最小闭环，可以直接照着下面这组命令执行：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># 1. 加载官方 Go2 环境</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="c1"># 2. 确认 Go2 话题已经在线</span>
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>ros2<span class="w"> </span>topic<span class="w"> </span>list
+</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/lf/sportmodestate<span class="w"> </span>--once
+</span><span id="__span-28-7"><a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>
+</span><span id="__span-28-8"><a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="c1"># 3. 编译教程包</span>
+</span><span id="__span-28-9"><a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-28-10"><a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_hello_py
+</span><span id="__span-28-11"><a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a>
+</span><span id="__span-28-12"><a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a><span class="c1"># 4. 加载教程工作空间并运行第一个节点</span>
+</span><span id="__span-28-13"><a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-28-14"><a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_hello_py<span class="w"> </span>hello_sport_state
+</span></code></pre></div>
+<p>如果你还想顺手验证官方示例，也可以额外执行：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># 可选：编译并运行官方 example 工作空间</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_ros2/example
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>colcon<span class="w"> </span>build
+</span><span id="__span-29-5"><a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>./install/unitree_ros2_example/bin/read_motion_state
+</span></code></pre></div>
+<p>这一步不是本章主线必须，但它很适合作为“官方底座没问题”的对照组。</p>
+<h2 id="_11">结果验证<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
+<p>本章完成后，你至少要完成下面这几条验证：</p>
+<ol>
+<li><code>source ~/unitree_ros2/setup.sh</code> 后，<code>ros2 topic list</code> 能看到 Go2 的核心 Topic</li>
+<li><code>ros2 topic echo /lf/sportmodestate --once</code> 能抓到一帧真实状态数据</li>
+<li><code>go2_hello_py</code> 能成功编译</li>
+<li><code>ros2 run go2_hello_py hello_sport_state</code> 会持续打印位姿和速度</li>
+</ol>
+<p>如果你准备后面补媒体，建议在这里补一张“终端中运行 <code>hello_sport_state</code>、持续打印位姿和速度”的截图。</p>
+<!-- TODO(媒体): 补一张终端成功运行 hello_sport_state 的截图 -->
+<!-- TODO(媒体): 录制从 source setup.sh 到 ros2 run hello_sport_state 成功打印状态的终端演示 -->
+
+<h2 id="_12">常见问题<a class="headerlink" href="#_12" title="锚点链接">&para;</a></h2>
+<h3 id="ros2-topic-list-go2"><code>ros2 topic list</code> 看不到 Go2 相关话题<a class="headerlink" href="#ros2-topic-list-go2" title="锚点链接">&para;</a></h3>
+<p>先按下面顺序排查：</p>
+<ol>
+<li>Go2 是否已经正常上电</li>
+<li>网线和网卡是否真的连对</li>
+<li>电脑的有线网卡是否已经进入 <code>192.168.123.x</code> 网段</li>
+<li><code>setup.sh</code> 里的网卡名是否写成了真正连接 Go2 的那块网卡</li>
+<li>当前终端是否真的执行了 <code>source ~/unitree_ros2/setup.sh</code></li>
+</ol>
+<p>这类问题九成不是代码问题，而是网络或环境层的问题。</p>
+<h3 id="ros2-topic-list-ros2-topic-echo-lfsportmodestate-once"><code>ros2 topic list</code> 有话题，但 <code>ros2 topic echo /lf/sportmodestate --once</code> 一直没输出<a class="headerlink" href="#ros2-topic-list-ros2-topic-echo-lfsportmodestate-once" title="锚点链接">&para;</a></h3>
+<p>这种情况通常说明“发现到了对方，但数据没有顺利进来”。</p>
+<p>优先怀疑：</p>
+<ul>
+<li><code>CYCLONEDDS_URI</code> 里绑定错了网卡</li>
+<li>你 source 的不是当前改完的 <code>setup.sh</code></li>
+<li>机器人虽然在线，但当前链路不稳定</li>
+</ul>
+<p>先别急着去改节点代码，因为这一步连你自己的包还没上场。</p>
+<h3 id="go2_hello_py-unitree_go">编译 <code>go2_hello_py</code> 时提示找不到 <code>unitree_go</code><a class="headerlink" href="#go2_hello_py-unitree_go" title="锚点链接">&para;</a></h3>
+<p>说明你在编译教程工作空间前，没有先把官方环境 source 进来。</p>
+<p>重新执行：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_hello_py
+</span></code></pre></div>
+<h3 id="ros2-run-go2_hello_py-hello_sport_state"><code>ros2 run go2_hello_py hello_sport_state</code> 提示找不到可执行入口<a class="headerlink" href="#ros2-run-go2_hello_py-hello_sport_state" title="锚点链接">&para;</a></h3>
+<p>常见原因有两个：</p>
+<ol>
+<li><code>setup.py</code> 里的 <code>entry_points</code> 没配对</li>
+<li>编译后忘了执行 <code>source install/setup.bash</code></li>
+</ol>
+<p>这个报错很常见，但别慌，它通常只是打包流程没走完整，不是节点本身逻辑有问题。</p>
+<h3 id="cyclonedds_1">编译 CycloneDDS 时就报错<a class="headerlink" href="#cyclonedds_1" title="锚点链接">&para;</a></h3>
+<p>优先检查当前终端是不是叠了不该叠的环境。</p>
+<p>最稳妥的做法是重新开一个干净终端，只保留系统级 ROS2 基础环境，不要先 source 别的工作空间，再去编译 <code>cyclonedds_ws</code>。</p>
+<h2 id="_13">本章小结<a class="headerlink" href="#_13" title="锚点链接">&para;</a></h2>
+<p>这一章完成后，你已经做成了三件真正有分量的事：</p>
+<ul>
+<li>搭好了 Go2 官方 ROS2 底座</li>
+<li>让 Ubuntu 电脑和 Go2 在同一条通信链路上对上了</li>
+<li>写出了自己的第一个教程节点，并成功读到 <code>/lf/sportmodestate</code></li>
+</ul>
+<p>这一步一旦走通，后面很多事情都会变简单。</p>
+<p>因为你已经从“我能看到一堆话题名”进化到了“我知道怎么在自己的工作空间里把 Go2 的消息接进来”。</p>
+<h2 id="_14">下一步<a class="headerlink" href="#_14" title="锚点链接">&para;</a></h2>
+<p>下一章我们不再满足于“能看到消息”，而是要把 Go2 最核心的几类 Topic 真正拆开来看：高层状态、低层状态、遥控器状态，以及高层控制和低层控制的边界。</p>
+<p>继续阅读：<a href="../02-messages/">第 2 章 认识 Go2 消息接口</a></p>
+<h2 id="_15">拓展阅读<a class="headerlink" href="#_15" title="锚点链接">&para;</a></h2>
+<ul>
+<li><a href="https://docs.ros.org/en/humble/index.html">ROS2 Humble 官方文档</a></li>
+<li><a href="https://github.com/unitreerobotics/unitree_ros2">Unitree <code>unitree_ros2</code> 仓库</a></li>
+<li><a href="https://docs.ros.org/en/humble/Concepts/About-Different-Middleware-Vendors.html">CycloneDDS 与 ROS2 中间件说明</a></li>
+</ul>
+<details class="note">
+<summary>附:C++ 实现</summary>
+<p>如果你已经会一点 C++，可以顺手对照一版等价的状态订阅节点。主线仍以 Python 为准，这里只看关键差异。</p>
+<p>在 <code>go2_hello/go2_hello/hello_sport_state.cpp</code> 中写入：</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;rclcpp/rclcpp.hpp&quot;</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;unitree_go/msg/sport_mode_state.hpp&quot;</span>
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">HelloSportState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">Node</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="w"> </span><span class="k">public</span><span class="o">:</span>
+</span><span id="__span-31-6"><a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="w">  </span><span class="n">HelloSportState</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Node</span><span class="p">(</span><span class="s">&quot;hello_sport_state&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-31-7"><a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="w">    </span><span class="n">subscription_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">create_subscription</span><span class="o">&lt;</span><span class="n">unitree_go</span><span class="o">::</span><span class="n">msg</span><span class="o">::</span><span class="n">SportModeState</span><span class="o">&gt;</span><span class="p">(</span>
+</span><span id="__span-31-8"><a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a><span class="w">        </span><span class="s">&quot;/lf/sportmodestate&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-31-9"><a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a><span class="w">        </span><span class="p">[</span><span class="k">this</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">unitree_go</span><span class="o">::</span><span class="n">msg</span><span class="o">::</span><span class="n">SportModeState</span><span class="o">::</span><span class="n">SharedPtr</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-31-10"><a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a><span class="w">          </span><span class="n">RCLCPP_INFO</span><span class="p">(</span>
+</span><span id="__span-31-11"><a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a><span class="w">              </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">get_logger</span><span class="p">(),</span>
+</span><span id="__span-31-12"><a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a><span class="w">              </span><span class="s">&quot;position=(%.2f, %.2f, %.2f), velocity=(%.2f, %.2f, %.2f), yaw=%.2f&quot;</span><span class="p">,</span>
+</span><span id="__span-31-13"><a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a><span class="w">              </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">position</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+</span><span id="__span-31-14"><a id="__codelineno-31-14" name="__codelineno-31-14" href="#__codelineno-31-14"></a><span class="w">              </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">velocity</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">velocity</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">velocity</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+</span><span id="__span-31-15"><a id="__codelineno-31-15" name="__codelineno-31-15" href="#__codelineno-31-15"></a><span class="w">              </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">yaw_speed</span><span class="p">);</span>
+</span><span id="__span-31-16"><a id="__codelineno-31-16" name="__codelineno-31-16" href="#__codelineno-31-16"></a><span class="w">        </span><span class="p">});</span>
+</span><span id="__span-31-17"><a id="__codelineno-31-17" name="__codelineno-31-17" href="#__codelineno-31-17"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-31-18"><a id="__codelineno-31-18" name="__codelineno-31-18" href="#__codelineno-31-18"></a>
+</span><span id="__span-31-19"><a id="__codelineno-31-19" name="__codelineno-31-19" href="#__codelineno-31-19"></a><span class="w"> </span><span class="k">private</span><span class="o">:</span>
+</span><span id="__span-31-20"><a id="__codelineno-31-20" name="__codelineno-31-20" href="#__codelineno-31-20"></a><span class="w">  </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">Subscription</span><span class="o">&lt;</span><span class="n">unitree_go</span><span class="o">::</span><span class="n">msg</span><span class="o">::</span><span class="n">SportModeState</span><span class="o">&gt;::</span><span class="n">SharedPtr</span><span class="w"> </span><span class="n">subscription_</span><span class="p">;</span>
+</span><span id="__span-31-21"><a id="__codelineno-31-21" name="__codelineno-31-21" href="#__codelineno-31-21"></a><span class="p">};</span>
+</span><span id="__span-31-22"><a id="__codelineno-31-22" name="__codelineno-31-22" href="#__codelineno-31-22"></a>
+</span><span id="__span-31-23"><a id="__codelineno-31-23" name="__codelineno-31-23" href="#__codelineno-31-23"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-31-24"><a id="__codelineno-31-24" name="__codelineno-31-24" href="#__codelineno-31-24"></a><span class="w">  </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">init</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+</span><span id="__span-31-25"><a id="__codelineno-31-25" name="__codelineno-31-25" href="#__codelineno-31-25"></a><span class="w">  </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">spin</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">HelloSportState</span><span class="o">&gt;</span><span class="p">());</span>
+</span><span id="__span-31-26"><a id="__codelineno-31-26" name="__codelineno-31-26" href="#__codelineno-31-26"></a><span class="w">  </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">shutdown</span><span class="p">();</span>
+</span><span id="__span-31-27"><a id="__codelineno-31-27" name="__codelineno-31-27" href="#__codelineno-31-27"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-31-28"><a id="__codelineno-31-28" name="__codelineno-31-28" href="#__codelineno-31-28"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>和 Python 版相比，C++ 版最需要注意的是三件事：</p>
+<ul>
+<li>你要自己处理 <code>CMakeLists.txt</code> 和 <code>package.xml</code></li>
+<li>节点类继承自 <code>rclcpp::Node</code></li>
+<li>订阅回调里拿到的是 <code>SharedPtr</code>，字段访问写成 <code>msg-&gt;position[0]</code></li>
+</ul>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

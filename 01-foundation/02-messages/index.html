@@ -1,0 +1,3365 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="面向本科小白的 Unitree Go2 + ROS2 二次开发实验教程">
+      
+      
+        <meta name="author" content="ztl">
+      
+      
+        <link rel="canonical" href="https://ztl3106742440-hub.github.io/go2-tutorial/01-foundation/02-messages/">
+      
+      
+        <link rel="prev" href="../01-install/">
+      
+      
+        <link rel="next" href="../../02-packages/03-keyboard/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>第 2 章 认识 Go2 消息接口 - Go2 机器狗实验指导书</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#2-go2" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Go2 机器狗实验指导书" class="md-header__button md-logo" aria-label="Go2 机器狗实验指导书" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.41 4 16 6.41v.18L18.41 9H22v2h-4.41L16 9.41V12h-1a2 2 0 0 1-2-2V7.5H9.86c-.09.37-.24.72-.44 1.05L15.18 19H20a2 2 0 0 1 2 2v1H2v-1a2 2 0 0 1 2-2h6.61l-4.69-8.5a4.006 4.006 0 0 1-3.81-3A4 4 0 0 1 5 2.63c2.13-.55 4.31.73 4.86 2.87H13V3a2 2 0 0 1 2-2h1v2.59L17.59 2H22v2zM6 4.5a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Go2 机器狗实验指导书
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第 2 章 认识 Go2 消息接口
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到深色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到浅色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ztl3106742440-hub/go2-tutorial" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ztl3106742440-hub/go2-tutorial
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../00-overview/01-intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  开篇
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../01-install/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  基础篇 · 环境与通信
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-packages/03-keyboard/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  功能包开发
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-communication/07-topic/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  ROS2 通信机制实战
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-perception/10-lidar/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  进阶篇 · 感知与导航
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-interaction/16-voice/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  交互篇 · 语音与视觉
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-integration/18-orchestration/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  综合篇
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Go2 机器狗实验指导书" class="md-nav__button md-logo" aria-label="Go2 机器狗实验指导书" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.41 4 16 6.41v.18L18.41 9H22v2h-4.41L16 9.41V12h-1a2 2 0 0 1-2-2V7.5H9.86c-.09.37-.24.72-.44 1.05L15.18 19H20a2 2 0 0 1 2 2v1H2v-1a2 2 0 0 1 2-2h6.61l-4.69-8.5a4.006 4.006 0 0 1-3.81-3A4 4 0 0 1 5 2.63c2.13-.55 4.31.73 4.86 2.87H13V3a2 2 0 0 1 2-2h1v2.59L17.59 2H22v2zM6 4.5a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg>
+
+    </a>
+    Go2 机器狗实验指导书
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ztl3106742440-hub/go2-tutorial" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ztl3106742440-hub/go2-tutorial
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开篇
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    开篇
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/01-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教程简介与使用指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go2 硬件一图看懂
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/03-env/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发环境总览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/04-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实机安全红线
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    基础篇 · 环境与通信
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    基础篇 · 环境与通信
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 环境搭建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 认识 Go2 消息接口
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 认识 Go2 消息接口
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章你将学到
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景与原理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="背景与原理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#topic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Topic、消息和机器人接口是什么关系
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么 Go2 要把高层接口和低层接口分开
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么“能看到消息”和“看懂消息”不是一回事
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构总览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        环境准备
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        实现步骤
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="实现步骤">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2-cli-topic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤一：先用 ROS2 CLI 看清楚你手里有哪些核心 Topic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lfsportmodestate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤二：先认识 /lf/sportmodestate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lflowstate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤三：再认识 /lf/lowstate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wirelesscontroller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤四：认识 /wirelesscontroller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_topics_py" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤五：在教程工作空间里创建 go2_topics_py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lfsportmodestate_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤六：写一个真正能看懂 /lf/sportmodestate 的节点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤七：再写一个遥控器状态节点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apisportrequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤八：认识高层动作入口 /api/sport/request
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤九：用最小脚本发一条安全的高层动作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lowcmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤十：只介绍 /lowcmd，但不在本章实操
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_topics_py_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤十一：注册入口并编译 go2_topics_py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译与运行
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果验证
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        常见问题
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="常见问题">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#print_sport_state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_sport_state 一直没有输出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#print_controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_controller 没反应，但机器人能动
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lowcmd_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        我能不能直接从这一章开始玩 /lowcmd
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么我发了高层动作，机器人动了一下又回到平衡站立？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        我看到 keys 是一个整数，看不懂具体哪个按键按下了怎么办？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章小结
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        下一步
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拓展阅读
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    功能包开发
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    功能包开发
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/03-keyboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 键盘控制节点
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/04-twist-bridge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 Twist 消息桥接
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/05-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 机器人可视化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/06-driver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 完整驱动包集成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ROS2 通信机制实战
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ROS2 通信机制实战
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/07-topic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 话题通信 — 巡航与位置获取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/08-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 服务通信 — 巡航启停
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/09-action/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 动作通信 — 导航任务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    进阶篇 · 感知与导航
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    进阶篇 · 感知与导航
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/10-lidar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 激光雷达原理与选型
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/11-slam-2d/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 2D SLAM 建图实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/12-nav2-baseline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 实机 Nav2 2D 基线
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/13-upgrade-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 升级动机与仿真环境搭建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/14-slam-3d-sim/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 仿真中的 3D SLAM 与 Nav2 升级
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-perception/15-mid360/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 实机升级 — 外接 MID-360 方案
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交互篇 · 语音与视觉
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    交互篇 · 语音与视觉
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-interaction/16-voice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 16 章 语音交互系统
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-interaction/17-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 17 章 视觉与 VLM 应用
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    综合篇
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    综合篇
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-integration/18-orchestration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 18 章 任务编排 — 多模态联动
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-integration/19-future/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 19 章 未来方向 — RL 与具身智能
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章你将学到
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景与原理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="背景与原理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#topic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Topic、消息和机器人接口是什么关系
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么 Go2 要把高层接口和低层接口分开
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么“能看到消息”和“看懂消息”不是一回事
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构总览
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        环境准备
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        实现步骤
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="实现步骤">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2-cli-topic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤一：先用 ROS2 CLI 看清楚你手里有哪些核心 Topic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lfsportmodestate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤二：先认识 /lf/sportmodestate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lflowstate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤三：再认识 /lf/lowstate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wirelesscontroller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤四：认识 /wirelesscontroller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_topics_py" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤五：在教程工作空间里创建 go2_topics_py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lfsportmodestate_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤六：写一个真正能看懂 /lf/sportmodestate 的节点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤七：再写一个遥控器状态节点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apisportrequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤八：认识高层动作入口 /api/sport/request
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤九：用最小脚本发一条安全的高层动作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lowcmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤十：只介绍 /lowcmd，但不在本章实操
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2_topics_py_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤十一：注册入口并编译 go2_topics_py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译与运行
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果验证
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        常见问题
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="常见问题">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#print_sport_state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_sport_state 一直没有输出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#print_controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_controller 没反应，但机器人能动
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lowcmd_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        我能不能直接从这一章开始玩 /lowcmd
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        为什么我发了高层动作，机器人动了一下又回到平衡站立？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        我看到 keys 是一个整数，看不懂具体哪个按键按下了怎么办？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章小结
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        下一步
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拓展阅读
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="2-go2">第 2 章 认识 Go2 消息接口<a class="headerlink" href="#2-go2" title="锚点链接">&para;</a></h1>
+<blockquote>
+<p>上一章你已经把电脑和 Go2 连起来了。这一章要做的事，是把那些看起来像黑话的 Topic 真正拆开：谁在发布、谁在订阅、哪些能安全动手、哪些现在只准认识名字。</p>
+</blockquote>
+<h2 id="_1">本章你将学到<a class="headerlink" href="#_1" title="锚点链接">&para;</a></h2>
+<ul>
+<li>ROS2 的 Topic、消息类型和 Go2 的高层 / 低层接口到底怎么对应</li>
+<li>为什么 <code>/lf/sportmodestate</code>、<code>/lf/lowstate</code>、<code>/wirelesscontroller</code> 是三类完全不同的信息</li>
+<li>怎样用最小 Python 节点订阅 <code>/lf/sportmodestate</code> 和 <code>/wirelesscontroller</code></li>
+<li>怎样向 <code>/api/sport/request</code> 发送一条最简单、相对安全的高层动作指令</li>
+<li>为什么新手阶段只介绍 <code>/lowcmd</code>，但绝不在本章实操发送它</li>
+</ul>
+<h2 id="_2">背景与原理<a class="headerlink" href="#_2" title="锚点链接">&para;</a></h2>
+<h3 id="topic">Topic、消息和机器人接口是什么关系<a class="headerlink" href="#topic" title="锚点链接">&para;</a></h3>
+<p>到这一章为止，你已经知道 ROS2 节点之间主要通过 Topic 通信。</p>
+<p>但在 Go2 场景里，Topic 不只是“频道”，它通常还自带接口层级。</p>
+<p>比如：</p>
+<ul>
+<li><code>/lf/sportmodestate</code> 更像“高层运动状态出口”</li>
+<li><code>/lf/lowstate</code> 更像“底层电机和电源状态出口”</li>
+<li><code>/wirelesscontroller</code> 反映的是遥控器输入</li>
+<li><code>/api/sport/request</code> 是高层动作入口</li>
+<li><code>/lowcmd</code> 是底层电机控制入口</li>
+</ul>
+<p>如果你不先把这些 Topic 放回它们所属的层级，后面最容易发生的事情就是：</p>
+<ul>
+<li>看到 <code>/lf/lowstate</code> 觉得“信息更全，直接用它吧”</li>
+<li>看到 <code>/lowcmd</code> 觉得“名字高级，直接发它应该更专业”</li>
+<li>把“高层动作接口”和“底层电机接口”混成一类</li>
+</ul>
+<p>而这几件事，恰恰是 Go2 新手最容易踩的大坑。</p>
+<h3 id="go2">为什么 Go2 要把高层接口和低层接口分开<a class="headerlink" href="#go2" title="锚点链接">&para;</a></h3>
+<p>四足机器人不是小车，也不是舵机玩具。</p>
+<p>当 Go2 在站立、起身、坐下、转向、走路时，它内部一直在做平衡和姿态控制。为了让开发者不必一上来就面对整套电机级控制问题，官方把接口切成了两层：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>你发的是什么</th>
+<th>机器人内部替你做了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>高层接口</td>
+<td>“站起来”“趴下”“往前走”“转一下”这类意图</td>
+<td>平衡、步态、姿态稳定、动作编排</td>
+</tr>
+<tr>
+<td>低层接口</td>
+<td>每个电机怎么转、用多少增益、给多少扭矩</td>
+<td>基本不帮你兜底，更多责任落到你自己身上</td>
+</tr>
+</tbody>
+</table>
+<p>所以本章的核心不是“把所有接口都试一遍”，而是先建立一个正确判断：</p>
+<p><strong>前期学习主线，用高层接口；低层接口先理解结构和风险，不碰实操。</strong></p>
+<h3 id="_3">为什么“能看到消息”和“看懂消息”不是一回事<a class="headerlink" href="#_3" title="锚点链接">&para;</a></h3>
+<p>上一章你已经能用 <code>ros2 topic echo /lf/sportmodestate --once</code> 抓到一帧数据。</p>
+<p>但“抓到了”只是第一步。</p>
+<p>你真正要学会的是：</p>
+<ul>
+<li>看到这个字段时，它是姿态、速度、步态，还是电池、温度、按键输入</li>
+<li>这个 Topic 更适合拿来做监控、控制前反馈，还是底层诊断</li>
+<li>这个入口现在能不能直接拿来发控制命令</li>
+</ul>
+<p>从这一章开始，我们就要把“看得到”升级成“看得懂、敢判断、知道边界”。</p>
+<h2 id="_4">架构总览<a class="headerlink" href="#_4" title="锚点链接">&para;</a></h2>
+<p>先把最核心的 Topic 放进一张图里：</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph Go2[Go2]
+        A[高层运动控制器]
+        B[底层电机与电源层]
+        C[遥控器输入]
+    end
+
+    A --&gt;|发布| D["/lf/sportmodestate&lt;br/&gt;/mf/sportmodestate&lt;br/&gt;/lf/sportmodestate"]
+    B --&gt;|发布| E["/lf/lowstate&lt;br/&gt;/lf/lowstate"]
+    C --&gt;|发布| F["/wirelesscontroller"]
+
+    G[你的 ROS2 节点] --&gt;|订阅| D
+    G --&gt;|订阅| E
+    G --&gt;|订阅| F
+
+    G --&gt;|高层动作请求| H["/api/sport/request"]
+    G -.危险，不在本章实操.-&gt; I["/lowcmd"]
+    H --&gt; A
+    I --&gt; B</code></pre>
+<p>把这张图翻译成一句话就是：</p>
+<ul>
+<li>想知道机器人“整体正在怎么动”，先看 <code>/lf/sportmodestate</code></li>
+<li>想知道底层电机、电池、足端力这些更靠近硬件的状态，再看 <code>/lf/lowstate</code></li>
+<li>想知道手柄摇杆和按键在干嘛，看 <code>/wirelesscontroller</code></li>
+<li>想让机器人执行基础动作，走 <code>/api/sport/request</code></li>
+<li>想直接碰电机层，才会碰到 <code>/lowcmd</code></li>
+</ul>
+<h2 id="_5">环境准备<a class="headerlink" href="#_5" title="锚点链接">&para;</a></h2>
+<p>这一章不需要额外安装新环境，直接复用上一章已经搭好的链路：</p>
+<table>
+<thead>
+<tr>
+<th>你现在应该已经有的东西</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>unitree_ros2</code> 官方环境</td>
+<td>提供 <code>unitree_go</code> 和 <code>unitree_api</code> 的消息定义</td>
+</tr>
+<tr>
+<td><code>unitree_go2_ws</code></td>
+<td>放你这一章新建的练习包</td>
+</tr>
+<tr>
+<td><code>setup.sh</code></td>
+<td>让当前终端进入 Go2 真机通信环境</td>
+</tr>
+<tr>
+<td>真机在线的 Go2</td>
+<td>这章的大部分验证都依赖真机消息流</td>
+</tr>
+</tbody>
+</table>
+<p>如果你上一章的 <code>hello_sport_state</code> 还能跑，说明这章的前置条件已经具备。</p>
+<div class="admonition tip">
+<p class="admonition-title">本章最好的打开方式</p>
+<p>准备两个终端：一个专门跑 <code>ros2 topic</code> 命令观察系统，一个专门跑你自己的节点。这样你很容易看清“系统本来就在发什么”和“我的程序做了什么”之间的区别。</p>
+</div>
+<h2 id="_6">实现步骤<a class="headerlink" href="#_6" title="锚点链接">&para;</a></h2>
+<h3 id="ros2-cli-topic">步骤一：先用 ROS2 CLI 看清楚你手里有哪些核心 Topic<a class="headerlink" href="#ros2-cli-topic" title="锚点链接">&para;</a></h3>
+<p>先加载官方环境：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 进入 Go2 真机通信环境</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span></code></pre></div>
+<p>然后列出所有话题，并只过滤本章最关键的几个：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># 先列全部，再用 grep 缩小范围</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span>list
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>ros2<span class="w"> </span>topic<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;sportmodestate|lowstate|wirelesscontroller|request&#39;</span>
+</span></code></pre></div>
+<p>你大概率会看到下面这些名字：</p>
+<ul>
+<li><code>/lf/sportmodestate</code></li>
+<li><code>/mf/sportmodestate</code></li>
+<li><code>/lf/sportmodestate</code></li>
+<li><code>/lf/lowstate</code></li>
+<li><code>/lf/lowstate</code></li>
+<li><code>/wirelesscontroller</code></li>
+<li><code>/api/sport/request</code></li>
+</ul>
+<p>这一步虽然看起来简单，但非常关键。</p>
+<p>因为你后面写代码时，真正该订阅和发布什么，不是凭印象选，而是要先用 CLI 把系统实际在线的话题看清楚。</p>
+<h3 id="lfsportmodestate">步骤二：先认识 <code>/lf/sportmodestate</code><a class="headerlink" href="#lfsportmodestate" title="锚点链接">&para;</a></h3>
+<p>高层状态是本章的主角。</p>
+<p>先看它的三档频率：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 查看高层状态的三个常用话题</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span>hz<span class="w"> </span>/lf/sportmodestate
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>ros2<span class="w"> </span>topic<span class="w"> </span>hz<span class="w"> </span>/mf/sportmodestate
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>ros2<span class="w"> </span>topic<span class="w"> </span>hz<span class="w"> </span>/lf/sportmodestate
+</span></code></pre></div>
+<p>从已有材料和官方示例可以归纳出下面这张表：</p>
+<table>
+<thead>
+<tr>
+<th>话题</th>
+<th>典型频率</th>
+<th>适合做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/lf/sportmodestate</code></td>
+<td>20Hz 左右</td>
+<td>人眼观察、调试日志、低频监控</td>
+</tr>
+<tr>
+<td><code>/mf/sportmodestate</code></td>
+<td>200Hz 左右</td>
+<td>中频控制与调试</td>
+</tr>
+<tr>
+<td><code>/lf/sportmodestate</code></td>
+<td>500Hz 左右</td>
+<td>高频状态反馈、精确观察</td>
+</tr>
+</tbody>
+</table>
+<p>再确认消息类型：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 高层状态对应的消息类型</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">type</span><span class="w"> </span>/lf/sportmodestate
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>unitree_go/msg/SportModeState
+</span></code></pre></div>
+<p>你会看到它的核心字段大致包括：</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>含义</th>
+<th>单位</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stamp.sec</code> / <code>stamp.nanosec</code></td>
+<td>这帧状态的时间戳</td>
+<td>秒 / 纳秒</td>
+<td>随时间增长</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td>当前高层运动模式</td>
+<td>—</td>
+<td>枚举值</td>
+</tr>
+<tr>
+<td><code>progress</code></td>
+<td>某些动作的执行进度</td>
+<td>—</td>
+<td>0.0 到 1.0</td>
+</tr>
+<tr>
+<td><code>gait_type</code></td>
+<td>当前步态类型</td>
+<td>—</td>
+<td>枚举值</td>
+</tr>
+<tr>
+<td><code>position[3]</code></td>
+<td>机身在里程计坐标系下的位置</td>
+<td>米</td>
+<td>取决于场地与运动</td>
+</tr>
+<tr>
+<td><code>body_height</code></td>
+<td>当前机身高度</td>
+<td>米</td>
+<td>取决于姿态和动作</td>
+</tr>
+<tr>
+<td><code>velocity[3]</code></td>
+<td>机身线速度</td>
+<td>米/秒</td>
+<td>取决于当前动作</td>
+</tr>
+<tr>
+<td><code>yaw_speed</code></td>
+<td>偏航角速度</td>
+<td>弧度/秒</td>
+<td>取决于当前动作</td>
+</tr>
+<tr>
+<td><code>foot_position_body[12]</code></td>
+<td>四条腿在机身坐标系下的足端位置</td>
+<td>米</td>
+<td>12 维数组</td>
+</tr>
+<tr>
+<td><code>foot_speed_body[12]</code></td>
+<td>四条腿在机身坐标系下的足端速度</td>
+<td>米/秒</td>
+<td>12 维数组</td>
+</tr>
+</tbody>
+</table>
+<p>这张表里最值得你先记住的，不是全部字段，而是三组最常用信息：</p>
+<ol>
+<li><code>position</code> / <code>velocity</code> / <code>yaw_speed</code>：整体运动状态</li>
+<li><code>mode</code> / <code>gait_type</code>：当前控制器处于什么状态</li>
+<li><code>foot_position_body</code> / <code>foot_speed_body</code>：更细一点的足端信息</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">时间戳别看成“北京时间”</p>
+<p><code>stamp</code> 在这里是消息时间戳，不会长得像“2026-04-20 14:30:00”这种字符串。你先把它理解成“这一帧是什么时刻来的”，而不是拿它当可读日期。</p>
+</div>
+<h3 id="lflowstate">步骤三：再认识 <code>/lf/lowstate</code><a class="headerlink" href="#lflowstate" title="锚点链接">&para;</a></h3>
+<p><code>/lf/lowstate</code> 不是更“高级”的状态，而是更“底层”的状态。</p>
+<p>先确认消息类型：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 低层状态对应的消息类型</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">type</span><span class="w"> </span>/lf/lowstate
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>unitree_go/msg/LowState
+</span></code></pre></div>
+<p>相比 <code>/lf/sportmodestate</code>，<code>/lf/lowstate</code> 的关注点明显更靠近硬件：</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>含义</th>
+<th>单位</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imu_state</code></td>
+<td>IMU 原始姿态与惯性信息</td>
+<td>混合</td>
+<td>取决于运动状态</td>
+</tr>
+<tr>
+<td><code>motor_state[i].q</code></td>
+<td>第 <code>i</code> 个电机的关节角度</td>
+<td>弧度</td>
+<td>取决于关节位置</td>
+</tr>
+<tr>
+<td><code>motor_state[i].dq</code></td>
+<td>第 <code>i</code> 个电机的角速度</td>
+<td>弧度/秒</td>
+<td>取决于当前动作</td>
+</tr>
+<tr>
+<td><code>motor_state[i].tau_est</code></td>
+<td>第 <code>i</code> 个电机的估计力矩</td>
+<td>—</td>
+<td>取决于负载和动作</td>
+</tr>
+<tr>
+<td><code>motor_state[i].temperature</code></td>
+<td>第 <code>i</code> 个电机温度</td>
+<td>摄氏度</td>
+<td>随负载变化</td>
+</tr>
+<tr>
+<td><code>foot_force[4]</code></td>
+<td>四足接触力</td>
+<td>—</td>
+<td>4 维数组</td>
+</tr>
+<tr>
+<td><code>bms_state.soc</code></td>
+<td>电池剩余电量百分比</td>
+<td>%</td>
+<td>0 到 100</td>
+</tr>
+<tr>
+<td><code>power_v</code></td>
+<td>电池电压</td>
+<td>V</td>
+<td>随电量变化</td>
+</tr>
+<tr>
+<td><code>power_a</code></td>
+<td>当前电流</td>
+<td>A</td>
+<td>随动作负载变化</td>
+</tr>
+</tbody>
+</table>
+<p><code>/lf/lowstate</code> 很有用，但它和 <code>/lf/sportmodestate</code> 的定位不同。</p>
+<p>如果你现在只是想判断“机器人整体有没有站稳、有没有在前进、当前位置和速度是多少”，高层状态更顺手。</p>
+<p>如果你已经在做电机级诊断、温度观察、底层驱动联调，那才会更频繁地盯 <code>/lf/lowstate</code>。</p>
+<h3 id="wirelesscontroller">步骤四：认识 <code>/wirelesscontroller</code><a class="headerlink" href="#wirelesscontroller" title="锚点链接">&para;</a></h3>
+<p>遥控器状态看起来最简单，但它很实用。</p>
+<p>先确认它的消息类型：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 遥控器状态只有一个核心话题</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">type</span><span class="w"> </span>/wirelesscontroller
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>unitree_go/msg/WirelessController
+</span></code></pre></div>
+<p>这个消息很短，核心字段只有下面这些：</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>含义</th>
+<th>单位</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lx</code></td>
+<td>左摇杆横向值</td>
+<td>—</td>
+<td>约 -1.0 到 1.0</td>
+</tr>
+<tr>
+<td><code>ly</code></td>
+<td>左摇杆纵向值</td>
+<td>—</td>
+<td>约 -1.0 到 1.0</td>
+</tr>
+<tr>
+<td><code>rx</code></td>
+<td>右摇杆横向值</td>
+<td>—</td>
+<td>约 -1.0 到 1.0</td>
+</tr>
+<tr>
+<td><code>ry</code></td>
+<td>右摇杆纵向值</td>
+<td>—</td>
+<td>约 -1.0 到 1.0</td>
+</tr>
+<tr>
+<td><code>keys</code></td>
+<td>按键状态位掩码</td>
+<td>—</td>
+<td>16 位整型</td>
+</tr>
+</tbody>
+</table>
+<p>这类消息特别适合做两件事：</p>
+<ul>
+<li>把手柄输入转换成你自己的控制逻辑</li>
+<li>调试“我刚刚推了摇杆，系统有没有真的收到”</li>
+</ul>
+<p>按键位的完整定义在官方 SDK 文档和后续进阶实践里会更常见，本章不要求你把它背下来。</p>
+<p>你现在先知道：<strong>这是一条遥控器输入状态流，不是运动状态流，也不是控制命令流。</strong></p>
+<h3 id="go2_topics_py">步骤五：在教程工作空间里创建 <code>go2_topics_py</code><a class="headerlink" href="#go2_topics_py" title="锚点链接">&para;</a></h3>
+<p>这一章我们不再复用上一章的 <code>go2_hello_py</code>，而是单独建一个更贴近“消息接口练习”的包。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 在教程工作空间里新建一个专门练消息接口的 Python 包</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws/src
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>ros2<span class="w"> </span>pkg<span class="w"> </span>create<span class="w"> </span>go2_topics_py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span>--build-type<span class="w"> </span>ament_python<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span>--dependencies<span class="w"> </span>rclpy<span class="w"> </span>unitree_go<span class="w"> </span>unitree_api
+</span></code></pre></div>
+<p>这个包里我们会放三类脚本：</p>
+<ul>
+<li><code>print_sport_state.py</code>：看高层状态</li>
+<li><code>print_controller.py</code>：看遥控器输入</li>
+<li><code>send_sport_request.py</code>：发一条最简单的高层动作请求</li>
+</ul>
+<h3 id="lfsportmodestate_1">步骤六：写一个真正能看懂 <code>/lf/sportmodestate</code> 的节点<a class="headerlink" href="#lfsportmodestate_1" title="锚点链接">&para;</a></h3>
+<p>先在 <code>go2_topics_py/go2_topics_py/print_sport_state.py</code> 里写一个比上一章稍微更完整的版本。</p>
+<p>接下来这段代码会打印位置、速度、偏航角速度、步态类型和机身高度。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>                                       <span class="c1"># ROS2 Python 客户端库</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>                        <span class="c1"># 自定义节点的基类</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unitree_go.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">SportModeState</span>          <span class="c1"># Go2 高层运动状态消息</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">SportStatePrinter</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;sport_state_printer&quot;</span><span class="p">)</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_subscription</span><span class="p">(</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>            <span class="n">SportModeState</span><span class="p">,</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>            <span class="s2">&quot;/lf/sportmodestate&quot;</span><span class="p">,</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">on_state</span><span class="p">,</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>            <span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>        <span class="p">)</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">SportModeState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>        <span class="n">now_ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">nanoseconds</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>        <span class="k">if</span> <span class="n">now_ns</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">&lt;</span> <span class="mi">200_000_000</span><span class="p">:</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>            <span class="k">return</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">=</span> <span class="n">now_ns</span>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>            <span class="sa">f</span><span class="s2">&quot;mode=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2"> gait=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">gait_type</span><span class="si">}</span><span class="s2"> &quot;</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>            <span class="sa">f</span><span class="s2">&quot;pos=(</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">) &quot;</span>
+</span><span id="__span-7-27"><a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>            <span class="sa">f</span><span class="s2">&quot;vel=(</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">velocity</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">) &quot;</span>
+</span><span id="__span-7-28"><a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>            <span class="sa">f</span><span class="s2">&quot;yaw=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">yaw_speed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> height=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">body_height</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-7-29"><a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>        <span class="p">)</span>
+</span><span id="__span-7-30"><a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>
+</span><span id="__span-7-31"><a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>
+</span><span id="__span-7-32"><a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-7-33"><a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+</span><span id="__span-7-34"><a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a>    <span class="n">node</span> <span class="o">=</span> <span class="n">SportStatePrinter</span><span class="p">()</span>
+</span><span id="__span-7-35"><a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-7-36"><a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</span><span id="__span-7-37"><a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a>    <span class="k">finally</span><span class="p">:</span>
+</span><span id="__span-7-38"><a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a>        <span class="n">node</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+</span><span id="__span-7-39"><a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</span><span id="__span-7-40"><a id="__codelineno-7-40" name="__codelineno-7-40" href="#__codelineno-7-40"></a>
+</span><span id="__span-7-41"><a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a>
+</span><span id="__span-7-42"><a id="__codelineno-7-42" name="__codelineno-7-42" href="#__codelineno-7-42"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span id="__span-7-43"><a id="__codelineno-7-43" name="__codelineno-7-43" href="#__codelineno-7-43"></a>    <span class="n">main</span><span class="p">()</span>
+</span></code></pre></div>
+<p>这段代码和上一章的 hello 版相比，多做了两件事：</p>
+<ol>
+<li>把 <code>mode</code> 和 <code>gait_type</code> 一起打出来，开始让你建立“当前控制器状态”意识</li>
+<li>把 <code>body_height</code> 也带上，方便后面理解姿态和站立状态变化</li>
+</ol>
+<h3 id="_7">步骤七：再写一个遥控器状态节点<a class="headerlink" href="#_7" title="锚点链接">&para;</a></h3>
+<p>在 <code>go2_topics_py/go2_topics_py/print_controller.py</code> 中写入：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>                                       <span class="c1"># ROS2 Python 客户端库</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>                        <span class="c1"># 自定义节点的基类</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unitree_go.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">WirelessController</span>      <span class="c1"># 遥控器输入消息</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">ControllerPrinter</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;controller_printer&quot;</span><span class="p">)</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_subscription</span><span class="p">(</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>            <span class="n">WirelessController</span><span class="p">,</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>            <span class="s2">&quot;/wirelesscontroller&quot;</span><span class="p">,</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">on_message</span><span class="p">,</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>            <span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>        <span class="p">)</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="n">WirelessController</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>        <span class="n">now_ns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clock</span><span class="p">()</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">nanoseconds</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>        <span class="k">if</span> <span class="n">now_ns</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">&lt;</span> <span class="mi">200_000_000</span><span class="p">:</span>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>            <span class="k">return</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>
+</span><span id="__span-8-23"><a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">last_log_ns</span> <span class="o">=</span> <span class="n">now_ns</span>
+</span><span id="__span-8-24"><a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+</span><span id="__span-8-25"><a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>            <span class="sa">f</span><span class="s2">&quot;lx=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">lx</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2"> ly=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">ly</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2"> &quot;</span>
+</span><span id="__span-8-26"><a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a>            <span class="sa">f</span><span class="s2">&quot;rx=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">rx</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2"> ry=</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">ry</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2"> keys=0x</span><span class="si">{</span><span class="n">msg</span><span class="o">.</span><span class="n">keys</span><span class="si">:</span><span class="s2">04x</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-8-27"><a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a>        <span class="p">)</span>
+</span><span id="__span-8-28"><a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a>
+</span><span id="__span-8-29"><a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a>
+</span><span id="__span-8-30"><a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-8-31"><a id="__codelineno-8-31" name="__codelineno-8-31" href="#__codelineno-8-31"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+</span><span id="__span-8-32"><a id="__codelineno-8-32" name="__codelineno-8-32" href="#__codelineno-8-32"></a>    <span class="n">node</span> <span class="o">=</span> <span class="n">ControllerPrinter</span><span class="p">()</span>
+</span><span id="__span-8-33"><a id="__codelineno-8-33" name="__codelineno-8-33" href="#__codelineno-8-33"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-8-34"><a id="__codelineno-8-34" name="__codelineno-8-34" href="#__codelineno-8-34"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</span><span id="__span-8-35"><a id="__codelineno-8-35" name="__codelineno-8-35" href="#__codelineno-8-35"></a>    <span class="k">finally</span><span class="p">:</span>
+</span><span id="__span-8-36"><a id="__codelineno-8-36" name="__codelineno-8-36" href="#__codelineno-8-36"></a>        <span class="n">node</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+</span><span id="__span-8-37"><a id="__codelineno-8-37" name="__codelineno-8-37" href="#__codelineno-8-37"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</span><span id="__span-8-38"><a id="__codelineno-8-38" name="__codelineno-8-38" href="#__codelineno-8-38"></a>
+</span><span id="__span-8-39"><a id="__codelineno-8-39" name="__codelineno-8-39" href="#__codelineno-8-39"></a>
+</span><span id="__span-8-40"><a id="__codelineno-8-40" name="__codelineno-8-40" href="#__codelineno-8-40"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span id="__span-8-41"><a id="__codelineno-8-41" name="__codelineno-8-41" href="#__codelineno-8-41"></a>    <span class="n">main</span><span class="p">()</span>
+</span></code></pre></div>
+<p>这个脚本的重点不是“打印更多字”，而是帮你建立一个判断：</p>
+<p>当你推摇杆、按按键时，系统到底有没有把这些输入原样收到。</p>
+<p>后面你做键盘控制、语音控制、动作编排时，这种“输入是不是先被正确采到”的判断非常有用。</p>
+<h3 id="apisportrequest">步骤八：认识高层动作入口 <code>/api/sport/request</code><a class="headerlink" href="#apisportrequest" title="锚点链接">&para;</a></h3>
+<p>状态看明白之后，才轮到控制入口。</p>
+<p>先用 CLI 确认接口类型：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 看高层动作请求使用什么消息类型</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">type</span><span class="w"> </span>/api/sport/request
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>unitree_api/msg/Request
+</span></code></pre></div>
+<p><code>Request</code> 消息真正最关键的部分，其实就三样：</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>含义</th>
+<th>单位</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>header.identity.api_id</code></td>
+<td>要执行哪类高层动作</td>
+<td>—</td>
+<td>取决于具体 API</td>
+</tr>
+<tr>
+<td><code>parameter</code></td>
+<td>这条动作的参数，通常是 JSON 字符串</td>
+<td>—</td>
+<td>取决于动作</td>
+</tr>
+<tr>
+<td><code>binary</code></td>
+<td>二进制扩展参数</td>
+<td>—</td>
+<td>本章不用</td>
+</tr>
+</tbody>
+</table>
+<p><code>api_id</code> 就像“动作编号”，而 <code>parameter</code> 就像“动作参数”。</p>
+<p>在本章里，我们只挑最简单、最安全的一类：<strong>无参数基础动作</strong>。</p>
+<p>下面这些 API ID 你现在就应该先认识：</p>
+<table>
+<thead>
+<tr>
+<th>API ID</th>
+<th>指令名</th>
+<th>作用</th>
+<th>参数格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1002</code></td>
+<td><code>BALANCESTAND</code></td>
+<td>平衡站立</td>
+<td>无</td>
+</tr>
+<tr>
+<td><code>1003</code></td>
+<td><code>STOPMOVE</code></td>
+<td>停止运动</td>
+<td>无</td>
+</tr>
+<tr>
+<td><code>1004</code></td>
+<td><code>STANDUP</code></td>
+<td>站起来</td>
+<td>无</td>
+</tr>
+<tr>
+<td><code>1005</code></td>
+<td><code>STANDDOWN</code></td>
+<td>趴下</td>
+<td>无</td>
+</tr>
+<tr>
+<td><code>1006</code></td>
+<td><code>RECOVERYSTAND</code></td>
+<td>恢复站立</td>
+<td>无</td>
+</tr>
+<tr>
+<td><code>1008</code></td>
+<td><code>MOVE</code></td>
+<td>高层移动控制</td>
+<td><code>{"x":vx,"y":vy,"z":vyaw}</code></td>
+</tr>
+<tr>
+<td><code>1016</code></td>
+<td><code>HELLO</code></td>
+<td>打招呼动作</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<p>这里最容易记错的是：有些动作没有参数，比如 <code>STANDUP</code> 和 <code>STANDDOWN</code>；有些动作需要 JSON 参数，比如 <code>MOVE</code>。</p>
+<h3 id="_8">步骤九：用最小脚本发一条安全的高层动作<a class="headerlink" href="#_8" title="锚点链接">&para;</a></h3>
+<p>在 <code>go2_topics_py/go2_topics_py/send_sport_request.py</code> 中写一个只负责发送“站起 / 趴下”的最小脚本。</p>
+<p>这一版故意写得很克制：不发连续速度，只发单次基础动作。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>                                         <span class="c1"># 读取命令行参数</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>                                       <span class="c1"># ROS2 Python 客户端库</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>                        <span class="c1"># 自定义节点的基类</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unitree_api.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span>                <span class="c1"># Go2 高层动作请求消息</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">ACTION_IDS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;stand_up&quot;</span><span class="p">:</span> <span class="mi">1004</span><span class="p">,</span> <span class="s2">&quot;stand_down&quot;</span><span class="p">:</span> <span class="mi">1005</span><span class="p">}</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">SportRequestOnce</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;sport_request_once&quot;</span><span class="p">)</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">action</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sent</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">publisher</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span><span class="n">Request</span><span class="p">,</span> <span class="s2">&quot;/api/sport/request&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_timer</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_once</span><span class="p">)</span>
+</span><span id="__span-10-17"><a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>
+</span><span id="__span-10-18"><a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">send_once</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-10-19"><a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sent</span><span class="p">:</span>
+</span><span id="__span-10-20"><a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>            <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</span><span id="__span-10-21"><a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>            <span class="k">return</span>
+</span><span id="__span-10-22"><a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a>
+</span><span id="__span-10-23"><a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="n">Request</span><span class="p">()</span>
+</span><span id="__span-10-24"><a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a>        <span class="n">msg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">identity</span><span class="o">.</span><span class="n">api_id</span> <span class="o">=</span> <span class="n">ACTION_IDS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="p">]</span>
+</span><span id="__span-10-25"><a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span id="__span-10-26"><a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sent action: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-10-27"><a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sent</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-10-28"><a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a>
+</span><span id="__span-10-29"><a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a>
+</span><span id="__span-10-30"><a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-10-31"><a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ACTION_IDS</span><span class="p">:</span>
+</span><span id="__span-10-32"><a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a>        <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="s2">&quot;usage: send_sport_request [stand_up|stand_down]&quot;</span><span class="p">)</span>
+</span><span id="__span-10-33"><a id="__codelineno-10-33" name="__codelineno-10-33" href="#__codelineno-10-33"></a>
+</span><span id="__span-10-34"><a id="__codelineno-10-34" name="__codelineno-10-34" href="#__codelineno-10-34"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+</span><span id="__span-10-35"><a id="__codelineno-10-35" name="__codelineno-10-35" href="#__codelineno-10-35"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">spin</span><span class="p">(</span><span class="n">SportRequestOnce</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</span><span id="__span-10-36"><a id="__codelineno-10-36" name="__codelineno-10-36" href="#__codelineno-10-36"></a>
+</span><span id="__span-10-37"><a id="__codelineno-10-37" name="__codelineno-10-37" href="#__codelineno-10-37"></a>
+</span><span id="__span-10-38"><a id="__codelineno-10-38" name="__codelineno-10-38" href="#__codelineno-10-38"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span id="__span-10-39"><a id="__codelineno-10-39" name="__codelineno-10-39" href="#__codelineno-10-39"></a>    <span class="n">main</span><span class="p">()</span>
+</span></code></pre></div>
+<p>这个脚本虽然短，但已经把高层动作请求的核心逻辑讲明白了：</p>
+<ul>
+<li>通过 <code>Request</code> 消息发动作</li>
+<li>真正关键的是 <code>header.identity.api_id</code></li>
+<li><code>stand_up</code> 和 <code>stand_down</code> 这类动作不需要额外参数</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">第一次发高层动作前先看一眼周围</p>
+<p>这一节虽然只让你发最基础的 <code>stand_up</code> / <code>stand_down</code>，但它们依然是真实的实机动作。先确认机器人周围空旷、遥控器在手、你知道下一步怎么停，再执行。</p>
+</div>
+<h3 id="lowcmd">步骤十：只介绍 <code>/lowcmd</code>，但不在本章实操<a class="headerlink" href="#lowcmd" title="锚点链接">&para;</a></h3>
+<p>先看它是什么：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># 底层电机控制入口</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">type</span><span class="w"> </span>/lowcmd
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>unitree_go/msg/LowCmd
+</span></code></pre></div>
+<p>从消息结构上看，<code>LowCmd</code> 的核心部分大概是：</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>含义</th>
+<th>单位</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>motor_cmd[i].mode</code></td>
+<td>第 <code>i</code> 个电机的控制模式</td>
+<td>—</td>
+<td>枚举值</td>
+</tr>
+<tr>
+<td><code>motor_cmd[i].q</code></td>
+<td>目标关节角度</td>
+<td>弧度</td>
+<td>取决于关节</td>
+</tr>
+<tr>
+<td><code>motor_cmd[i].dq</code></td>
+<td>目标关节角速度</td>
+<td>弧度/秒</td>
+<td>取决于关节</td>
+</tr>
+<tr>
+<td><code>motor_cmd[i].tau</code></td>
+<td>目标扭矩前馈</td>
+<td>—</td>
+<td>取决于控制策略</td>
+</tr>
+<tr>
+<td><code>motor_cmd[i].kp</code></td>
+<td>位置环增益</td>
+<td>—</td>
+<td>取决于控制策略</td>
+</tr>
+<tr>
+<td><code>motor_cmd[i].kd</code></td>
+<td>速度环增益</td>
+<td>—</td>
+<td>取决于控制策略</td>
+</tr>
+<tr>
+<td><code>led[12]</code></td>
+<td>低层消息里携带的灯光字段</td>
+<td>—</td>
+<td>12 字节数组</td>
+</tr>
+<tr>
+<td><code>crc</code></td>
+<td>校验字段</td>
+<td>—</td>
+<td>32 位整型</td>
+</tr>
+</tbody>
+</table>
+<p>光看这个表你就应该能感觉到：这已经不是“发一个动作编号”的层级了。</p>
+<p>你现在不仅要知道自己想让机器人做什么，还要知道每个电机命令字段意味着什么，彼此之间怎么配合，CRC 怎么算，当前控制模式和上层运动控制是否冲突。</p>
+<div class="admonition danger">
+<p class="admonition-title">本书前 9 章不实操 <code>/lowcmd</code></p>
+<p>这不是卖关子，而是安全边界。真实踩坑里，曾经出现过为了改灯光去碰底层消息，结果把零值电机命令一起发出去，最后导致关节持续对抗发热、机器人摔倒的事故。所以本章只带你认识它，不给发送代码，不鼓励“先发一条试试”。</p>
+</div>
+<h3 id="go2_topics_py_1">步骤十一：注册入口并编译 <code>go2_topics_py</code><a class="headerlink" href="#go2_topics_py_1" title="锚点链接">&para;</a></h3>
+<p>打开 <code>go2_topics_py/setup.py</code>，把入口注册成下面这样：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">entry_points</span><span class="o">=</span><span class="p">{</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="s2">&quot;console_scripts&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>        <span class="s2">&quot;print_sport_state = go2_topics_py.print_sport_state:main&quot;</span><span class="p">,</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>        <span class="s2">&quot;print_controller = go2_topics_py.print_controller:main&quot;</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>        <span class="s2">&quot;send_sport_request = go2_topics_py.send_sport_request:main&quot;</span><span class="p">,</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="p">],</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="p">},</span>
+</span></code></pre></div>
+<p>然后回到工作空间根目录，编译这个包：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># 先加载官方环境，再编译消息练习包</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_topics_py
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span></code></pre></div>
+<p>到这里，你这一章的三个练习脚本都已经变成可运行节点了。</p>
+<h2 id="_9">编译与运行<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h2>
+<p>建议你按下面这个顺序完整跑一遍：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># 1. 加载 Go2 真机环境</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># 2. 加载教程工作空间</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="c1"># 3. 看高层状态</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_topics_py<span class="w"> </span>print_sport_state
+</span></code></pre></div>
+<p>再开一个新终端，看遥控器输入：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_topics_py<span class="w"> </span>print_controller
+</span></code></pre></div>
+<p>确认这两条链路都通了之后，再执行最小高层动作：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># 让 Go2 趴下</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_topics_py<span class="w"> </span>send_sport_request<span class="w"> </span>stand_down
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="c1"># 再让 Go2 站起来</span>
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_topics_py<span class="w"> </span>send_sport_request<span class="w"> </span>stand_up
+</span></code></pre></div>
+<p>如果你想对照官方示例，也可以额外运行下面这些：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># 官方高层状态示例</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_ros2/example
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>./install/unitree_ros2_example/bin/read_motion_state
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="c1"># 官方遥控器状态示例</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>./install/unitree_ros2_example/bin/read_wireless_controller
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="c1"># 官方高层运动示例（例如 3=stand_down, 4=stand_up）</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>./install/unitree_ros2_example/bin/go2_sport_client<span class="w"> </span><span class="m">3</span>
+</span></code></pre></div>
+<p>这组官方示例不是本章主线必须，但它很适合拿来对照“是我自己的脚本有问题，还是官方环境本身就没通”。</p>
+<h2 id="_10">结果验证<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
+<p>本章完成后，你应该能稳定做到下面这几件事：</p>
+<ol>
+<li>看懂 <code>/lf/sportmodestate</code> 和 <code>/lf/lowstate</code> 的分工差异</li>
+<li>推一下摇杆时，<code>print_controller</code> 会在终端里看到对应的 <code>lx/ly/rx/ry</code> 变化</li>
+<li>运行 <code>send_sport_request stand_down</code> 后，Go2 会执行一次趴下动作</li>
+<li>你能清楚说出：为什么本章只介绍 <code>/lowcmd</code>，但不实操发送</li>
+</ol>
+<p>媒体建议先记在这里，后面统一补：</p>
+<!-- TODO(媒体): 补一张 print_sport_state 终端输出截图，显示 mode、gait、pos、vel 等字段 -->
+<!-- TODO(媒体): 补一张 print_controller 终端输出截图，推摇杆后 lx/ly/rx/ry 数值发生变化 -->
+<!-- TODO(媒体): 录制 stand_down -> stand_up 的最小高层动作演示 GIF -->
+
+<h2 id="_11">常见问题<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
+<h3 id="print_sport_state"><code>print_sport_state</code> 一直没有输出<a class="headerlink" href="#print_sport_state" title="锚点链接">&para;</a></h3>
+<p>先别改脚本，先做三件事：</p>
+<ol>
+<li>运行 <code>ros2 topic echo /lf/sportmodestate --once</code></li>
+<li>运行 <code>ros2 topic type /lf/sportmodestate</code></li>
+<li>回头确认上一章的 <code>setup.sh</code>、网卡和 Go2 连通性</li>
+</ol>
+<p>如果 CLI 本身都拿不到数据，你自己的节点大概率也拿不到。</p>
+<h3 id="print_controller"><code>print_controller</code> 没反应，但机器人能动<a class="headerlink" href="#print_controller" title="锚点链接">&para;</a></h3>
+<p>这种情况通常说明你验证方式不对，或者当前遥控器输入没有被你预期地采到。</p>
+<p>先用：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/wirelesscontroller
+</span></code></pre></div>
+<p>确认这条状态流本身是否在线，再判断是不是你脚本的打印节流写得太保守。</p>
+<h3 id="lowcmd_1">我能不能直接从这一章开始玩 <code>/lowcmd</code><a class="headerlink" href="#lowcmd_1" title="锚点链接">&para;</a></h3>
+<p>不建议。</p>
+<p>你现在还在打基础，最重要的是把“消息层级”和“实机边界”吃透。直接跳到底层控制，得到的通常不是更快的进步，而是更快地把问题和风险放大。</p>
+<h3 id="_12">为什么我发了高层动作，机器人动了一下又回到平衡站立？<a class="headerlink" href="#_12" title="锚点链接">&para;</a></h3>
+<p>这正是高层动作接口的一部分特点。</p>
+<p>很多动作是“请求执行某个动作”，而不是“永久切到某个控制模式”。所以你会看到执行完成后，系统回到更稳定的状态。</p>
+<h3 id="keys">我看到 <code>keys</code> 是一个整数，看不懂具体哪个按键按下了怎么办？<a class="headerlink" href="#keys" title="锚点链接">&para;</a></h3>
+<p>先别急着硬背位定义。</p>
+<p>本章的重点不是完整遥控器协议，而是建立一个判断：<strong>手柄输入有没有进系统、摇杆值有没有变化、按键状态有没有变化。</strong></p>
+<h2 id="_13">本章小结<a class="headerlink" href="#_13" title="锚点链接">&para;</a></h2>
+<p>这一章真正完成的，不是“又多会了几个命令”，而是把 Go2 的核心消息接口按层级拆开了：</p>
+<ul>
+<li><code>/lf/sportmodestate</code> 看整体运动状态</li>
+<li><code>/lf/lowstate</code> 看更底层的电机和电源状态</li>
+<li><code>/wirelesscontroller</code> 看手柄输入</li>
+<li><code>/api/sport/request</code> 发高层动作</li>
+<li><code>/lowcmd</code> 只认识结构，不在新手阶段实操</li>
+</ul>
+<p>从这一章开始，你看 Topic 就不再只是看名字，而是会开始判断“它属于哪一层、我现在该不该碰、碰了之后应该看到什么现象”。</p>
+<h2 id="_14">下一步<a class="headerlink" href="#_14" title="锚点链接">&para;</a></h2>
+<p>下一章我们就不只盯着接口看了，而是开始做第一个更像“功能模块”的节点：用键盘直接操控 Go2，让 Topic、消息和动作第一次变成你可直观感受到的交互效果。</p>
+<p>继续阅读：<a href="../../02-packages/03-keyboard/">第 3 章 键盘控制节点</a></p>
+<h2 id="_15">拓展阅读<a class="headerlink" href="#_15" title="锚点链接">&para;</a></h2>
+<ul>
+<li><a href="https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html">ROS2 Topic 官方文档</a></li>
+<li><a href="https://github.com/unitreerobotics/unitree_ros2">Unitree <code>unitree_ros2</code> 仓库</a></li>
+<li><a href="https://support.unitree.com/">Unitree 官方开发者文档</a></li>
+</ul>
+<details class="note">
+<summary>附:C++ 实现</summary>
+<p>本章只要求正文主线用 Python。如果你想顺手对照一版 C++ 的高层状态订阅，可以参考下面这个最小版本。</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;rclcpp/rclcpp.hpp&quot;</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;unitree_go/msg/sport_mode_state.hpp&quot;</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">SportStatePrinter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">Node</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w"> </span><span class="k">public</span><span class="o">:</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">  </span><span class="n">SportStatePrinter</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Node</span><span class="p">(</span><span class="s">&quot;sport_state_printer&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">    </span><span class="n">subscription_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">create_subscription</span><span class="o">&lt;</span><span class="n">unitree_go</span><span class="o">::</span><span class="n">msg</span><span class="o">::</span><span class="n">SportModeState</span><span class="o">&gt;</span><span class="p">(</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">        </span><span class="s">&quot;/lf/sportmodestate&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">        </span><span class="p">[</span><span class="k">this</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">unitree_go</span><span class="o">::</span><span class="n">msg</span><span class="o">::</span><span class="n">SportModeState</span><span class="o">::</span><span class="n">SharedPtr</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">          </span><span class="n">RCLCPP_INFO</span><span class="p">(</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">              </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">get_logger</span><span class="p">(),</span>
+</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">              </span><span class="s">&quot;mode=%u gait=%u pos=(%.2f, %.2f, %.2f) vel=(%.2f, %.2f, %.2f) yaw=%.2f height=%.2f&quot;</span><span class="p">,</span>
+</span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">              </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">mode</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">gait_type</span><span class="p">,</span>
+</span><span id="__span-19-14"><a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="w">              </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">position</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+</span><span id="__span-19-15"><a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="w">              </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">velocity</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">velocity</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">velocity</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+</span><span id="__span-19-16"><a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="w">              </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">yaw_speed</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="o">-&gt;</span><span class="n">body_height</span><span class="p">);</span>
+</span><span id="__span-19-17"><a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="w">        </span><span class="p">});</span>
+</span><span id="__span-19-18"><a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-19-19"><a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a>
+</span><span id="__span-19-20"><a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="w"> </span><span class="k">private</span><span class="o">:</span>
+</span><span id="__span-19-21"><a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="w">  </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">Subscription</span><span class="o">&lt;</span><span class="n">unitree_go</span><span class="o">::</span><span class="n">msg</span><span class="o">::</span><span class="n">SportModeState</span><span class="o">&gt;::</span><span class="n">SharedPtr</span><span class="w"> </span><span class="n">subscription_</span><span class="p">;</span>
+</span><span id="__span-19-22"><a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="p">};</span>
+</span><span id="__span-19-23"><a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a>
+</span><span id="__span-19-24"><a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-25"><a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="w">  </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">init</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+</span><span id="__span-19-26"><a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a><span class="w">  </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">spin</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SportStatePrinter</span><span class="o">&gt;</span><span class="p">());</span>
+</span><span id="__span-19-27"><a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a><span class="w">  </span><span class="n">rclcpp</span><span class="o">::</span><span class="n">shutdown</span><span class="p">();</span>
+</span><span id="__span-19-28"><a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-19-29"><a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>这一版和 Python 版的核心区别只有两点：</p>
+<ul>
+<li>消息字段通过 <code>msg-&gt;field</code> 访问</li>
+<li>你需要自己补 <code>CMakeLists.txt</code> 和 <code>package.xml</code> 的依赖声明</li>
+</ul>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

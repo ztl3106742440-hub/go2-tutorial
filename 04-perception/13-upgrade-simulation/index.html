@@ -1,0 +1,3471 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="面向本科小白的 Unitree Go2 + ROS2 二次开发实验教程">
+      
+      
+        <meta name="author" content="ztl">
+      
+      
+        <link rel="canonical" href="https://ztl3106742440-hub.github.io/go2-tutorial/04-perception/13-upgrade-simulation/">
+      
+      
+        <link rel="prev" href="../12-nav2-baseline/">
+      
+      
+        <link rel="next" href="../14-slam-3d-sim/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>第 13 章 升级动机与仿真环境搭建 - Go2 机器狗实验指导书</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#13" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Go2 机器狗实验指导书" class="md-header__button md-logo" aria-label="Go2 机器狗实验指导书" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.41 4 16 6.41v.18L18.41 9H22v2h-4.41L16 9.41V12h-1a2 2 0 0 1-2-2V7.5H9.86c-.09.37-.24.72-.44 1.05L15.18 19H20a2 2 0 0 1 2 2v1H2v-1a2 2 0 0 1 2-2h6.61l-4.69-8.5a4.006 4.006 0 0 1-3.81-3A4 4 0 0 1 5 2.63c2.13-.55 4.31.73 4.86 2.87H13V3a2 2 0 0 1 2-2h1v2.59L17.59 2H22v2zM6 4.5a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Go2 机器狗实验指导书
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第 13 章 升级动机与仿真环境搭建
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到深色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到浅色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ztl3106742440-hub/go2-tutorial" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ztl3106742440-hub/go2-tutorial
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../00-overview/01-intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  开篇
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../01-foundation/01-install/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  基础篇 · 环境与通信
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-packages/03-keyboard/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  功能包开发
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-communication/07-topic/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  ROS2 通信机制实战
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../10-lidar/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  进阶篇 · 感知与导航
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-interaction/16-voice/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  交互篇 · 语音与视觉
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../06-integration/18-orchestration/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  综合篇
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Go2 机器狗实验指导书" class="md-nav__button md-logo" aria-label="Go2 机器狗实验指导书" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.41 4 16 6.41v.18L18.41 9H22v2h-4.41L16 9.41V12h-1a2 2 0 0 1-2-2V7.5H9.86c-.09.37-.24.72-.44 1.05L15.18 19H20a2 2 0 0 1 2 2v1H2v-1a2 2 0 0 1 2-2h6.61l-4.69-8.5a4.006 4.006 0 0 1-3.81-3A4 4 0 0 1 5 2.63c2.13-.55 4.31.73 4.86 2.87H13V3a2 2 0 0 1 2-2h1v2.59L17.59 2H22v2zM6 4.5a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2"/></svg>
+
+    </a>
+    Go2 机器狗实验指导书
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ztl3106742440-hub/go2-tutorial" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ztl3106742440-hub/go2-tutorial
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开篇
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    开篇
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/01-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教程简介与使用指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/02-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go2 硬件一图看懂
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/03-env/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发环境总览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-overview/04-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实机安全红线
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    基础篇 · 环境与通信
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    基础篇 · 环境与通信
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-foundation/01-install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 1 章 环境搭建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-foundation/02-messages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 2 章 认识 Go2 消息接口
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    功能包开发
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    功能包开发
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/03-keyboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 3 章 键盘控制节点
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/04-twist-bridge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 4 章 Twist 消息桥接
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/05-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 5 章 机器人可视化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-packages/06-driver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 6 章 完整驱动包集成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ROS2 通信机制实战
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ROS2 通信机制实战
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/07-topic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 7 章 话题通信 — 巡航与位置获取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/08-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 8 章 服务通信 — 巡航启停
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-communication/09-action/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 9 章 动作通信 — 导航任务
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    进阶篇 · 感知与导航
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    进阶篇 · 感知与导航
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-lidar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 10 章 激光雷达原理与选型
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-slam-2d/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 11 章 2D SLAM 建图实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-nav2-baseline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 12 章 实机 Nav2 2D 基线
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 升级动机与仿真环境搭建
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 13 章 升级动机与仿真环境搭建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章你将学到
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景与原理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="背景与原理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        引子:为什么第 12 章不是终点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#l1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第一部分:L1 为什么升不动
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第二部分:为什么先去仿真
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第三部分:仿真方案怎么选
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本书这一章的最终选型
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构总览
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="架构总览">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仿真基础盘的数据流
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仿真里这几个包分别干什么
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一个必须先说的坐标系提醒
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        环境准备
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="环境准备">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前置条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        统一工作空间
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安装系统依赖
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        准备一个“只走回环网卡”的 DDS 配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        实现步骤
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="实现步骤">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤一:把仿真仓库拉进工作空间
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤二:先看清这套仓库里谁负责什么
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vlp-16-go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤三:把 VLP-16 正式挂到 Go2 模型上
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤四:确保控制器按顺序加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤五:编译整个仿真工作空间
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gazebo-go2-vlp-16-rviz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤六:启动 Gazebo + Go2 + VLP-16 + RViz
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤七:用键盘让 Go2 先走起来
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译与运行
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="编译与运行">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        终端 1:启动仿真
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        终端 2:启动键盘控制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一次性回顾启动顺序
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果验证
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证一:机器人是否真的站稳
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证二:点云和 IMU 是否都在出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证三:键盘控制是否真的生效
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        常见问题
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="常见问题">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        这些坑我建议你按“先看现象,再动手”来排
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章小结
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        下一步
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拓展阅读
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-slam-3d-sim/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 14 章 仿真中的 3D SLAM 与 Nav2 升级
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-mid360/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 15 章 实机升级 — 外接 MID-360 方案
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交互篇 · 语音与视觉
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    交互篇 · 语音与视觉
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-interaction/16-voice/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 16 章 语音交互系统
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-interaction/17-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 17 章 视觉与 VLM 应用
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    综合篇
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    综合篇
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-integration/18-orchestration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 18 章 任务编排 — 多模态联动
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-integration/19-future/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第 19 章 未来方向 — RL 与具身智能
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章你将学到
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景与原理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="背景与原理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        引子:为什么第 12 章不是终点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#l1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第一部分:L1 为什么升不动
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第二部分:为什么先去仿真
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第三部分:仿真方案怎么选
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本书这一章的最终选型
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构总览
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="架构总览">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仿真基础盘的数据流
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仿真里这几个包分别干什么
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一个必须先说的坐标系提醒
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        环境准备
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="环境准备">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前置条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        统一工作空间
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        安装系统依赖
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        准备一个“只走回环网卡”的 DDS 配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        实现步骤
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="实现步骤">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤一:把仿真仓库拉进工作空间
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤二:先看清这套仓库里谁负责什么
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vlp-16-go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤三:把 VLP-16 正式挂到 Go2 模型上
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤四:确保控制器按顺序加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤五:编译整个仿真工作空间
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gazebo-go2-vlp-16-rviz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤六:启动 Gazebo + Go2 + VLP-16 + RViz
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        步骤七:用键盘让 Go2 先走起来
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编译与运行
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="编译与运行">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        终端 1:启动仿真
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        终端 2:启动键盘控制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一次性回顾启动顺序
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果验证
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证一:机器人是否真的站稳
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证二:点云和 IMU 是否都在出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证三:键盘控制是否真的生效
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        常见问题
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="常见问题">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        这些坑我建议你按“先看现象,再动手”来排
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本章小结
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        下一步
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拓展阅读
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="13">第 13 章 升级动机与仿真环境搭建<a class="headerlink" href="#13" title="锚点链接">&para;</a></h1>
+<blockquote>
+<p>第 12 章我们已经让 Go2 在实机上跑通了 <strong>L1 + 2D Nav2</strong> 基线。但如果你还记得章末那张“能走但有限”的清单,就会发现一个残酷事实:继续在这条链上硬抠参数,大概率只会越调越累。这一章,我们先把“为什么要换路”讲透,再把一套能走能扫的 Gazebo 仿真基础盘搭起来,给下一章真正的 3D 升级做准备。</p>
+</blockquote>
+<hr />
+<h2 id="_1">本章你将学到<a class="headerlink" href="#_1" title="锚点链接">&para;</a></h2>
+<ul>
+<li>用真实实验数据说明:为什么 Go2 的 <strong>L1 + 实机 3D LIO</strong> 这条路,不是“再调一调就能救回来”</li>
+<li>看懂 L1 的四个关键限制:步态 IMU 噪声、坐标系问题、稀疏单环点云、扩展坞官方支持范围</li>
+<li>比较 Gazebo Classic、Gazebo Gz、Isaac Sim、Webots 这几条仿真路线,理解为什么本书先选 <strong>Gazebo Classic</strong></li>
+<li>在 <code>go2_sim_ws</code> 里搭起 <strong>unitree-go2-ros2 + CHAMP + VLP-16</strong> 这一套仿真底座</li>
+<li>识别 8 个真正容易把人卡住的坑,避免把一周时间浪费在路径、DDS、控制器时序和传感器插件上</li>
+</ul>
+<h2 id="_2">背景与原理<a class="headerlink" href="#_2" title="锚点链接">&para;</a></h2>
+<h3 id="12">引子:为什么第 12 章不是终点<a class="headerlink" href="#12" title="锚点链接">&para;</a></h3>
+<p>如果只看阶段性成果,第 11 章和第 12 章其实已经很像“胜利前夜”了:</p>
+<ul>
+<li>第 11 章我们有了 2D 地图</li>
+<li>第 12 章我们看到了 Go2 能自己走到目标点</li>
+</ul>
+<p>但我当时很快就发现,这条路线有一个非常难受的现实:</p>
+<p><strong>我们想要的不是“平地里慢慢到点”,而是后面那条完整任务链:自主导航、感知、识别、再去放置。</strong></p>
+<p>一旦目标变成这个级别,2D 基线就只是起点,不是终点。</p>
+<p>更糟的是,我最开始以为“再把 L1 接到 3D LIO 上,事情就自然升级了”。结果后面的几轮实验基本把这个幻想打碎了。</p>
+<h3 id="l1">第一部分:L1 为什么升不动<a class="headerlink" href="#l1" title="锚点链接">&para;</a></h3>
+<p>这一节不是为了贬低 L1,而是为了把边界讲清楚。讲清楚边界,后面的换路才不是拍脑袋。</p>
+<h4 id="1-imu">硬伤 1:步态 IMU 噪声淹没了真实运动<a class="headerlink" href="#1-imu" title="锚点链接">&para;</a></h4>
+<p>Point-LIO 在 Go2 上最迷惑人的地方是:</p>
+<ul>
+<li><strong>静止时很好看</strong></li>
+<li><strong>一走起来就崩</strong></li>
+</ul>
+<p>实验里最稳定的一次结果是:</p>
+<ul>
+<li>机器人静止时,建图精度可以压到 <strong>±2 cm</strong></li>
+<li>一旦开始行走,点云会穿透墙体、旧信息丢失、位姿估计直接发散</li>
+</ul>
+<p>我当时最先怀疑的是“是不是 IMU 太吵,低通滤波一下就好了”。结果实验数据很无情:</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>截止频率</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一阶低通滤波</td>
+<td><code>1 Hz</code></td>
+<td>静止还行,旋转时位置飘到 <strong>-98 m</strong></td>
+</tr>
+<tr>
+<td>一阶低通滤波</td>
+<td><code>3 Hz</code></td>
+<td>启动就炸,<code>z</code> 直接飘到 <strong>-557 m</strong></td>
+</tr>
+</tbody>
+</table>
+<p>这组数字很值钱,因为它直接说明了一个工程事实:</p>
+<p><strong>Go2 步态振动的频段,和机器人真实运动引起的有效加速度变化频段,高度重叠。</strong></p>
+<p>也就是说:</p>
+<ul>
+<li>你把滤波器调狠了,步态噪声是少了,但真实运动信号也一起被你削掉了</li>
+<li>你把滤波器调松了,有效信号是保住了,步态噪声又原封不动灌进去了</li>
+</ul>
+<p>这不是“参数还没调到位”,而是线性滤波在这个场景里的能力边界。</p>
+<h4 id="2l1-imu">硬伤 2:L1 IMU 坐标系问题不是普通的小偏差<a class="headerlink" href="#2l1-imu" title="锚点链接">&para;</a></h4>
+<p>第二个坑比“IMU 很吵”更阴。</p>
+<p>按官方 L1 手册的定义:</p>
+<ul>
+<li>IMU 坐标系和 LiDAR 坐标系是平行对齐的</li>
+<li><code>+Z</code> 指向上方</li>
+</ul>
+<p>但真正装到 Go2 身上之后,事情就没这么简单了。</p>
+<p>一方面,Go2 上的 L1 是倒装的;另一方面,我在实测里又发现:</p>
+<ul>
+<li>直接照搬 CMU 开源项目里的 <code>negate Y/Z + 15.1°</code> 变换,重力方向会偏掉将近 <strong>30°</strong></li>
+<li>进一步拆开看,加速度和角速度的坐标约定甚至不像是同一套“简单轴翻转”关系</li>
+</ul>
+<p>也就是说,这里不是一个“差个 5° 再微调一下”的问题,而是传感器契约本身就不够规整。</p>
+<div class="admonition info">
+<p class="admonition-title">来自宇树的回复</p>
+<p>我当时把问题提给了宇树技术支持,拿到的几个关键信息如下:</p>
+<ul>
+<li>L1 安装外参给到的是 <code>xyzrpy = [0.28945, 0, -0.046825, 0, 2.8782, 0]</code></li>
+<li>官方给过一个 <code>point_lio_unilidar</code> 仓库,但它是 <strong>ROS1 Noetic</strong> 方案,不是 Go2 ROS2 直接可抄的成品</li>
+<li><code>slam_operate</code> 这套导航接口只支持 <strong>MID-360</strong> 和 <strong>XT-16</strong>, <strong>L1 不支持</strong></li>
+<li>机器人里的 <code>uslam</code> 主要是 App 侧功能,不提供这条开发链可直接接入的开放接口</li>
+</ul>
+</div>
+<p>这个回复其实非常关键。因为它帮我们确认了:</p>
+<ul>
+<li>你不是“姿势没找对”</li>
+<li>而是官方支持范围本来就不包括“L1 直接走这条开发链”</li>
+</ul>
+<h4 id="3ring-1-2d">硬伤 3:<code>ring = 1</code> 的稀疏点云,只够做 2D 基线<a class="headerlink" href="#3ring-1-2d" title="锚点链接">&para;</a></h4>
+<p>第 10 章我们已经看过 L1 的点云性格了:</p>
+<ul>
+<li>单帧大约 <code>4193 ~ 4194</code> 点</li>
+<li>发布频率大约 <code>10 Hz</code></li>
+<li><code>ring</code> 字段实测基本全是 <code>1</code></li>
+</ul>
+<p>这种点云当然不是“完全不能用”。第 11 章和第 12 章已经证明了:</p>
+<ul>
+<li>把它压成 <code>/scan</code>,做 2D SLAM 和 2D Nav2 是能跑的</li>
+</ul>
+<p>但问题在于,3D LIO 对点云的要求比“能压成一圈二维扫描”高得多。</p>
+<p>至少在我当时验证的这几条路上:</p>
+<ul>
+<li><code>KISS-ICP</code> 会嫌点云几何特征太稀</li>
+<li><code>Point-LIO</code> 会越来越依赖 IMU,而 IMU 又刚好是最不稳的那环</li>
+<li>依赖更强结构特征或稳定逐点时间的 3D LIO/回环方案,会更加难受</li>
+</ul>
+<p>所以这里别把“L1 能输出 PointCloud2”误听成“L1 天然适合做 3D LIO 前端”。</p>
+<h4 id="4-l1">硬伤 4:扩展坞这条官方链,本来就没把 L1 放进来<a class="headerlink" href="#4-l1" title="锚点链接">&para;</a></h4>
+<p>根据第 4 周那轮官方文档调研,以及后面自己查 <code>graph_pid_ws</code> 的结果:</p>
+<ul>
+<li>官方 SLAM 导航文档默认前提是 <strong>EDU + 扩展坞 + 官方购入激光雷达</strong></li>
+<li>支持口径明确写的是 <strong>MID-360</strong> 或 <strong>XT-16</strong></li>
+<li>扩展坞那套预装链路里,雷达 IP、驱动脚本和 <code>lio_sam</code> 配置也都是围着它们写的</li>
+</ul>
+<p>比如当时已经能确认的事实就包括:</p>
+<ul>
+<li>雷达默认 IP 直指 <code>192.168.123.20</code></li>
+<li><code>mid360_lidar.sh</code> 调的就是 <code>livox_ros_driver2</code></li>
+<li><code>lio_sam</code> 相关配置是 <code>sensor: livox</code>, <code>N_SCAN: 4</code></li>
+</ul>
+<p>这意味着什么?</p>
+<p>意味着就算你愿意继续为 L1 坐标系和 IMU 数据硬啃,扩展坞那条官方“教育版 SLAM 导航主线”也并没有在前方等你。</p>
+<div class="admonition danger">
+<p class="admonition-title">此路不通</p>
+<p>到这里,我们其实已经能下结论了:</p>
+<ul>
+<li><strong>步态 IMU 噪声</strong> 不是调一两个滤波参数能救的</li>
+<li><strong>IMU 坐标系问题</strong> 不是普通的“小偏差”,而是传感器契约不够规整</li>
+<li><strong>L1 稀疏单环点云</strong> 足够做 2D 基线,但并不适合作为这条 3D LIO 升级链的稳定前端</li>
+<li><strong>扩展坞官方支持</strong> 本来就站在 MID-360 / XT-16 这边,不站在 L1 这边</li>
+</ul>
+<p>所以第 12 章之后最理性的决定,不是继续在实机 L1 上死磕 3D,而是先把算法链放到一个传感器契约更干净的地方跑通。</p>
+</div>
+<h3 id="_3">第二部分:为什么先去仿真<a class="headerlink" href="#_3" title="锚点链接">&para;</a></h3>
+<p>我当时最终切到仿真,不是因为“仿真更高级”,恰恰相反,是因为它更朴素:</p>
+<ul>
+<li>IMU 数据更干净</li>
+<li>雷达模型更标准</li>
+<li>外参、TF、控制链都更容易穷举排查</li>
+<li>场景可控,出了问题能快速复现</li>
+</ul>
+<p>这类转向最容易被误会成“逃避实机”,其实不是。</p>
+<p>真正合理的顺序是:</p>
+<ol>
+<li>先在仿真里把 <strong>算法和工程链</strong> 跑通</li>
+<li>再带着一套已经验证过的系统回到实机</li>
+<li>最后决定值不值得采购更适合的传感器,比如 MID-360</li>
+</ol>
+<p>这比一边踩 L1 的硬件坑,一边还想同时调 3D 算法,要省时间得多。</p>
+<h3 id="_4">第三部分:仿真方案怎么选<a class="headerlink" href="#_4" title="锚点链接">&para;</a></h3>
+<h4 id="_5">先比仿真器<a class="headerlink" href="#_5" title="锚点链接">&para;</a></h4>
+<p>这一步我没有追求“最强”,而是优先看 <strong>ROS2 Humble 生态</strong> 和 <strong>四足现成例子</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>学习曲线</th>
+<th>ROS2 Humble 生态</th>
+<th>四足现成示例</th>
+<th>这一章是否推荐</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gazebo Classic</td>
+<td>低到中</td>
+<td>最成熟</td>
+<td><strong>有 CHAMP + Velodyne 现成链路</strong></td>
+<td><strong>推荐</strong></td>
+</tr>
+<tr>
+<td>Gazebo Gz</td>
+<td>中</td>
+<td>新,但迁移成本高</td>
+<td>有,但资料分散</td>
+<td>暂不选</td>
+</tr>
+<tr>
+<td>Isaac Sim</td>
+<td>高</td>
+<td>很强,但偏重 GPU 和生态整合</td>
+<td>有,但更适合后期</td>
+<td>暂不选</td>
+</tr>
+<tr>
+<td>Webots</td>
+<td>低到中</td>
+<td>够用</td>
+<td>四足案例少</td>
+<td>暂不选</td>
+</tr>
+</tbody>
+</table>
+<p>如果你现在的目标是“先把 Go2 在仿真里走起来,再让它能扫、能给下一章上 3D SLAM”,Gazebo Classic 是最省心的选择。</p>
+<h4 id="_6">再比控制框架<a class="headerlink" href="#_6" title="锚点链接">&para;</a></h4>
+<p>控制层我最后也做过取舍。</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优点</th>
+<th>缺点</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接走 Go2 SDK 仿真链</td>
+<td>接口更像实机</td>
+<td>现成示例分散,对 URDF/传感器改造不友好</td>
+<td>暂不选</td>
+</tr>
+<tr>
+<td><strong>CHAMP</strong></td>
+<td>四足步态框架成熟,ROS2/Gazebo 资料多,能直接接 <code>cmd_vel</code></td>
+<td>不是 Unitree 官方控制栈</td>
+<td><strong>选它</strong></td>
+</tr>
+</tbody>
+</table>
+<p>本书这一套教程里,CHAMP 的价值非常直接:</p>
+<ul>
+<li>它不是最终产品</li>
+<li>但它非常适合搭一块“能走、能看、能接传感器、能继续接 SLAM/Nav2”的实验底板</li>
+</ul>
+<h4 id="_7">最后比雷达模型<a class="headerlink" href="#_7" title="锚点链接">&para;</a></h4>
+<p>这一步最容易想当然。</p>
+<p>如果只考虑“以后可能买 MID-360”,你会本能地想直接模拟 MID-360。但我当时最后先选的是 <strong>VLP-16</strong>。</p>
+<p>原因有三个:</p>
+<ol>
+<li>Gazebo 现成插件和资料最多</li>
+<li>输出是标准的 <code>PointCloud2</code> 多环点云,更容易接通后续 3D 算法链</li>
+<li><code>/velodyne_points</code> 这条话题在 ROS 生态里几乎是“默认公约”,很多现成配置直接就能吃</li>
+</ol>
+<p>不过这里要诚实说一句:</p>
+<div class="admonition note">
+<p class="admonition-title">VLP-16 也不是完美答案</p>
+<p>它解决的是“<strong>先把多环点云 + 标准 TF + 可控仿真场景搭起来</strong>”这件事,不是一步到位解决所有 3D SLAM 细节。比如我后来在第 14 章的联调里就发现,某些 Gazebo VLP-16 插件对逐点 <code>time</code> 字段的实现并不理想。这不影响本章把基础盘搭起来,但你别把它误会成“仿真里就没有坑了”。</p>
+</div>
+<h3 id="_8">本书这一章的最终选型<a class="headerlink" href="#_8" title="锚点链接">&para;</a></h3>
+<p>所以这章的结论很明确:</p>
+<p><strong>Gazebo Classic + CHAMP + VLP-16</strong></p>
+<p>原因可以压缩成三句话:</p>
+<ul>
+<li><strong>Gazebo Classic</strong>:最稳,和 ROS2 Humble 配合成熟</li>
+<li><strong>CHAMP</strong>:最省时间地把 Go2 变成“能走的四足机器人”</li>
+<li><strong>VLP-16</strong>:最容易先给下一章准备一份像样的 3D 点云输入</li>
+</ul>
+<h2 id="_9">架构总览<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h2>
+<h3 id="_10">仿真基础盘的数据流<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h3>
+<p>本章我们先不急着接 Fast-LIO,也不急着接 Nav2。先把一块“能走能扫”的底板搭牢。</p>
+<pre class="mermaid"><code>flowchart LR
+    A[Gazebo World&lt;br/&gt;indoor.world] --&gt; B[spawn_entity]
+    B --&gt; C[Go2 Robot Model&lt;br/&gt;robot_VLP.xacro]
+
+    C --&gt; D[gazebo_ros2_control]
+    D --&gt; E[controller_manager]
+    E --&gt; F[joint_states_controller]
+    E --&gt; G[joint_group_effort_controller]
+
+    H[champ_teleop / 键盘输入] --&gt; I["/cmd_vel"]
+    I --&gt; J[quadruped_controller_node]
+    J --&gt; G
+
+    C --&gt; K["/imu/data"]
+    C --&gt; L["/velodyne_points"]
+    C --&gt; M["/joint_states"]
+    C --&gt; N["/odom + TF"]
+
+    K --&gt; O[RViz]
+    L --&gt; O
+    M --&gt; O
+    N --&gt; O
+
+    K --&gt; P[第 14 章 3D SLAM]
+    L --&gt; P</code></pre>
+<h3 id="_11">仿真里这几个包分别干什么<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h3>
+<p>为了后面不被目录绕晕,你先记住这一层分工:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>unitree-go2-ros2/
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── champ/                         ← 四足控制框架本体
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── champ_base/
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   ├── champ_bringup/
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│   ├── champ_gazebo/
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   └── champ_description/
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── robots/descriptions/go2_description/
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   └── xacro/                     ← Go2 模型和传感器挂载
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>├── robots/configs/go2_config/
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│   ├── launch/                    ← Gazebo / RViz / 后续导航入口
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│   ├── worlds/                    ← 仿真世界
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│   └── rviz/                      ← RViz 配置
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>└── champ_teleop/                  ← 键盘遥控
+</span></code></pre></div>
+<p>这套结构的好处是:</p>
+<ul>
+<li>机器人模型和传感器在 <code>go2_description</code></li>
+<li>世界、launch 和 RViz 在 <code>go2_config</code></li>
+<li>步态控制和状态估计在 <code>champ/*</code></li>
+</ul>
+<p>后面你查问题时,知道该去哪一层下手。</p>
+<h3 id="_12">一个必须先说的坐标系提醒<a class="headerlink" href="#_12" title="锚点链接">&para;</a></h3>
+<p>第 12 章实机链路里,我们一直强调 Go2 用的是 <code>base</code>。但这一章的仿真链不是那套驱动,它的根 link 叫的是:</p>
+<ul>
+<li><code>base_link</code></li>
+</ul>
+<p>所以请你现在先把这条规则记住:</p>
+<ul>
+<li><strong>实机章节</strong>跟 Go2 原生驱动时,优先认 <code>base</code></li>
+<li><strong>这一章仿真</strong>跟 CHAMP / URDF / Gazebo 时,优先认 <code>base_link</code></li>
+</ul>
+<p>如果你硬要在这章里把它们统一成一个名字,大概率会把 launch、RViz、EKF 和传感器 frame 一起搅乱。</p>
+<h2 id="_13">环境准备<a class="headerlink" href="#_13" title="锚点链接">&para;</a></h2>
+<h3 id="_14">前置条件<a class="headerlink" href="#_14" title="锚点链接">&para;</a></h3>
+<p>开始本章前,你最好已经具备两类前置:</p>
+<ol>
+<li>概念上读过 <a href="../10-lidar/">第 10 章 激光雷达原理与选型</a>、<a href="../11-slam-2d/">第 11 章 2D SLAM 建图实战</a> 和 <a href="../12-nav2-baseline/">第 12 章 实机 Nav2 2D 基线</a></li>
+<li>机器上已经装好了 ROS2 Humble,并能正常 <code>ros2 topic list</code></li>
+</ol>
+<p>这一章不依赖你已经把实机链跑通,但它强依赖你知道:</p>
+<ul>
+<li>什么是 <code>/cmd_vel</code></li>
+<li>什么是 TF</li>
+<li>什么是 <code>PointCloud2</code></li>
+</ul>
+<h3 id="_15">统一工作空间<a class="headerlink" href="#_15" title="锚点链接">&para;</a></h3>
+<p>原始笔记里,我当时单独开过一个仿真工作空间。但这本书为了统一命名,我们这里全部放进:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>~/go2_sim_ws/
+</span></code></pre></div>
+<p>这样后面你在第 14 章继续加 3D SLAM,不会又多出一套新路径。</p>
+<h3 id="_16">安装系统依赖<a class="headerlink" href="#_16" title="锚点链接">&para;</a></h3>
+<p>先把 Gazebo、ros2_control、Velodyne 仿真相关依赖补齐:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Gazebo Classic + ROS2 控制 + 机器人建模 + VLP-16 插件</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span>gazebo<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span>ros-humble-gazebo-ros-pkgs<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span>ros-humble-gazebo-ros2-control<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span>ros-humble-controller-manager<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span>ros-humble-ros2-control<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span>ros-humble-ros2-controllers<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span>ros-humble-robot-localization<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span>ros-humble-xacro<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span>ros-humble-velodyne<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span>ros-humble-velodyne-gazebo-plugins<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span>ros-humble-velodyne-description<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span>python3-rosdep
+</span></code></pre></div>
+<p>如果你的系统里还没初始化过 <code>rosdep</code>,先做一次:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 只需要首次执行一次</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>rosdep<span class="w"> </span>init
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>rosdep<span class="w"> </span>update
+</span></code></pre></div>
+<h3 id="dds">准备一个“只走回环网卡”的 DDS 配置<a class="headerlink" href="#dds" title="锚点链接">&para;</a></h3>
+<p>如果你前面一直在连真机,很可能已经把 <code>CYCLONEDDS_URI</code> 绑到了某块有线网卡上。真机断开后,仿真节点就容易出现莫名其妙的 DDS 报错。</p>
+<p>最稳的做法是给仿真单独准备一份只走 <code>lo</code> 的配置。</p>
+<p>比如你可以先建目录:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/go2_sim_ws/config
+</span></code></pre></div>
+<p>然后在 <code>config/cyclonedds-lo.xml</code> 里写入:</p>
+<div class="language-xml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">&lt;CycloneDDS</span><span class="w"> </span><span class="na">xmlns=</span><span class="s">&quot;https://cdds.io/config&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&lt;Domain</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;any&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">&lt;General&gt;</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">      </span><span class="nt">&lt;Interfaces&gt;</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="nt">&lt;NetworkInterface</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;lo&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">      </span><span class="nt">&lt;/Interfaces&gt;</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">      </span><span class="nt">&lt;AllowMulticast&gt;</span>false<span class="nt">&lt;/AllowMulticast&gt;</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nt">&lt;/General&gt;</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span><span class="nt">&lt;/Domain&gt;</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="nt">&lt;/CycloneDDS&gt;</span>
+</span></code></pre></div>
+<p>本章运行仿真前,只要在终端里临时导出它:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 让 DDS 在仿真时只走本机回环</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CYCLONEDDS_URI</span><span class="o">=</span>file://<span class="nv">$HOME</span>/go2_sim_ws/config/cyclonedds-lo.xml
+</span></code></pre></div>
+<p>如果你没有绑过真机 DDS,也可以简单粗暴地先执行:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 最简单的排查方式:先把旧的 DDS 绑定清掉</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">unset</span><span class="w"> </span>CYCLONEDDS_URI
+</span></code></pre></div>
+<h2 id="_17">实现步骤<a class="headerlink" href="#_17" title="锚点链接">&para;</a></h2>
+<h3 id="_18">步骤一:把仿真仓库拉进工作空间<a class="headerlink" href="#_18" title="锚点链接">&para;</a></h3>
+<p>现在我们正式搭环境。</p>
+<p>先创建工作空间并克隆聚合仓库:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 创建教程统一工作空间</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/go2_sim_ws/src
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws/src
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># 这一个仓库里已经打包了 CHAMP、Go2 描述包和配置包</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/anujjain-dev/unitree-go2-ros2.git
+</span></code></pre></div>
+<p>这一步为什么我推荐直接用这个聚合仓库,而不是自己手动拼 <code>champ + go2_description + go2_config</code>?</p>
+<p>原因很简单:</p>
+<ul>
+<li>目录关系已经排好</li>
+<li>launch 链已经串好</li>
+<li>你现在最缺的不是“再多控制一份仓库”,而是先把底座跑起来</li>
+</ul>
+<p>接着在工作空间根目录安装依赖:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 让 rosdep 把仓库声明过的依赖一次装齐</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>rosdep<span class="w"> </span>install<span class="w"> </span>--from-paths<span class="w"> </span>src<span class="w"> </span>--ignore-src<span class="w"> </span>-r<span class="w"> </span>-y
+</span></code></pre></div>
+<h3 id="_19">步骤二:先看清这套仓库里谁负责什么<a class="headerlink" href="#_19" title="锚点链接">&para;</a></h3>
+<p>别急着 <code>colcon build</code>。先看明白你后面会改到的关键位置:</p>
+<ul>
+<li><code>robots/descriptions/go2_description/xacro/robot_VLP.xacro</code>
+  负责决定 Go2 模型最终挂了哪些传感器</li>
+<li><code>robots/descriptions/go2_description/xacro/velodyne.xacro</code>
+  负责定义 VLP-16 的 link、joint 和 Gazebo 插件</li>
+<li><code>champ/champ_gazebo/launch/gazebo.launch.py</code>
+  负责 Gazebo 启动、spawn 机器人和控制器加载顺序</li>
+<li><code>robots/configs/go2_config/launch/gazebo_velodyne.launch.py</code>
+  负责把 Go2 + Velodyne + RViz 整体拉起来</li>
+</ul>
+<p>这一步虽然只是认目录,但非常重要。因为后面一旦“机器人不站”“点云不出”“控制器没加载”,你得知道去哪个文件里找。</p>
+<h3 id="vlp-16-go2">步骤三:把 VLP-16 正式挂到 Go2 模型上<a class="headerlink" href="#vlp-16-go2" title="锚点链接">&para;</a></h3>
+<p>这一章最核心的模型改造,其实就两步:</p>
+<ol>
+<li>在 Go2 的主 xacro 里包含 <code>velodyne.xacro</code></li>
+<li>在 <code>velodyne.xacro</code> 里把传感器挂到 <code>base_link</code>,并声明 Gazebo 插件</li>
+</ol>
+<h4 id="vlp-16">先在主模型里包含 VLP-16<a class="headerlink" href="#vlp-16" title="锚点链接">&para;</a></h4>
+<p><code>robot_VLP.xacro</code> 的关键就是这一行:</p>
+<div class="language-xml highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nt">&lt;xacro:include</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;$(find go2_description)/xacro/velodyne.xacro&quot;</span><span class="nt">/&gt;</span>
+</span></code></pre></div>
+<p>这意味着这份模型不再是“裸 Go2”,而是“挂了 VLP-16 的 Go2”。</p>
+<p>如果你以后想切回 2D 激光模型,也正是在这里把 <code>velodyne.xacro</code> 换成 <code>laser.xacro</code>。</p>
+<h4 id="velodynexacro">再看 <code>velodyne.xacro</code> 里真正发生了什么<a class="headerlink" href="#velodynexacro" title="锚点链接">&para;</a></h4>
+<p>下面这段是你最该看懂的部分:</p>
+<div class="language-xml highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">&lt;joint</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne_base_mount_joint&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;fixed&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span><span class="nt">&lt;origin</span><span class="w"> </span><span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span><span class="w"> </span><span class="na">xyz=</span><span class="s">&quot;0.2 0 0.08&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">&lt;parent</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;base_link&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">&lt;child</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne_base_link&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nt">&lt;/joint&gt;</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="nt">&lt;joint</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne_base_scan_joint&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;fixed&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="nt">&lt;origin</span><span class="w"> </span><span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span><span class="w"> </span><span class="na">xyz=</span><span class="s">&quot;0 0 0.0377&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="nt">&lt;parent</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne_base_link&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">    </span><span class="nt">&lt;child</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="nt">&lt;/joint&gt;</span>
+</span></code></pre></div>
+<p>它做了两件事:</p>
+<ul>
+<li>把雷达基座固定在 <code>base_link</code> 上方前侧</li>
+<li>再把真正输出点云的 <code>velodyne</code> link 接到基座上</li>
+</ul>
+<p>也就是说,你在 RViz 里看到的 <code>/velodyne_points</code>,并不是“悬浮在世界里的一团点”,而是明确挂在机器人本体上的。</p>
+<h4 id="gazebo">最后是 Gazebo 插件<a class="headerlink" href="#gazebo" title="锚点链接">&para;</a></h4>
+<p>真正让 <code>/velodyne_points</code> 出来的,是同一个文件里的这段插件配置:</p>
+<div class="language-xml highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">&lt;gazebo</span><span class="w"> </span><span class="na">reference=</span><span class="s">&quot;velodyne&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&lt;sensor</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne-VLP16&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;ray&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nt">&lt;update_rate&gt;</span>10<span class="nt">&lt;/update_rate&gt;</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nt">&lt;ray&gt;</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">      </span><span class="nt">&lt;scan&gt;</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">        </span><span class="nt">&lt;horizontal&gt;</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">          </span><span class="nt">&lt;samples&gt;</span>1800<span class="nt">&lt;/samples&gt;</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">          </span><span class="nt">&lt;min_angle&gt;</span>-3.141592653589793<span class="nt">&lt;/min_angle&gt;</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">          </span><span class="nt">&lt;max_angle&gt;</span>3.141592653589793<span class="nt">&lt;/max_angle&gt;</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">        </span><span class="nt">&lt;/horizontal&gt;</span>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">        </span><span class="nt">&lt;vertical&gt;</span>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">          </span><span class="nt">&lt;samples&gt;</span>16<span class="nt">&lt;/samples&gt;</span>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">          </span><span class="nt">&lt;min_angle&gt;</span>-0.2617993877991494<span class="nt">&lt;/min_angle&gt;</span>
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">          </span><span class="nt">&lt;max_angle&gt;</span>0.2617993877991494<span class="nt">&lt;/max_angle&gt;</span>
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">        </span><span class="nt">&lt;/vertical&gt;</span>
+</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">      </span><span class="nt">&lt;/scan&gt;</span>
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">    </span><span class="nt">&lt;/ray&gt;</span>
+</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">    </span><span class="nt">&lt;plugin</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;libgazebo_ros_velodyne_laser.so&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;gazebo_ros_laser_controller&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">      </span><span class="nt">&lt;ros&gt;</span>
+</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="w">        </span><span class="nt">&lt;remapping&gt;</span>~/out:=velodyne_points<span class="nt">&lt;/remapping&gt;</span>
+</span><span id="__span-12-21"><a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">      </span><span class="nt">&lt;/ros&gt;</span>
+</span><span id="__span-12-22"><a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">      </span><span class="nt">&lt;frame_name&gt;</span>velodyne<span class="nt">&lt;/frame_name&gt;</span>
+</span><span id="__span-12-23"><a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">    </span><span class="nt">&lt;/plugin&gt;</span>
+</span><span id="__span-12-24"><a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">  </span><span class="nt">&lt;/sensor&gt;</span>
+</span><span id="__span-12-25"><a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="nt">&lt;/gazebo&gt;</span>
+</span></code></pre></div>
+<p>这里最关键的不是每个数字本身,而是你要知道:</p>
+<ul>
+<li><code>samples=16</code> 对应的是 16 线垂直扫描</li>
+<li>输出话题被 remap 到了 <code>/velodyne_points</code></li>
+<li>点云 frame 叫 <code>velodyne</code></li>
+</ul>
+<p>下一章所有 3D SLAM 实验,其实都建立在这个话题契约上。</p>
+<h4 id="imu-go2">IMU 插件已经在 Go2 本体里<a class="headerlink" href="#imu-go2" title="锚点链接">&para;</a></h4>
+<p>除了 VLP-16,<code>go2_description/xacro/gazebo.xacro</code> 里还已经把 IMU 插件挂到 <code>imu_link</code> 上了,输出是:</p>
+<ul>
+<li><code>/imu/data</code></li>
+</ul>
+<p>这也是为什么我们说仿真环境的“传感器契约更干净”:</p>
+<ul>
+<li>雷达有标准 3D 点云</li>
+<li>IMU 有标准 <code>sensor_msgs/Imu</code></li>
+<li>两者都在 URDF / Gazebo 插件层被明确定义</li>
+</ul>
+<h3 id="_20">步骤四:确保控制器按顺序加载<a class="headerlink" href="#_20" title="锚点链接">&para;</a></h3>
+<p>四足机器人在 Gazebo 里最常见的第一类崩法不是点云没有,而是:</p>
+<ul>
+<li>Gazebo 窗口开了</li>
+<li>机器人也 spawn 了</li>
+<li>但就是软趴趴地瘫在地上</li>
+</ul>
+<p>根因通常是:</p>
+<p><strong><code>controller_manager</code> 还没准备好,你就抢着去加载控制器了。</strong></p>
+<p>这里本书沿用的修法是 <code>RegisterEventHandler + OnProcessExit</code>。</p>
+<p><code>champ_gazebo/launch/gazebo.launch.py</code> 里的关键逻辑长这样:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">load_joint_state_after_spawn</span> <span class="o">=</span> <span class="n">RegisterEventHandler</span><span class="p">(</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">event_handler</span><span class="o">=</span><span class="n">OnProcessExit</span><span class="p">(</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>        <span class="n">target_action</span><span class="o">=</span><span class="n">start_gazebo_spawner_cmd</span><span class="p">,</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>        <span class="n">on_exit</span><span class="o">=</span><span class="p">[</span><span class="n">load_joint_state_controller</span><span class="p">],</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="p">)</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="p">)</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="n">load_effort_after_joint_state</span> <span class="o">=</span> <span class="n">RegisterEventHandler</span><span class="p">(</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="n">event_handler</span><span class="o">=</span><span class="n">OnProcessExit</span><span class="p">(</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>        <span class="n">target_action</span><span class="o">=</span><span class="n">load_joint_state_controller</span><span class="p">,</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>        <span class="n">on_exit</span><span class="o">=</span><span class="p">[</span><span class="n">load_joint_trajectory_effort_controller</span><span class="p">],</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>    <span class="p">)</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>意思是:</p>
+<ol>
+<li>先 spawn 机器人</li>
+<li>spawn 完成后再激活 <code>joint_states_controller</code></li>
+<li><code>joint_states_controller</code> 激活后,再加载 <code>joint_group_effort_controller</code></li>
+</ol>
+<p>这几步顺序不能乱。乱了以后,你最容易看到的报错就是:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Controller &#39;xxx&#39; not found
+</span></code></pre></div>
+<p>或者更讨厌一点,表面没报错,但机器人就是不站。</p>
+<h3 id="_21">步骤五:编译整个仿真工作空间<a class="headerlink" href="#_21" title="锚点链接">&para;</a></h3>
+<p>现在可以开始编译了。</p>
+<p>我建议第一次就带上两个参数:</p>
+<ul>
+<li><code>--symlink-install</code></li>
+<li><code>-DCMAKE_POLICY_VERSION_MINIMUM=3.5</code></li>
+</ul>
+<p>命令如下:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># 编译整个仿真工作空间</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--symlink-install<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span>--cmake-args<span class="w"> </span>-DCMAKE_POLICY_VERSION_MINIMUM<span class="o">=</span><span class="m">3</span>.5
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span></code></pre></div>
+<p>这条命令里的 <code>-DCMAKE_POLICY_VERSION_MINIMUM=3.5</code> 看着像个小怪招,其实是当时排掉 CMake 兼容问题后留下来的保险丝。</p>
+<p>如果你只编这一章的 Gazebo 基础盘,它未必每次都救场;但后面一旦你把更多第三方包拉进同一个工作区,这个参数很容易省你一轮莫名其妙的构建报错。</p>
+<h3 id="gazebo-go2-vlp-16-rviz">步骤六:启动 Gazebo + Go2 + VLP-16 + RViz<a class="headerlink" href="#gazebo-go2-vlp-16-rviz" title="锚点链接">&para;</a></h3>
+<p>本章的主入口就是:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># 启动 Go2 + VLP-16 仿真,并顺手打开 RViz</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_config<span class="w"> </span>gazebo_velodyne.launch.py<span class="w"> </span>rviz:<span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<p>默认情况下,这个 launch 会做三件事:</p>
+<ol>
+<li>拉起 <code>champ_bringup</code>,发布机器人描述和控制节点</li>
+<li>拉起 <code>champ_gazebo</code>,进入 Gazebo 世界并 spawn 机器人</li>
+<li>使用 <code>go2_config/rviz/vlp16.rviz</code> 打开一份已经配好点云显示的 RViz</li>
+</ol>
+<p>如果一切正常,你会看到:</p>
+<ul>
+<li>Gazebo 里 Go2 站起来</li>
+<li>RViz 里有机器人模型</li>
+<li><code>/velodyne_points</code> 开始持续刷新</li>
+</ul>
+<h3 id="go2">步骤七:用键盘让 Go2 先走起来<a class="headerlink" href="#go2" title="锚点链接">&para;</a></h3>
+<p>本章的目标不是一上来就上导航,而是先确认:</p>
+<ul>
+<li>控制链通了</li>
+<li>机器人能走</li>
+<li>雷达和点云会跟着动</li>
+</ul>
+<p>如果你想尽量贴近当前代码,我建议直接用仓库里的 <code>champ_teleop.py</code>,并把它的输出话题改到 <code>/cmd_vel</code>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># 用仓库里的键盘遥控节点控制仿真中的 Go2</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>ros2<span class="w"> </span>run<span class="w"> </span>champ_teleop<span class="w"> </span>champ_teleop.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>cmd_vel_topic:<span class="o">=</span>/cmd_vel
+</span></code></pre></div>
+<p>它的好处是:</p>
+<ul>
+<li>本来就是为 CHAMP 四足控制写的</li>
+<li>后面你如果想顺手试身体姿态控制,它也已经留好了接口</li>
+</ul>
+<p>如果你只想最快验证“能不能走”,也可以直接用标准键盘工具:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># 最小可用方案:标准 Twist 键盘控制</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>ros2<span class="w"> </span>run<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-r<span class="w"> </span>cmd_vel:<span class="o">=</span>/cmd_vel
+</span></code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">这一章先别急着开 use_slam</p>
+<p>你会在 <code>gazebo_velodyne.launch.py</code> 里看到 <code>use_slam</code> 这个参数。先别开。本章只做“仿真底座搭好,Go2 能走能扫”。真正要把 3D SLAM 接上来,放到下一章再做,你会轻松很多。</p>
+</div>
+<h2 id="_22">编译与运行<a class="headerlink" href="#_22" title="锚点链接">&para;</a></h2>
+<p>这一节把前面零散的动作收成一套可直接照抄的顺序。</p>
+<h3 id="1">终端 1:启动仿真<a class="headerlink" href="#1" title="锚点链接">&para;</a></h3>
+<p>如果你之前配置过真机 DDS,先切回回环网卡:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># 仿真时优先走本机回环,别让旧的真机 DDS 配置捣乱</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CYCLONEDDS_URI</span><span class="o">=</span>file://<span class="nv">$HOME</span>/go2_sim_ws/config/cyclonedds-lo.xml
+</span></code></pre></div>
+<p>然后启动 Gazebo:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># 启动 Gazebo + Go2 + VLP-16 + RViz</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_config<span class="w"> </span>gazebo_velodyne.launch.py<span class="w"> </span>rviz:<span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<h3 id="2">终端 2:启动键盘控制<a class="headerlink" href="#2" title="锚点链接">&para;</a></h3>
+<p>等 Gazebo 完全加载、Go2 站稳以后,再开第二个终端:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># 键盘控制,让 Go2 在室内世界里走起来</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>ros2<span class="w"> </span>run<span class="w"> </span>champ_teleop<span class="w"> </span>champ_teleop.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>cmd_vel_topic:<span class="o">=</span>/cmd_vel
+</span></code></pre></div>
+<p>如果你不想用仓库里的 teleop,就改成:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># 只用标准 Twist 键盘也可以</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>ros2<span class="w"> </span>run<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-r<span class="w"> </span>cmd_vel:<span class="o">=</span>/cmd_vel
+</span></code></pre></div>
+<h3 id="_23">一次性回顾启动顺序<a class="headerlink" href="#_23" title="锚点链接">&para;</a></h3>
+<p>第一次上手时,请强迫自己按这个顺序来:</p>
+<ol>
+<li>先 <code>source</code> 工作空间</li>
+<li>再启动 <code>gazebo_velodyne.launch.py</code></li>
+<li>看 Go2 是否站稳</li>
+<li>看 RViz 是否已经有 <code>/velodyne_points</code></li>
+<li>最后才启动 teleop</li>
+</ol>
+<p>这个顺序看起来保守,其实是在帮你把问题隔离开:</p>
+<ul>
+<li>Gazebo 没起好,就别怪 teleop</li>
+<li>点云没出,就别怪 SLAM</li>
+<li>机器人没站稳,就别急着按键乱跑</li>
+</ul>
+<h2 id="_24">结果验证<a class="headerlink" href="#_24" title="锚点链接">&para;</a></h2>
+<p>这一章的完成标志很明确:</p>
+<ul>
+<li>Go2 在 Gazebo 里站起来</li>
+<li>键盘能让它前进、转向</li>
+<li>RViz 能看到随运动变化的 3D 点云</li>
+</ul>
+<h3 id="_25">验证一:机器人是否真的站稳<a class="headerlink" href="#_25" title="锚点链接">&para;</a></h3>
+<p>最直观的现象就是 Gazebo 里的姿态:</p>
+<ul>
+<li>不趴地</li>
+<li>不抽搐</li>
+<li>不原地疯狂抖腿</li>
+</ul>
+<p>如果你一开场就看到 Go2 像失去灵魂一样瘫着,不要继续往下按键。先回去查控制器加载时序。</p>
+<h3 id="imu">验证二:点云和 IMU 是否都在出<a class="headerlink" href="#imu" title="锚点链接">&para;</a></h3>
+<p>打开新终端,抽查两个核心传感器:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># 看 VLP-16 点云有没有在发</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/velodyne_points<span class="w"> </span>--once
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="c1"># 看 IMU 有没有在发</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/imu/data<span class="w"> </span>--once
+</span></code></pre></div>
+<p>你还可以进一步确认点云频率:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># VLP-16 仿真插件默认是 10 Hz</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>ros2<span class="w"> </span>topic<span class="w"> </span>hz<span class="w"> </span>/velodyne_points
+</span></code></pre></div>
+<h3 id="_26">验证三:键盘控制是否真的生效<a class="headerlink" href="#_26" title="锚点链接">&para;</a></h3>
+<p>按一次前进或转向键,你应该同时看到三件事:</p>
+<ol>
+<li>Gazebo 里的 Go2 开始移动</li>
+<li>RViz 里的机器人模型跟着动</li>
+<li>点云位置相对环境发生变化</li>
+</ol>
+<p>如果只是 Gazebo 动了,但 RViz 不动,先去查 <code>Fixed Frame</code> 和时间同步。</p>
+<p>这就是本章理想中的最终画面:</p>
+<p><img alt="Gazebo 中的 Go2 站立,并在 RViz 中显示 VLP-16 点云" src="../../assets/images/13-gazebo-vlp16-rviz.png" width="600" /></p>
+<h2 id="_27">常见问题<a class="headerlink" href="#_27" title="锚点链接">&para;</a></h2>
+<h3 id="_28">这些坑我建议你按“先看现象,再动手”来排<a class="headerlink" href="#_28" title="锚点链接">&para;</a></h3>
+<p>下面这 8 个坑,是我当时真正花时间的地方。你不一定会全踩,但踩到时基本都很烦。</p>
+<div class="admonition bug">
+<p class="admonition-title">坑 1: CMake / jsoncpp 报错,构建死在第三方包</p>
+<p><strong>现象</strong>:你把后续的 <code>liorf</code>、<code>sc_pgo</code> 之类包也一起拉进工作区后,<code>colcon build</code> 在 CMake 配置阶段直接炸掉,日志里能看到 <code>jsoncpp</code>、策略版本或查找模块相关错误。</p>
+<p><strong>原因</strong>:这通常不是 Gazebo 本体坏了,而是某些第三方包的 CMake 写法比较老,在你当前系统上的 CMake 策略版本下不够稳。</p>
+<p><strong>解决</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># 先用更保守的 CMake 策略版本重跑</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--symlink-install<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">    </span>--cmake-args<span class="w"> </span>-DCMAKE_POLICY_VERSION_MINIMUM<span class="o">=</span><span class="m">3</span>.5
+</span></code></pre></div>
+<p>如果还是卡在 <code>jsoncpp</code>,再补系统依赖:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>libjsoncpp-dev<span class="w"> </span>pkg-config
+</span></code></pre></div>
+<p>对那种老 CMakeLists,可以显式改成:</p>
+<div class="language-cmake highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nb">find_package</span><span class="p">(</span><span class="s">PkgConfig</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nb">pkg_check_modules</span><span class="p">(</span><span class="s">JSONCPP</span><span class="w"> </span><span class="s">jsoncpp</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nb">include_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">JSONCPP_INCLUDE_DIRS</span><span class="o">}</span><span class="p">)</span>
+</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="nb">link_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">JSONCPP_LIBRARY_DIRS</span><span class="o">}</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">坑 2: 工作区路径里有空格或中文,xacro 直接炸</p>
+<p><strong>现象</strong>:<code>xacro</code> 命令报错,模型起不来,有时 Gazebo 里直接空空如也。</p>
+<p><strong>原因</strong>:很多 launch 文件最终还是要经过 shell 调 <code>xacro</code>,路径里一旦混入空格或中文,最容易在这里翻车。</p>
+<p><strong>解决</strong>:</p>
+<ul>
+<li>最稳的方案:从一开始就把工作区放在 <code>~/go2_sim_ws</code></li>
+<li>如果你已经把项目放进了带空格的路径,那就给 <code>Command(["xacro '", path, "'"])</code> 这种写法补上引号</li>
+</ul>
+<p>这也是为什么这本书全程都坚持统一工作空间命名,不是洁癖,是被坑过。</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">坑 3: 路径已经有空格了,怎么办</p>
+<p><strong>现象</strong>:你不止 <code>xacro</code> 报错,连 mesh 加载、<code>file://</code> URI、RViz 模型显示都开始抽风。</p>
+<p><strong>原因</strong>:<code>xacro</code> 只是第一层。后面 mesh URI、Gazebo 资源路径也会继续被空格污染。</p>
+<p><strong>解决</strong>:最实用的补救不是全仓搜改,而是给工作区做一层无空格软链接:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># 给带空格的工作区做一层干净入口</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>ln<span class="w"> </span>-sfn<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/我的原始路径/项目目录&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/go2_sim_ws_alias&quot;</span>
+</span></code></pre></div>
+<p>然后后续统一从这个无空格路径 <code>source install/setup.bash</code>。这招很土,但真有用。</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">坑 4: Gazebo 起了,ROS2 节点却集体失联</p>
+<p><strong>现象</strong>:<code>ros2 topic list</code> 看起来怪怪的,节点发现不稳定,或者一开仿真就出现 DDS 通信异常。</p>
+<p><strong>原因</strong>:你之前为了连真机把 <code>CYCLONEDDS_URI</code> 绑到了某块有线网卡上,现在那块网卡没在用,但环境变量还在。</p>
+<p><strong>解决</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># 最快的排查办法</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="nb">unset</span><span class="w"> </span>CYCLONEDDS_URI
+</span></code></pre></div>
+<p>如果你希望仿真和真机来回切更稳,就用本章前面的 <code>cyclonedds-lo.xml</code>,让仿真显式走 <code>lo</code>。</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">坑 5: 控制器没加载,Go2 软趴趴地躺地上</p>
+<p><strong>现象</strong>:Gazebo 里机器人 spawn 出来了,但腿不受控,或者日志里有 <code>Controller 'xxx' not found</code>。</p>
+<p><strong>原因</strong>:<code>controller_manager</code> 还没准备好,控制器加载动作就已经发出去了。</p>
+<p><strong>解决</strong>:</p>
+<ul>
+<li>别把几个 <code>ExecuteProcess</code> 并行一丢就完事</li>
+<li>用 <code>RegisterEventHandler + OnProcessExit</code> 串联 spawn 和 controller load</li>
+</ul>
+<p>这一步是四足仿真里最容易被低估的工程细节之一。</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">坑 6: <code>contact_sensor</code> 一开,CPU 直接冒烟</p>
+<p><strong>现象</strong>:仿真实时因子掉得很厉害,<code>contact_sensor</code> 吃掉大把 CPU,整个 Gazebo 肉眼可见卡顿。</p>
+<p><strong>原因</strong>:默认接触传感器更新频率很高,而四足机器人四只脚一起算,非常容易把机器拖慢。</p>
+<p><strong>解决</strong>有两条路:</p>
+<ul>
+<li>保守修法:把更新频率降到 <strong>200 Hz</strong></li>
+<li>我最后在当前代码里采用的修法:直接在 <code>champ_gazebo/launch/gazebo.launch.py</code> 里禁用 <code>contact_sensor</code>,然后让 <code>quadruped_controller</code> 在 Gazebo 下继续发布 <code>foot_contacts</code></li>
+</ul>
+<p>当前教程跟的是第二条,因为它和本地代码一致,也最省 CPU。</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">坑 7: 键盘 teleop 在 Humble 下不好使</p>
+<p><strong>现象</strong>:按键没反应、首键被吞、布局别扭,或者你明明发了速度,机器人却像没听见。</p>
+<p><strong>原因</strong>:CHAMP 自带 teleop 的兼容性和默认话题并不总是正好匹配你现在这套链路。</p>
+<p><strong>解决</strong>:</p>
+<ul>
+<li>最简单:用 <code>teleop_twist_keyboard</code> 直接 remap 到 <code>/cmd_vel</code></li>
+<li>更贴当前代码:用仓库里的 <code>champ_teleop.py</code>,并显式传 <code>cmd_vel_topic:=/cmd_vel</code></li>
+</ul>
+<p>记住一句话:这章只需要先让 Go2 在仿真里走起来,别把自己绑死在某一个 teleop 实现上。</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">坑 8: RViz 里什么都不对,其实只是 Fixed Frame 错了</p>
+<p><strong>现象</strong>:模型不显示、点云飘、TF 看着断断续续,甚至你以为整条链都炸了。</p>
+<p><strong>原因</strong>:这一章仿真的参考系应该优先站在 <code>odom</code> 上看,而不是沿用你在别的章节里记住的 <code>base</code> 或 <code>base_footprint</code>。</p>
+<p><strong>解决</strong>:</p>
+<ul>
+<li>打开 RViz</li>
+<li>把 <code>Fixed Frame</code> 先设成 <code>odom</code></li>
+<li>再检查 <code>RobotModel</code>、<code>PointCloud2</code>、TF 是否一起恢复正常</li>
+</ul>
+<p>这一步尤其容易把第 12 章的实机记忆带进来,然后把自己绕进去。</p>
+</div>
+<h2 id="_29">本章小结<a class="headerlink" href="#_29" title="锚点链接">&para;</a></h2>
+<p>这一章我们先做了两件很重要的事。</p>
+<p>第一件事,是把“为什么不再继续硬磕 L1 实机 3D 升级”讲明白了。关键证据不是情绪,而是数据:</p>
+<ul>
+<li>静态可以做到 <strong>±2 cm</strong></li>
+<li>一到动态,低通 <code>1 Hz</code> 会飘到 <strong>-98 m</strong></li>
+<li>低通 <code>3 Hz</code> 甚至会直接飘到 <strong>-557 m</strong></li>
+</ul>
+<p>这已经足够说明:问题不在于“再调一两个参数”,而在于这条硬件和软件组合本身就不适合作为稳定的 3D 前端。</p>
+<p>第二件事,是我们把一套 <strong>Gazebo Classic + CHAMP + VLP-16</strong> 的仿真底座搭起来了。现在你已经有:</p>
+<ul>
+<li>一台能在 Gazebo 里站起来、走起来的 Go2</li>
+<li>一路标准的 <code>/velodyne_points</code></li>
+<li>一路标准的 <code>/imu/data</code></li>
+</ul>
+<p>这块基础盘,就是下一章真正接入 3D SLAM 的出发点。</p>
+<h2 id="_30">下一步<a class="headerlink" href="#_30" title="锚点链接">&para;</a></h2>
+<p>现在“能走能扫”的仿真底板已经搭好了。下一章,我们就不再停留在环境搭建,而是正式把 3D SLAM 接进来,看看仿真里的 Go2 到底能不能稳定建图、它又会暴露哪些新的工程细节。</p>
+<p>继续阅读:<a href="../14-slam-3d-sim/">第 14 章 仿真中的 3D SLAM 与 Nav2 升级</a></p>
+<h2 id="_31">拓展阅读<a class="headerlink" href="#_31" title="锚点链接">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/anujjain-dev/unitree-go2-ros2">Unitree Go2 ROS2 + CHAMP 仿真仓库</a></li>
+<li><a href="https://github.com/chvmp/champ">CHAMP 四足机器人控制框架</a></li>
+<li><a href="https://control.ros.org/master/doc/gazebo_ros2_control/doc/index.html">Gazebo ROS2 Control 官方文档</a></li>
+<li><a href="https://github.com/lmark1/velodyne_simulator">Velodyne Gazebo Plugins</a></li>
+<li><a href="https://github.com/unitreerobotics/point_lio_unilidar">Unitree 官方 Point-LIO for L1/L2 仓库</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "navigation.indexes", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
