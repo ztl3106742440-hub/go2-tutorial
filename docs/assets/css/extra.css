@@ -1,0 +1,27 @@
+/* 放宽主内容区宽度（默认 61rem 两边太空,改到 85rem ≈ 1360px） */
+/* 后期嫌窄就调大这个数(如 100rem),嫌太宽就调小 */
+.md-grid {
+  max-width: 85rem;
+}
+
+/* 中文排版微调 */
+.md-typeset {
+  font-feature-settings: "palt";
+  line-height: 1.75;
+}
+
+/* 代码块字号略大一点,看得清 */
+.md-typeset pre > code,
+.md-typeset code {
+  font-size: 0.85em;
+}
+
+/* 表格居中对齐 + 内边距更紧凑 */
+.md-typeset table:not([class]) th {
+  background-color: rgba(99, 102, 241, 0.08);
+}
+
+/* 警告/提示块更醒目 */
+.md-typeset .admonition {
+  font-size: 0.95em;
+}

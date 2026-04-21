@@ -1,0 +1,154 @@
+# ========================================================
+# MkDocs 配置 —— Go2 机器狗实验指导书
+# 修改 nav / theme 前，请先阅读 meta/编写指南.md
+# ========================================================
+
+site_name: Go2 机器狗实验指导书
+site_description: 面向本科小白的 Unitree Go2 + ROS2 二次开发实验教程
+site_author: ztl
+site_url: https://ztl3106742440-hub.github.io/go2-tutorial/
+repo_url: https://github.com/ztl3106742440-hub/go2-tutorial
+repo_name: ztl3106742440-hub/go2-tutorial
+edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+use_directory_urls: true
+
+# ---------- 主题 ----------
+theme:
+  name: material
+  language: zh
+  features:
+    # 导航
+    - navigation.tabs              # 顶部大分类 tab
+    - navigation.tabs.sticky       # tab 固定在顶
+    - navigation.sections          # 左侧分节标题
+    - navigation.expand            # 默认展开
+    - navigation.top               # 回到顶部
+    - navigation.tracking          # URL 反映当前锚点
+    - navigation.indexes           # 支持节首页
+    - toc.follow                   # 右侧目录跟随
+    # 搜索
+    - search.suggest
+    - search.highlight
+    - search.share
+    # 代码
+    - content.code.copy            # 代码块一键复制
+    - content.code.annotate        # 代码注解 (1)
+    # 标签页组件(C++/Python 切换要用)
+    - content.tabs.link
+    # 图片
+    - content.tooltips
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+  font:
+    text: Noto Sans SC
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/robot-industrial
+
+# ---------- Markdown 扩展 ----------
+markdown_extensions:
+  # admonition + details:警告/提示/折叠块
+  - admonition
+  - pymdownx.details
+  # superfences:支持代码块套代码块、Mermaid 图
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  # 高亮
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+      auto_title: false
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  # 标签页(Python/C++ 并列切换)
+  - pymdownx.tabbed:
+      alternate_style: true
+  # 任务列表(- [x] / - [ ])
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  # 键盘按键高亮 ++ctrl+c++
+  - pymdownx.keys
+  # 其他
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - def_list
+  - abbr
+  - toc:
+      permalink: true
+      permalink_title: 锚点链接
+      toc_depth: 3
+
+# ---------- 插件 ----------
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+
+# ---------- 额外 CSS/JS ----------
+extra_css:
+  - assets/css/extra.css
+
+# ---------- 导航树 ----------
+# 章节标题使用中文,文件名保持英文数字编号
+nav:
+  - 首页: index.md
+
+  - 开篇:
+    - 教程简介与使用指南: 00-overview/01-intro.md
+    - Go2 硬件一图看懂: 00-overview/02-hardware.md
+    - 开发环境总览: 00-overview/03-env.md
+    - 实机安全红线: 00-overview/04-safety.md
+
+  - 基础篇 · 环境与通信:
+    - 第 1 章 环境搭建: 01-foundation/01-install.md
+    - 第 2 章 认识 Go2 消息接口: 01-foundation/02-messages.md
+
+  - 功能包开发:
+    - 第 3 章 键盘控制节点: 02-packages/03-keyboard.md
+    - 第 4 章 Twist 消息桥接: 02-packages/04-twist-bridge.md
+    - 第 5 章 机器人可视化: 02-packages/05-visualization.md
+    - 第 6 章 完整驱动包集成: 02-packages/06-driver.md
+
+  - ROS2 通信机制实战:
+    - 第 7 章 话题通信 — 巡航与位置获取: 03-communication/07-topic.md
+    - 第 8 章 服务通信 — 巡航启停: 03-communication/08-service.md
+    - 第 9 章 动作通信 — 导航任务: 03-communication/09-action.md
+
+  - 进阶篇 · 感知与导航:
+    - 第 10 章 激光雷达原理与选型: 04-perception/10-lidar.md
+    - 第 11 章 2D SLAM 建图实战: 04-perception/11-slam-2d.md
+    - 第 12 章 实机 Nav2 2D 基线: 04-perception/12-nav2-baseline.md
+    - 第 13 章 升级动机与仿真环境搭建: 04-perception/13-upgrade-simulation.md
+    - 第 14 章 仿真中的 3D SLAM 与 Nav2 升级: 04-perception/14-slam-3d-sim.md
+    - 第 15 章 实机升级 — 外接 MID-360 方案: 04-perception/15-mid360.md
+
+  - 交互篇 · 语音与视觉:
+    - 第 16 章 语音交互系统: 05-interaction/16-voice.md
+    - 第 17 章 视觉与 VLM 应用: 05-interaction/17-vision.md
+
+  - 综合篇:
+    - 第 18 章 任务编排 — 多模态联动: 06-integration/18-orchestration.md
+    - 第 19 章 未来方向 — RL 与具身智能: 06-integration/19-future.md
