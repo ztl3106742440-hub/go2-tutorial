@@ -1252,10 +1252,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -1316,7 +1333,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -1327,7 +1344,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         下一步
@@ -2021,10 +2038,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -2085,7 +2119,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -2096,7 +2130,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         下一步
@@ -2128,8 +2162,15 @@
 
 <h1 id="8-service">第 8 章 用 Service 控制巡航开关<a class="headerlink" href="#8-service" title="锚点链接">&para;</a></h1>
 <blockquote>
-<p>上一章我们已经能用参数直接驱动 Go2 了，但每次都手敲 <code>ros2 param set</code> 还是很粗糙。这一章我们把“开始巡航 / 停止巡航”封装成一个 Service，让控制动作变成一次请求、一条响应。</p>
+<p>上一章我们用 <strong>Topic</strong> 持续推送控制命令。这一章换一种通信形状:把"开始巡航 / 停止巡航"封装成一个 <strong>Service</strong>,让控制动作变成一次请求、一条响应——一问一答,事毕即止。</p>
 </blockquote>
+<div class="admonition success">
+<p class="admonition-title">📨 本章通信方式:Service(服务)</p>
+<p><strong>形状</strong>:双向 · 一请求一响应 · 短事务<br />
+<strong>本章关键 API</strong>:<code>self.create_service(Cruising, "cruising", self.cru_cb)</code><br />
+<strong>要记住的事</strong>:客户端说"帮我做这件事",服务端立刻处理并回一条结果,通信到此结束。Service 不适合持续控制数据流(那是 Topic 的活),更适合"切状态""触发一次动作""读一次结果"这种短事务。</p>
+<p>和第 7 章的 Topic 对比看——Topic 是单向广播、不关心谁在听;Service 是双向握手、每次请求都一定有一条响应。下一章的 Action 又会换一种形状(长任务 + 反馈)。</p>
+</div>
 <h2 id="_1">本章你将学到<a class="headerlink" href="#_1" title="锚点链接">&para;</a></h2>
 <ul>
 <li>看懂 <code>Cruising.srv</code> 这种最小 Service 接口是怎么描述“开关型命令”的</li>
@@ -2148,11 +2189,15 @@
 </ul>
 <h2 id="_3">架构总览<a class="headerlink" href="#_3" title="锚点链接">&para;</a></h2>
 <pre class="mermaid"><code>flowchart LR
-    A[go2_cruising_client] --&gt;|请求 flag| B["/cruising&lt;br/&gt;go2_tutorial_inter/srv/Cruising"]
-    B --&gt; C[go2_cruising_service]
-    C --&gt; D["/api/sport/request&lt;br/&gt;unitree_api/msg/Request"]
+    A[go2_cruising_client] ==&gt;|"📨 请求 flag"| B["/cruising&lt;br/&gt;go2_tutorial_inter/srv/Cruising"]
+    B ==&gt; C[go2_cruising_service]
+    C -.-&gt;|"📨 响应 point"| A
+    C --&gt;|"(Topic)持续发布"| D["/api/sport/request&lt;br/&gt;unitree_api/msg/Request"]
     E["/odom&lt;br/&gt;nav_msgs/msg/Odometry"] --&gt; C
-    C --&gt;|响应当前位置 point| A</code></pre>
+
+    classDef service fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    class B service</code></pre>
+<p>对照着第 7 章的 mermaid 看,本章增加的那条 <code>-.-&gt;</code> 虚线箭头(响应 <code>point</code> 回到客户端)就是 Service 相对 Topic 多出来的"握手环节":客户端发请求必须拿到一条响应才算完。内部节点依然用 Topic 持续刷 <code>/api/sport/request</code>——这说明<strong>在同一个节点里,Topic 和 Service 完全可以并存,各负责不同的事</strong>。</p>
 <p>这里最容易看错的是响应方向。</p>
 <p><code>Cruising.srv</code> 里真正返回给客户端的不是 <code>success/message</code>，而是一个 <code>geometry_msgs/msg/Point</code>。也就是说，服务端每次收到请求后，会把它当前记住的机器人位置回给客户端。</p>
 <h2 id="_4">环境准备<a class="headerlink" href="#_4" title="锚点链接">&para;</a></h2>
@@ -2250,60 +2295,67 @@
 </span><span id="__span-2-55"><a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">odom</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span>
 </span></code></pre></div>
 <p>这段代码的关键不在语法，而在分工。</p>
-<p>Service 回调 <code>cru_cb()</code> 只负责“切状态”和“回结果”。真正持续发控制消息的，还是 <code>on_timer()</code> 这个定时器。所以你要把它理解成“Service 改内部状态，定时器负责持续执行”。</p>
+<p>Service 回调 <code>cru_cb()</code> 只负责"切状态"和"回结果"。真正持续发控制消息的，还是 <code>on_timer()</code> 这个定时器。所以你要把它理解成"Service 改内部状态，定时器负责持续执行"。</p>
+<div class="admonition success">
+<p class="admonition-title">📨 本章 Service 通信的钥匙就是这一行</p>
+<p><div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_service</span><span class="p">(</span><span class="n">Cruising</span><span class="p">,</span> <span class="s2">&quot;cruising&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cru_cb</span><span class="p">)</span>
+</span></code></pre></div>
+<code>create_service</code> 把节点注册成 Service 服务端。三个参数依次是:<strong>接口类型</strong>(<code>Cruising.srv</code> 生成)、<strong>服务名</strong>、<strong>处理请求的回调函数</strong>。</p>
+<p>对比第 7 章的 <code>create_publisher</code>:那一行只是"我会往这个话题发东西";这一行是"我会收别人的请求、处理、并一定回一条响应"。一旦理解了这对调用的差异,Topic 与 Service 的分野就彻底清晰了。</p>
+</div>
 <h3 id="go2_cruising_client">步骤三:实现 <code>go2_cruising_client</code><a class="headerlink" href="#go2_cruising_client" title="锚点链接">&para;</a></h3>
 <p>服务端有了之后，客户端就简单很多了。它只负责连上服务、发一个 <code>flag</code>，然后把响应里的坐标打出来。</p>
 <p>把下面代码放进 <code>src/tutorial/go2_tutorial_py/go2_tutorial_py/go2_cruising_client.py</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>                                <span class="c1"># 读取命令行参数</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>                             <span class="c1"># ROS2 Python 客户端库</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>     <span class="c1"># 用来打印日志</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>              <span class="c1"># 自定义节点基类</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">Future</span>            <span class="c1"># 异步请求返回值类型</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">go2_tutorial_inter.srv</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cruising</span>      <span class="c1"># 本章的自定义 Service</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">Go2CruisingClient</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;go2_cruising_client&quot;</span><span class="p">)</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span><span class="n">Cruising</span><span class="p">,</span> <span class="s2">&quot;cruising&quot;</span><span class="p">)</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">connect_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="mf">1.0</span><span class="p">):</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">ok</span><span class="p">():</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>                <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;rclpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;连接被中断&quot;</span><span class="p">)</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>                <span class="k">return</span> <span class="kc">False</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;服务器连接中...&quot;</span><span class="p">)</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>        <span class="k">return</span> <span class="kc">True</span>
-</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>
-</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">send_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span>
-</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>        <span class="n">req</span> <span class="o">=</span> <span class="n">Cruising</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
-</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>        <span class="n">req</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
-</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
-</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>
-</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>
-</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;rclpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;请提交一个整型数据！&quot;</span><span class="p">)</span>
-</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>        <span class="k">return</span>
-</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>
-</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
-</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>    <span class="n">cru_client</span> <span class="o">=</span> <span class="n">Go2CruisingClient</span><span class="p">()</span>
-</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>
-</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">cru_client</span><span class="o">.</span><span class="n">connect_server</span><span class="p">():</span>
-</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>        <span class="k">return</span>
-</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>
-</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>    <span class="n">future</span> <span class="o">=</span> <span class="n">cru_client</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="n">cru_client</span><span class="p">,</span> <span class="n">future</span><span class="p">)</span>
-</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>
-</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a>    <span class="k">if</span> <span class="n">future</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
-</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>        <span class="n">response</span><span class="p">:</span> <span class="n">Cruising</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
-</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>        <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;rclpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>            <span class="s2">&quot;机器人坐标：(</span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
-</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>        <span class="p">)</span>
-</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>
-</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>                                <span class="c1"># 读取命令行参数</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>                             <span class="c1"># ROS2 Python 客户端库</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>     <span class="c1"># 用来打印日志</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>              <span class="c1"># 自定义节点基类</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">Future</span>            <span class="c1"># 异步请求返回值类型</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">go2_tutorial_inter.srv</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cruising</span>      <span class="c1"># 本章的自定义 Service</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">Go2CruisingClient</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;go2_cruising_client&quot;</span><span class="p">)</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_client</span><span class="p">(</span><span class="n">Cruising</span><span class="p">,</span> <span class="s2">&quot;cruising&quot;</span><span class="p">)</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">connect_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="mf">1.0</span><span class="p">):</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">ok</span><span class="p">():</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>                <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;rclpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;连接被中断&quot;</span><span class="p">)</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>                <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;服务器连接中...&quot;</span><span class="p">)</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">send_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Future</span><span class="p">:</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>        <span class="n">req</span> <span class="o">=</span> <span class="n">Cruising</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>        <span class="n">req</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">call_async</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>        <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;rclpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;请提交一个整型数据！&quot;</span><span class="p">)</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>        <span class="k">return</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>    <span class="n">cru_client</span> <span class="o">=</span> <span class="n">Go2CruisingClient</span><span class="p">()</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">cru_client</span><span class="o">.</span><span class="n">connect_server</span><span class="p">():</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>        <span class="k">return</span>
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>    <span class="n">future</span> <span class="o">=</span> <span class="n">cru_client</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_until_future_complete</span><span class="p">(</span><span class="n">cru_client</span><span class="p">,</span> <span class="n">future</span><span class="p">)</span>
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>
+</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a>    <span class="k">if</span> <span class="n">future</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a>        <span class="n">response</span><span class="p">:</span> <span class="n">Cruising</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a>        <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;rclpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a>            <span class="s2">&quot;机器人坐标：(</span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+</span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a>        <span class="p">)</span>
+</span><span id="__span-4-49"><a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a>
+</span><span id="__span-4-50"><a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </span></code></pre></div>
 <p>你会发现，这个客户端根本没有碰 <code>/api/sport/request</code>，也没有碰 <code>/odom</code>。这正是 Service 的职责边界:客户端只说“我要开始”或“我要停止”，具体执行细节全留给服务端。</p>
 <h3 id="xyz">步骤四:顺手理解三个参数 <code>x/y/z</code><a class="headerlink" href="#xyz" title="锚点链接">&para;</a></h3>
@@ -2321,34 +2373,44 @@
 </ul>
 <h2 id="_7">编译与运行<a class="headerlink" href="#_7" title="锚点链接">&para;</a></h2>
 <p>先编译接口包和教程包:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 编译 Service 相关的两个包，并重新加载环境</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_tutorial_inter<span class="w"> </span>go2_tutorial_py
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 编译 Service 相关的两个包，并重新加载环境</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_tutorial_inter<span class="w"> </span>go2_tutorial_py
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
 </span></code></pre></div>
 <p>第一终端启动服务端:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 启动巡航服务端，并给一个默认角速度</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_cruising_service<span class="w"> </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>z:<span class="o">=</span><span class="m">0</span>.5
-</span></code></pre></div>
-<p>第二终端启动客户端，让它发送开始巡航请求:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 发送 flag=1，表示开始巡航</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 启动巡航服务端:同时给一个前进速度和一个角速度</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_cruising_client<span class="w"> </span><span class="m">1</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_cruising_service<span class="w"> </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>x:<span class="o">=</span><span class="m">0</span>.1<span class="w"> </span>-p<span class="w"> </span>z:<span class="o">=</span><span class="m">0</span>.5
 </span></code></pre></div>
-<p>如果你想停下机器人，再发一次 <code>0</code>:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 发送 flag=0，表示停止巡航</span>
+<div class="admonition tip">
+<p class="admonition-title">想调不同的巡航轨迹?改 <mark><code>x</code></mark> / <mark><code>y</code></mark> / <mark><code>z</code></mark> 这三个参数就行</p>
+<p>服务端节点里声明了三个运行参数,都是你可以自由修改的入口:</p>
+<ul>
+<li><mark><code>x</code></mark> 前后线速度(m/s):决定机器人往前走多快</li>
+<li><mark><code>y</code></mark> 左右线速度(m/s):非零时会侧移</li>
+<li><mark><code>z</code></mark> 偏航角速度(rad/s):决定转向快慢</li>
+</ul>
+<p>启动时用 <code>--ros-args -p 名字:=值</code> 覆盖默认值即可。<strong>三者都为 0 时机器人不动;只有 <code>z</code> 非零会原地转圈;<code>x</code> 和 <code>z</code> 同时非零才是弧线巡航</strong>。本章重点是 Service 通信机制,具体巡航轨迹你随意调,不影响理解。</p>
+</div>
+<p>第二终端启动客户端，让它发送开始巡航请求:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 发送 flag=1，表示开始巡航</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_cruising_client<span class="w"> </span><span class="m">0</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_cruising_client<span class="w"> </span><span class="m">1</span>
 </span></code></pre></div>
-<p>也可以不用客户端，直接在终端里调用 Service:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 直接调用 /cruising Service</span>
+<p>如果你想停下机器人，再发一次 <code>0</code>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 发送 flag=0，表示停止巡航</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/cruising<span class="w"> </span>go2_tutorial_inter/srv/Cruising<span class="w"> </span><span class="s2">&quot;{flag: 1}&quot;</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_cruising_client<span class="w"> </span><span class="m">0</span>
+</span></code></pre></div>
+<p>也可以不用客户端，直接在终端里调用 Service:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 直接调用 /cruising Service</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>ros2<span class="w"> </span>service<span class="w"> </span>call<span class="w"> </span>/cruising<span class="w"> </span>go2_tutorial_inter/srv/Cruising<span class="w"> </span><span class="s2">&quot;{flag: 1}&quot;</span>
 </span></code></pre></div>
 <p>这里要特别注意，请求里只有 <code>flag</code>，没有别的字段。别把旧版 <code>mode/success/message</code> 之类的写法抄进来。</p>
 <h2 id="_8">结果验证<a class="headerlink" href="#_8" title="锚点链接">&para;</a></h2>
@@ -2360,17 +2422,20 @@
 <li>客户端输出里能看到服务端返回的当前位置</li>
 </ol>
 <p>可以用下面几条命令交叉验证:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 看服务是否已经上线</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>ros2<span class="w"> </span>service<span class="w"> </span>list<span class="w"> </span>-t
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># 看接口定义是不是对的</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>go2_tutorial_inter/srv/Cruising
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># 看控制消息有没有持续发到 Go2</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># 看服务是否已经上线</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>ros2<span class="w"> </span>service<span class="w"> </span>list<span class="w"> </span>-t
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># 看接口定义是不是对的</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>go2_tutorial_inter/srv/Cruising
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># 看控制消息有没有持续发到 Go2</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
 </span></code></pre></div>
-<p><img alt="TODO:终端显示 ros2 service call /cruising 与 point 响应" src="../assets/images/08-service-cruising.png" width="600" /></p>
-<h2 id="_9">常见问题<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h2>
+<h3 id="_9">结果演示<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h3>
+<p>下面两张终端截图展示了 <code>/cruising</code> Service 被调用后的关键现象:服务端收到请求后开始执行巡航/转向逻辑,客户端能拿到响应结果。Service 和 Topic 的区别也在这里很直观:Topic 是持续发控制流,Service 是“一次请求,一次响应”。</p>
+<p><img alt="调用 /cruising 后,服务端开始处理巡航请求" src="../../assets/images/08-service-turn-1.png" width="620" /></p>
+<p><img alt="Service 客户端收到 /cruising 返回结果,终端显示响应信息" src="../../assets/images/08-service-turn-2.png" width="620" /></p>
+<h2 id="_10">常见问题<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
 <h3 id="1">1. 客户端一直提示“服务器连接中...”<a class="headerlink" href="#1" title="锚点链接">&para;</a></h3>
 <p><strong>现象</strong>:客户端启动后一直在等服务上线。</p>
 <p><strong>原因</strong>:通常是服务端没启动，或者你编译后忘了 <code>source install/setup.bash</code>。</p>
@@ -2407,11 +2472,11 @@
 <li>用 <code>ros2 topic echo /odom --once</code> 看有没有数据</li>
 <li>没数据的话，先回第 6 章把 <code>go2_driver_py</code> 跑起来</li>
 </ul>
-<h2 id="_10">本章小结<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
+<h2 id="_11">本章小结<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
 <p>这一章我们第一次把“持续控制”外面包了一层 Service。</p>
 <p>真正持续发控制消息的还是服务端节点里的定时器；Service 只是负责收一个开关命令，再把内部状态切过去。这种分层很常见，你后面写更复杂的机器人应用时也会经常用到。</p>
 <p>更重要的是，你现在应该已经能分清 Topic 和 Service 的边界了:连续数据流走 Topic，短事务控制走 Service。</p>
-<h2 id="_11">下一步<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
+<h2 id="_12">下一步<a class="headerlink" href="#_12" title="锚点链接">&para;</a></h2>
 <p>Service 适合“一问一答”，但不适合执行一个可能持续十几秒的长任务。下一章我们把这个思路再往前推一步，用 Action 来封装“前进 X 米”这种需要反馈和结束结果的任务。</p>
 
 

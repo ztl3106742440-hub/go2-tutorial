@@ -1127,10 +1127,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -1185,13 +1202,24 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#5-robot_state_publisher-kdl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 启动时 robot_state_publisher 打印 KDL 惯性警告
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -1202,7 +1230,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         下一步
@@ -2021,10 +2049,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -2079,13 +2124,24 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#5-robot_state_publisher-kdl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 启动时 robot_state_publisher 打印 KDL 惯性警告
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -2096,7 +2152,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         下一步
@@ -2155,8 +2211,8 @@
     G[go2_twist_bridge_py/twist_bridge] --&gt; H["/api/sport/request"]
     I[go2_description] --&gt; J[robot_state_publisher]
     F --&gt; J</code></pre>
-<p>从这张图可以看出，<code>go2_driver_py</code> 并不直接发控制命令给 Go2。控制链还是第 3/4 章那边的事情。</p>
-<p>它真正做的是“把状态准备好”，让 RViz、SLAM、Nav2 这些上层模块都能直接消费标准话题。</p>
+<p>从这张图可以看出，<code>driver</code> 节点本身并不直接发控制命令给 Go2，它真正做的是"把状态准备好"，让 RViz、SLAM、Nav2 这些上层模块都能直接消费标准话题。</p>
+<p>但<strong>本章的 <code>driver.launch.py</code> 不只启动 <code>driver</code>，还会把第 4 章的 <code>twist_bridge</code> 并进来</strong>，让"状态标准化层"和"控制适配层"在同一套 launch 里一起上线。这就是第六章相对第五章的核心增量——第五章的 <code>visualization.launch.py</code> 只立起状态链，本章把控制通道也补上，形成完整的驱动底座。</p>
 <h2 id="_4">环境准备<a class="headerlink" href="#_4" title="锚点链接">&para;</a></h2>
 <p>开始前先确认下面几个包已经在工作空间里:</p>
 <ul>
@@ -2293,6 +2349,7 @@
 <li>启动 <code>go2_twist_bridge_py/twist_bridge</code></li>
 <li>启动 <code>go2_driver_py/driver</code></li>
 </ul>
+<p>和第 5 章的 <code>visualization.launch.py</code> 对照着看:后者只启动前三项再加 <code>driver</code>，<strong>本章多出来的就是 <code>twist_bridge</code> 这一层</strong>。所以你会在同一个 launch 里同时看到"状态往外给"和"控制往里送"两条链被纳入集成。</p>
 <p>关键片段如下:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">Node</span><span class="p">(</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">package</span><span class="o">=</span><span class="s2">&quot;tf2_ros&quot;</span><span class="p">,</span>
@@ -2371,8 +2428,10 @@
 <li><code>/joint_states</code> 里有 12 个关节角度</li>
 <li>TF 图里已经连上 <code>odom -&gt; base</code></li>
 </ul>
-<p><img alt="TODO:RViz 中显示 odom、joint_states 和完整 TF 树" src="../assets/images/06-driver-base-stack.png" width="600" /></p>
-<h2 id="_9">常见问题<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h2>
+<h3 id="_9">结果演示<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h3>
+<p>截图里 RViz 已经能显示 Go2 模型和底座坐标系,说明 <code>/joint_states</code>、<code>/odom</code> 和 TF 都进入了可视化链路。这里重点不是画面好不好看,而是确认 <code>odom -&gt; base</code> 这条主链稳定存在,否则后面 SLAM 和 Nav2 都会跟着炸。</p>
+<p><img alt="RViz 中显示 Go2 驱动发布的 odom、joint_states 和完整 TF 主链" src="../../assets/images/06-driver-base-stack.png" width="720" /></p>
+<h2 id="_10">常见问题<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
 <h3 id="1-ros2-launch-odom">1. <code>ros2 launch</code> 能起来，但 <code>/odom</code> 一直没数据<a class="headerlink" href="#1-ros2-launch-odom" title="锚点链接">&para;</a></h3>
 <p><strong>现象</strong>:launch 没报错，可是 <code>/odom</code> 空空如也。</p>
 <p><strong>原因</strong>:通常是 <code>/lf/sportmodestate</code> 没有进来，而不是 <code>driver</code> 发布逻辑本身有问题。</p>
@@ -2406,7 +2465,19 @@
 <li>把相关配置里的机器人底座坐标系统一改成 <code>base</code></li>
 <li>别在同一套系统里混用 <code>base</code> 和 <code>base_link</code></li>
 </ul>
-<h2 id="_10">本章小结<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
+<h3 id="5-robot_state_publisher-kdl">5. 启动时 <code>robot_state_publisher</code> 打印 KDL 惯性警告<a class="headerlink" href="#5-robot_state_publisher-kdl" title="锚点链接">&para;</a></h3>
+<p><strong>现象</strong>:<code>driver.launch.py</code> 拉起后，日志里会出现类似一行:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>The root link base has an inertia specified in the URDF, but KDL does not support a root link with an inertia.
+</span></code></pre></div>
+<p><strong>原因</strong>:URDF 在根链接 <code>base</code> 上声明了 <code>inertia</code>，而 KDL 对"根链接直接带 inertia"这种写法支持不完整。</p>
+<p><strong>判定</strong>:这是<strong>非阻塞警告</strong>，不代表启动失败:</p>
+<ul>
+<li>launch 仍会继续展开，<code>robot_state_publisher</code>、<code>rviz2</code>、<code>static_transform_publisher</code>、<code>twist_bridge</code>、<code>driver</code> 都会照常启动</li>
+<li><code>/odom</code>、<code>/joint_states</code>、TF 等输出不受影响</li>
+<li>本章不需要为此回退代码</li>
+</ul>
+<p>如果后续要做更严格的模型处理(比如 KDL 链解算、惯性参数标定)，可以在根部再套一层 dummy link 把 inertia 挪到子链上。对当前阶段来说，直接忽略这条警告即可。</p>
+<h2 id="_11">本章小结<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
 <p>这一章我们把 <code>go2_driver_py</code> 的真实职责彻底拆开看了一遍。</p>
 <p>最重要的结论有两个:</p>
 <ul>
@@ -2414,7 +2485,7 @@
 <li>它真正支持的参数只有三个，不存在"订阅话题名可配置"这条参数链</li>
 </ul>
 <p>后面不管是 SLAM、Nav2 还是传感器处理，都会默认依赖这套驱动基座。所以这一章的边界感，一定要现在就立住。</p>
-<h2 id="_11">下一步<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
+<h2 id="_12">下一步<a class="headerlink" href="#_12" title="锚点链接">&para;</a></h2>
 <p>控制链和状态链到这里已经够扎实了。接下来我们把注意力切到感知侧，先从 Go2 的点云数据开始，把它整理成后面 SLAM 和导航都能直接吃的标准输入。</p>
 
 

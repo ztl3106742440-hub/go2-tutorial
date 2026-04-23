@@ -1043,10 +1043,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -1107,7 +1124,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -2010,10 +2027,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -2074,7 +2108,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -2450,8 +2484,10 @@
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># 看请求消息是不是正在变化</span>
 </span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
 </span></code></pre></div>
-<p><img alt="TODO:终端显示九宫格遥控说明和 /api/sport/request 输出" src="../assets/images/03-keyboard-teleop.png" width="600" /></p>
-<h2 id="_12">常见问题<a class="headerlink" href="#_12" title="锚点链接">&para;</a></h2>
+<h3 id="_12">结果演示<a class="headerlink" href="#_12" title="锚点链接">&para;</a></h3>
+<p>下面这张截图里,左侧终端是键盘控制节点打印的按键说明,右侧终端是 <code>/api/sport/request</code> 的实际输出。只要按键后右侧消息跟着刷新,就说明“键盘输入 → Go2 高层 Request”这条链路已经打通。</p>
+<p><img alt="键盘控制节点启动后,终端显示九宫格按键说明和 /api/sport/request 输出" src="../../assets/images/03-keyboard-teleop.png" width="620" /></p>
+<h2 id="_13">常见问题<a class="headerlink" href="#_13" title="锚点链接">&para;</a></h2>
 <h3 id="1">1. 按键没反应<a class="headerlink" href="#1" title="锚点链接">&para;</a></h3>
 <p><strong>现象</strong>:节点看起来启动了，但按键没有任何效果。</p>
 <p><strong>原因</strong>:最常见的是当前终端焦点不在运行键盘节点的那个窗口里。</p>
@@ -2486,7 +2522,7 @@
 <li>按住 <code>Shift</code> 再按 <code>j</code></li>
 <li>如果你只按小写，自然不会命中 <code>sportModel</code></li>
 </ul>
-<h2 id="_13">本章小结<a class="headerlink" href="#_13" title="锚点链接">&para;</a></h2>
+<h2 id="_14">本章小结<a class="headerlink" href="#_14" title="锚点链接">&para;</a></h2>
 <p>这一章我们写出了第一份真正可交互的 Go2 遥控节点。</p>
 <p>它背后的套路很值得记住:终端负责产生按键事件，映射表负责决定动作语义，ROS2 节点负责把最终结果发到 <code>/api/sport/request</code>。这其实就是“输入层 + 逻辑层 + 输出层”的最小工程拆分。</p>
 <p>下一章我们会换一条更通用的路线，不再直接发 Go2 专有消息，而是先发 ROS2 标准 <code>Twist</code>，再通过桥接节点转成 <code>Request</code>。</p>

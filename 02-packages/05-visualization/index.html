@@ -1053,10 +1053,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#driverlaunchpy" class="md-nav__link">
+  <a href="#visualizationlaunchpy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        步骤三:用 driver.launch.py 一次拉起可视化底座
+        步骤三:用 visualization.launch.py 一次拉起可视化底座
       
     </span>
   </a>
@@ -1088,10 +1088,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -1146,13 +1163,24 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#5-failed-to-enumerate-interfaces-for-udp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 节点刚起就全挂:failed to enumerate interfaces for "udp"
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -1953,10 +1981,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#driverlaunchpy" class="md-nav__link">
+  <a href="#visualizationlaunchpy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        步骤三:用 driver.launch.py 一次拉起可视化底座
+        步骤三:用 visualization.launch.py 一次拉起可视化底座
       
     </span>
   </a>
@@ -1988,10 +2016,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -2046,13 +2091,24 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#5-failed-to-enumerate-interfaces-for-udp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 节点刚起就全挂:failed to enumerate interfaces for "udp"
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -2106,7 +2162,7 @@
 <li><code>go2_driver_py/driver</code> 同时广播 <code>odom -&gt; base</code></li>
 <li><code>go2_driver_py/driver</code> 也直接发布 <code>/joint_states</code></li>
 </ul>
-<p>也就是说，第 5 章的可视化底座和第 6 章的驱动底座，已经合并成同一个节点了。</p>
+<p>也就是说，原来"关节桥接"这一层独立节点，现在已经并入 <code>driver</code> 了。但这不代表第 5 章和第 6 章就该合成一步——本章只用 <code>driver</code> 产出的状态链（<code>/odom</code>、TF、<code>/joint_states</code>）把机器人在 RViz 里立起来，<strong>还不引入 <code>twist_bridge</code> 这层控制通道</strong>，那部分属于第 6 章完整驱动包的事。</p>
 <h2 id="_3">架构总览<a class="headerlink" href="#_3" title="锚点链接">&para;</a></h2>
 <pre class="mermaid"><code>flowchart LR
     A["/lf/sportmodestate&lt;br/&gt;unitree_go/msg/SportModeState"] --&gt; B[go2_driver_py/driver]
@@ -2120,7 +2176,7 @@
     D --&gt; I
     H --&gt; I</code></pre>
 <p>这套链路最关键的变化是:关节状态发布不再是独立节点，而是直接并进了 <code>driver</code>。</p>
-<p>好处也很直接。后面你只要启动一份 <code>driver.launch.py</code>，模型、关节、TF、里程计就能一起起来，不会再出现两个节点抢着发 <code>/joint_states</code> 的问题。</p>
+<p>好处也很直接。本章只需要启动 <code>visualization.launch.py</code>，模型、关节、TF、里程计就能一起起来，不会再出现两个节点抢着发 <code>/joint_states</code> 的问题。<code>twist_bridge</code> 这层控制桥留给第 6 章的 <code>driver.launch.py</code> 再并入。</p>
 <h2 id="_4">环境准备<a class="headerlink" href="#_4" title="锚点链接">&para;</a></h2>
 <p>开始前先确认两个包已经在工作空间里:</p>
 <ul>
@@ -2210,64 +2266,62 @@
 </span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">tf_bro</span><span class="o">.</span><span class="n">sendTransform</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
 </span></code></pre></div>
 <p>这段代码说明一件很关键的事:当前可视化链不是“自己积分推 odom”，而是直接用 <code>SportModeState</code> 里已有的位置和姿态字段，整理成标准 <code>Odometry</code> 和 TF。</p>
-<h3 id="driverlaunchpy">步骤三:用 <code>driver.launch.py</code> 一次拉起可视化底座<a class="headerlink" href="#driverlaunchpy" title="锚点链接">&para;</a></h3>
-<p>现在看总启动文件 <code>src/base/go2_driver_py/launch/driver.launch.py</code>。这一份 launch 做了四件事:</p>
+<h3 id="visualizationlaunchpy">步骤三:用 <code>visualization.launch.py</code> 一次拉起可视化底座<a class="headerlink" href="#visualizationlaunchpy" title="锚点链接">&para;</a></h3>
+<p>现在看本章专用的启动文件 <code>src/base/go2_driver_py/launch/visualization.launch.py</code>。这一份 launch 做了四件事:</p>
 <ul>
 <li>包含 <code>go2_description</code> 的模型显示 launch</li>
 <li>按需启动 RViz</li>
 <li>启动一个 <code>radar -&gt; utlidar_lidar</code> 的静态 TF</li>
-<li>启动 <code>twist_bridge</code> 和 <code>driver</code></li>
+<li>启动 <code>driver</code> 节点（发 <code>/odom</code>、TF、<code>/joint_states</code>）</li>
 </ul>
+<p>注意<strong>这里故意不启动 <code>twist_bridge</code></strong>。本章目标是"把 Go2 在 RViz 里立起来"，不涉及控制链；<code>twist_bridge</code> 要到第 6 章的 <code>driver.launch.py</code> 里才会并进来。</p>
 <p>关键部分如下:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">return</span> <span class="n">LaunchDescription</span><span class="p">([</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">IncludeLaunchDescription</span><span class="p">(</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="n">PythonLaunchDescriptionSource</span><span class="p">(</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">go2_desc_pkg</span><span class="p">,</span> <span class="s2">&quot;launch&quot;</span><span class="p">,</span> <span class="s2">&quot;display.launch.py&quot;</span><span class="p">)</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="p">),</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="n">launch_arguments</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;use_joint_state_publisher&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)],</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="p">),</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">Node</span><span class="p">(</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        <span class="n">package</span><span class="o">=</span><span class="s2">&quot;rviz2&quot;</span><span class="p">,</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;rviz2&quot;</span><span class="p">,</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">go2_driver_pkg</span><span class="p">,</span> <span class="s2">&quot;rviz&quot;</span><span class="p">,</span> <span class="s2">&quot;display.rviz&quot;</span><span class="p">)],</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="n">condition</span><span class="o">=</span><span class="n">IfCondition</span><span class="p">(</span><span class="n">LaunchConfiguration</span><span class="p">(</span><span class="s2">&quot;use_rviz&quot;</span><span class="p">)),</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="p">),</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">Node</span><span class="p">(</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>        <span class="n">package</span><span class="o">=</span><span class="s2">&quot;tf2_ros&quot;</span><span class="p">,</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;static_transform_publisher&quot;</span><span class="p">,</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--frame-id&quot;</span><span class="p">,</span> <span class="s2">&quot;radar&quot;</span><span class="p">,</span> <span class="s2">&quot;--child-frame-id&quot;</span><span class="p">,</span> <span class="s2">&quot;utlidar_lidar&quot;</span><span class="p">],</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>    <span class="p">),</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="n">Node</span><span class="p">(</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>        <span class="n">package</span><span class="o">=</span><span class="s2">&quot;go2_twist_bridge_py&quot;</span><span class="p">,</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>        <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;twist_bridge&quot;</span><span class="p">,</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="p">),</span>
-</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="n">Node</span><span class="p">(</span>
-</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>        <span class="n">package</span><span class="o">=</span><span class="s2">&quot;go2_driver_py&quot;</span><span class="p">,</span>
-</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>        <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;driver&quot;</span><span class="p">,</span>
-</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>        <span class="n">parameters</span><span class="o">=</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">go2_driver_pkg</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">,</span> <span class="s2">&quot;driver.yaml&quot;</span><span class="p">)],</span>
-</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>    <span class="p">),</span>
-</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="p">])</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">use_rviz</span><span class="p">,</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">IncludeLaunchDescription</span><span class="p">(</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="n">PythonLaunchDescriptionSource</span><span class="p">(</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">go2_description_pkg</span><span class="p">,</span> <span class="s2">&quot;launch&quot;</span><span class="p">,</span> <span class="s2">&quot;display.launch.py&quot;</span><span class="p">)</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="p">),</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="n">launch_arguments</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;use_joint_state_publisher&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="p">),</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">Node</span><span class="p">(</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="n">package</span><span class="o">=</span><span class="s2">&quot;rviz2&quot;</span><span class="p">,</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;rviz2&quot;</span><span class="p">,</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">go2_driver_pkg</span><span class="p">,</span> <span class="s2">&quot;rviz&quot;</span><span class="p">,</span> <span class="s2">&quot;display.rviz&quot;</span><span class="p">)],</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="n">condition</span><span class="o">=</span><span class="n">IfCondition</span><span class="p">(</span><span class="n">LaunchConfiguration</span><span class="p">(</span><span class="s2">&quot;use_rviz&quot;</span><span class="p">)),</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="p">),</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">Node</span><span class="p">(</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="n">package</span><span class="o">=</span><span class="s2">&quot;tf2_ros&quot;</span><span class="p">,</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;static_transform_publisher&quot;</span><span class="p">,</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--frame-id&quot;</span><span class="p">,</span> <span class="s2">&quot;radar&quot;</span><span class="p">,</span> <span class="s2">&quot;--child-frame-id&quot;</span><span class="p">,</span> <span class="s2">&quot;utlidar_lidar&quot;</span><span class="p">],</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="p">),</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    <span class="n">Node</span><span class="p">(</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>        <span class="n">package</span><span class="o">=</span><span class="s2">&quot;go2_driver_py&quot;</span><span class="p">,</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>        <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;driver&quot;</span><span class="p">,</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>        <span class="n">parameters</span><span class="o">=</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">go2_driver_pkg</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">,</span> <span class="s2">&quot;driver.yaml&quot;</span><span class="p">)],</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="p">),</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="p">])</span>
 </span></code></pre></div>
 <p>注意这里专门把 <code>use_joint_state_publisher</code> 关成了 <code>false</code>。</p>
-<p>原因很简单:默认的 <code>joint_state_publisher</code> 是给“没有真机关节数据时”用的；我们现在已经有真实的 <code>/joint_states</code> 了，再开一份假的就会跟真实数据打架。</p>
+<p>原因很简单:默认的 <code>joint_state_publisher</code> 是给"没有真机关节数据时"用的；我们现在已经有真实的 <code>/joint_states</code> 了，再开一份假的就会跟真实数据打架。</p>
 <h2 id="_7">编译与运行<a class="headerlink" href="#_7" title="锚点链接">&para;</a></h2>
 <p>先把相关包编译好:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 编译可视化底座相关的三个包</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 编译可视化底座相关的两个包</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_description<span class="w"> </span>go2_driver_py<span class="w"> </span>go2_twist_bridge_py
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_description<span class="w"> </span>go2_driver_py
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
 </span></code></pre></div>
-<p>最推荐的启动方式是一条命令直接拉起整套底座:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 启动模型、RViz、twist_bridge 和 driver</span>
+<p>最推荐的启动方式是一条命令直接拉起可视化底座:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 启动模型、RViz、静态 TF 和 driver</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_driver_py<span class="w"> </span>driver.launch.py
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_driver_py<span class="w"> </span>visualization.launch.py
 </span></code></pre></div>
 <p>如果你只想先确认数据链，不想开 RViz，可以关掉它:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 只起数据链，不开 RViz</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_driver_py<span class="w"> </span>driver.launch.py<span class="w"> </span>use_rviz:<span class="o">=</span><span class="nb">false</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_driver_py<span class="w"> </span>visualization.launch.py<span class="w"> </span>use_rviz:<span class="o">=</span><span class="nb">false</span>
 </span></code></pre></div>
 <p>也可以单独跑 <code>driver</code> 节点本身:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 只启动 driver 节点</span>
@@ -2298,8 +2352,10 @@
 <li>机器人姿态会跟着真实状态变化</li>
 <li>Fixed Frame 设成 <code>odom</code> 后，模型位置不再飘成一坨</li>
 </ul>
-<p><img alt="TODO:RViz 中显示 RobotModel、TF 和 /odom 轨迹" src="../assets/images/05-visualization-driver-rviz.png" width="600" /></p>
-<h2 id="_9">常见问题<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h2>
+<h3 id="_9">结果演示<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h3>
+<p>RViz 中能同时看到 RobotModel、TF 和 <code>/odom</code> 轨迹,就说明可视化链路已经能把第 6 章驱动发布的状态画出来。后面排查导航问题时,这张 RViz 视图就是你判断“模型姿态、里程计、坐标系有没有乱”的第一现场。</p>
+<p><img alt="RViz 中显示 Go2 RobotModel、TF 和 /odom 轨迹" src="../../assets/images/05-visualization-driver-rviz.png" width="720" /></p>
+<h2 id="_10">常见问题<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
 <h3 id="1">1. 模型加载出来了，但四条腿完全不动<a class="headerlink" href="#1" title="锚点链接">&para;</a></h3>
 <p><strong>现象</strong>:RobotModel 能显示，但关节姿态像被焊死了一样。</p>
 <p><strong>原因</strong>:通常是 <code>/joint_states</code> 没有数据，或者被别的节点抢着发布了假数据。</p>
@@ -2331,10 +2387,36 @@
 <p><strong>原因</strong>:当前仓库已经把那层过渡逻辑合并进 <code>go2_driver_py/driver</code> 了。</p>
 <p><strong>解决</strong>:</p>
 <ul>
-<li>把“关节桥接”这件事直接理解成 <code>driver</code> 的一部分</li>
+<li>把"关节桥接"这件事直接理解成 <code>driver</code> 的一部分</li>
 <li>后面所有章节默认也都按这个新结构往下讲</li>
 </ul>
-<h2 id="_10">本章小结<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
+<h3 id="5-failed-to-enumerate-interfaces-for-udp">5. 节点刚起就全挂:<code>failed to enumerate interfaces for "udp"</code><a class="headerlink" href="#5-failed-to-enumerate-interfaces-for-udp" title="锚点链接">&para;</a></h3>
+<p><strong>现象</strong>:<code>ros2 launch</code> 命令看起来已经正确展开，<code>robot_state_publisher</code>、<code>static_transform_publisher</code>、<code>driver</code> 都已进入初始化阶段，但随后集体报错退出，核心信息是:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>failed to enumerate interfaces for &quot;udp&quot;: -1
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>rmw_create_node: failed to create domain, error Error
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>rcl node&#39;s rmw handle is invalid
+</span></code></pre></div>
+<p><strong>原因</strong>:这不是本章代码或 launch 写错，而是 CycloneDDS 运行环境没准备好——通常是 Humble 或 <code>cyclonedds_ws</code> 的环境变量没 source 进当前终端。ROS2 创建节点时无法枚举 UDP 接口，所有节点都会跟着挂掉。</p>
+<p><strong>解决</strong>:</p>
+<ul>
+<li>
+<p>先在当前终端重新 source 一遍环境:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">source</span><span class="w"> </span>/opt/ros/humble/setup.bash
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/cyclonedds_ws/install/setup.bash
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nb">source</span><span class="w"> </span>~/unitree_go2_ws/install/setup.bash
+</span></code></pre></div>
+</li>
+<li>
+<p>再用最朴素的命令验证 DDS 能不能通:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>ros2<span class="w"> </span>topic<span class="w"> </span>list
+</span></code></pre></div>
+<p>如果这条都挂，说明 DDS 环境本身坏了，需要回头检查 <code>CYCLONEDDS_URI</code>、网卡状态，而不是继续调本章代码。</p>
+</li>
+<li>
+<p>DDS 正常后再重新执行 <code>ros2 launch go2_driver_py visualization.launch.py</code>。</p>
+</li>
+</ul>
+<h2 id="_11">本章小结<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
 <p>这一章我们把 Go2 在 RViz 里的可视化链真正跑顺了。</p>
 <p>最重要的收获不是“能看到模型”，而是你已经知道这套可视化依赖哪三类数据: <code>/odom</code>、TF、<code>/joint_states</code>。更关键的是，当前代码树里这三类数据都由 <code>go2_driver_py/driver</code> 统一输出。</p>
 <p>下一章我们就不再只把它当成“可视化底座”了，而是把这个 <code>driver</code> 节点本身完整拆开，看清楚它到底是怎么从原始机器人状态整理出标准 ROS2 数据的。</p>

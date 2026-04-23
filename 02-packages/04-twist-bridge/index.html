@@ -1221,10 +1221,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -1258,7 +1275,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_17" class="md-nav__link">
     <span class="md-ellipsis">
       
         左转右转的方向和你预期相反
@@ -1296,7 +1313,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -1307,7 +1324,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_19" class="md-nav__link">
     <span class="md-ellipsis">
       
         下一步
@@ -1318,7 +1335,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_19" class="md-nav__link">
+  <a href="#_20" class="md-nav__link">
     <span class="md-ellipsis">
       
         拓展阅读
@@ -2343,10 +2360,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -2380,7 +2414,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_17" class="md-nav__link">
     <span class="md-ellipsis">
       
         左转右转的方向和你预期相反
@@ -2418,7 +2452,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -2429,7 +2463,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_19" class="md-nav__link">
     <span class="md-ellipsis">
       
         下一步
@@ -2440,7 +2474,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_19" class="md-nav__link">
+  <a href="#_20" class="md-nav__link">
     <span class="md-ellipsis">
       
         拓展阅读
@@ -3002,12 +3036,18 @@
 <p>你可以把这一章的联调想成三层：上游先发出 <code>Twist</code>，桥接节点把它翻成 <code>Request</code>，最后 Go2 再执行高层运动接口。哪一层出问题，都更容易定位。</p>
 <hr />
 <h2 id="_13">编译与运行<a class="headerlink" href="#_13" title="锚点链接">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">桥接节点自己不会产生速度命令</p>
+<p><code>go2_twist_bridge_py</code> 只是中间适配层，职责就是把 <code>/cmd_vel</code> 翻译成 <code>/api/sport/request</code>。如果系统里没有别的节点往 <code>/cmd_vel</code> 发消息，它虽然挂着，但既没有输入也不会产生输出，很容易让人误以为"桥接节点坏了"。</p>
+<p>另外，第 3 章 <code>go2_teleop_ctrl_keyboard</code> 直接发布的是 <code>Request</code>，<strong>不走 <code>/cmd_vel</code>、不经过本章桥接</strong>。如果同时打开第 3 章键盘节点和本章桥接节点后发现 Go2 动了，这并不能证明本章桥接生效——真正起作用的可能只是第 3 章节点。所以本章必须用 <code>teleop_twist_keyboard</code> 这类发布 <code>Twist</code> 的上游来验证。</p>
+</div>
 <p>这一章最推荐的验证方式，是开三个终端：</p>
 <ul>
 <li>终端 1：跑桥接节点</li>
-<li>终端 2：跑 <code>teleop_twist_keyboard</code></li>
+<li>终端 2：跑 <code>teleop_twist_keyboard</code>（或其他发布 <code>/cmd_vel</code> 的上游）</li>
 <li>终端 3：观察 <code>/api/sport/request</code></li>
 </ul>
+<p>三者缺一不可：少了终端 2，桥接没有输入；少了终端 3，你无法区分"桥接没收到"和"Go2 没响应"这两种情况。</p>
 <p>先回到工作空间根目录，编译 <code>go2_twist_bridge_py</code>：</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># 先加载 Go2 官方环境，再编译 Twist 桥接包</span>
 </span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nb">source</span><span class="w"> </span>~/unitree_ros2/setup.sh
@@ -3135,12 +3175,11 @@
 <ol>
 <li>实机表现稳定：<code>i</code> / <code>,</code> 能前后走，<code>j</code> / <code>l</code> 能原地转，<code>Shift + J</code> / <code>Shift + L</code> 能左右平移，松手后不会继续磨蹭。</li>
 </ol>
-<p>媒体内容先留占位，后面统一补录：</p>
-<!-- TODO(媒体): 补一张 /cmd_vel 与 /api/sport/request 对照截图，显示 Twist 与 Request 的映射 -->
-<!-- TODO(媒体): 录制 04-twist-bridge-demo.gif，展示 teleop_twist_keyboard -> twist_bridge -> Go2 的完整联调过程 -->
-
+<h3 id="_15">结果演示<a class="headerlink" href="#_15" title="锚点链接">&para;</a></h3>
+<p>下面这张截图用来确认本章最关键的映射关系:上游 <code>/cmd_vel</code> 里是标准 <code>Twist</code>,桥接节点输出到 <code>/api/sport/request</code> 后变成 Go2 高层接口能识别的 <code>Request</code>。看到 <code>parameter</code> 里出现 <code>x/y/z</code> 这组 JSON,才算真的经过了桥接,不是上一章键盘节点直接在控制 Go2。</p>
+<p><img alt="Twist 桥接验证: teleop_twist_keyboard 发布 /cmd_vel, twist_bridge 转成 /api/sport/request" src="../../assets/images/04-twist-bridge-demo.png" width="620" /></p>
 <hr />
-<h2 id="_15">常见问题<a class="headerlink" href="#_15" title="锚点链接">&para;</a></h2>
+<h2 id="_16">常见问题<a class="headerlink" href="#_16" title="锚点链接">&para;</a></h2>
 <h3 id="go2">明明没再按键了，Go2 还在微微抖<a class="headerlink" href="#go2" title="锚点链接">&para;</a></h3>
 <p>这通常就是死区没设，或者死区太小。先检查 <code>apply_deadband()</code> 是否真的作用在 <code>linear.x</code>、<code>linear.y</code>、<code>angular.z</code> 上，以及线速度和角速度是否分别设置了阈值。</p>
 <h3 id="parameter-go2"><code>parameter</code> 看起来像字典，但 Go2 不认<a class="headerlink" href="#parameter-go2" title="锚点链接">&para;</a></h3>
@@ -3151,7 +3190,7 @@
 <div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="n">request</span><span class="o">.</span><span class="n">parameter</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z</span><span class="p">})</span>
 </span></code></pre></div>
 <p>还有一个坑是字段名拼错。对这条接口来说，本章固定用 <code>x</code>、<code>y</code>、<code>z</code> 这三个键。</p>
-<h3 id="_16">左转右转的方向和你预期相反<a class="headerlink" href="#_16" title="锚点链接">&para;</a></h3>
+<h3 id="_17">左转右转的方向和你预期相反<a class="headerlink" href="#_17" title="锚点链接">&para;</a></h3>
 <p>这种情况优先怀疑坐标约定。本章默认 <code>angular.z &gt; 0</code> 是逆时针，<code>angular.z &lt; 0</code> 是顺时针。如果你在桥接里手滑写成了：</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">z</span> <span class="o">=</span> <span class="o">-</span><span class="n">msg</span><span class="o">.</span><span class="n">angular</span><span class="o">.</span><span class="n">z</span>
 </span></code></pre></div>
@@ -3161,7 +3200,7 @@
 <h3 id="nav2">用 Nav2 时，桥接又显得太保守了怎么办<a class="headerlink" href="#nav2" title="锚点链接">&para;</a></h3>
 <p>这不是 bug，而是本章的教学取舍。先确认桥接逻辑没问题，再统一调整 <code>max_vel_x</code>、<code>max_vel_theta</code> 这类上限；不要今天上游一套数，桥里一套数，机器人上再靠猜。</p>
 <hr />
-<h2 id="_17">本章小结<a class="headerlink" href="#_17" title="锚点链接">&para;</a></h2>
+<h2 id="_18">本章小结<a class="headerlink" href="#_18" title="锚点链接">&para;</a></h2>
 <p>这一章你真正做成的，不只是“又多写了一个节点”，而是把 Go2 接进了 ROS2 生态最常见的一条速度控制主线。</p>
 <p>从现在开始，你可以把上游控制逻辑和厂商接口拆开来看：</p>
 <ul>
@@ -3171,11 +3210,11 @@
 </ul>
 <p>这层抽象一旦有了，后面不管是 <code>teleop_twist_keyboard</code>、Nav2，还是你自己写的路径跟随器，都会顺很多。</p>
 <hr />
-<h2 id="_18">下一步<a class="headerlink" href="#_18" title="锚点链接">&para;</a></h2>
+<h2 id="_19">下一步<a class="headerlink" href="#_19" title="锚点链接">&para;</a></h2>
 <p>现在 Go2 已经能通过标准 <code>Twist</code> 接口被驱动了，下一章我们把关注点从“怎么控它动”转到“怎么把它在 ROS2 世界里看清楚”。</p>
 <p>继续阅读：<a href="../05-visualization/">第 5 章 机器人可视化与完整驱动包</a></p>
 <hr />
-<h2 id="_19">拓展阅读<a class="headerlink" href="#_19" title="锚点链接">&para;</a></h2>
+<h2 id="_20">拓展阅读<a class="headerlink" href="#_20" title="锚点链接">&para;</a></h2>
 <ul>
 <li><a href="https://docs.ros.org/en/humble/p/geometry_msgs/msg/Twist.html">ROS2 <code>geometry_msgs/msg/Twist</code> 文档</a></li>
 <li><a href="https://github.com/ros2/teleop_twist_keyboard">ROS2 <code>teleop_twist_keyboard</code> 仓库</a></li>

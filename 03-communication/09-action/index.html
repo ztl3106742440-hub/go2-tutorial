@@ -1320,7 +1320,7 @@
   <a href="#3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. 剩余距离一直不变
+        3. 剩余距离一直不变、任务永远不结束(高频坑)
       
     </span>
   </a>
@@ -1351,6 +1351,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="本章小结">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2-789" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 ROS2 三大通信机制对照(第 7/8/9 章总复习)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2061,7 +2078,7 @@
   <a href="#3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. 剩余距离一直不变
+        3. 剩余距离一直不变、任务永远不结束(高频坑)
       
     </span>
   </a>
@@ -2092,6 +2109,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="本章小结">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2-789" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 ROS2 三大通信机制对照(第 7/8/9 章总复习)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2126,10 +2160,23 @@
   
 
 
-<h1 id="9-action-x">第 9 章 用 Action 封装“前进 X 米”<a class="headerlink" href="#9-action-x" title="锚点链接">&para;</a></h1>
+<h1 id="9-action-x">第 9 章 用 Action 封装"前进 X 米"<a class="headerlink" href="#9-action-x" title="锚点链接">&para;</a></h1>
 <blockquote>
-<p>上一章我们已经把“开始 / 停止”这种短事务封装成了 Service。这一章再往前走一步:让 Go2 接收一个“前进多少米”的长任务，在执行过程中持续回报剩余距离，结束时再给出最终位置。</p>
+<p>上一章我们用 <strong>Service</strong> 完成了一问一答的短事务。这一章再换一种通信形状:用 <strong>Action</strong> 封装"前进 X 米"这种长任务——发一次目标,中间持续拿到反馈,结束时才拿到最终结果。</p>
 </blockquote>
+<div class="admonition warning">
+<p class="admonition-title">🎯 本章通信方式:Action(动作)</p>
+<p><strong>形状</strong>:双向 · Goal + Feedback + Result · 长任务<br />
+<strong>本章关键 API</strong>:<code>ActionServer(self, Nav, "nav", self.execute, ...)</code><br />
+<strong>要记住的事</strong>:客户端发一个 Goal,服务端在执行过程中<strong>持续</strong>推送 Feedback(进度信息),完成后再推送一次 Result。Action 是三大通信机制里最"重"的一种——它融合了 Service 的"请求-响应"和 Topic 的"持续发布",专为会持续一段时间的任务准备。</p>
+<p>至此你已经看过三种通信了:</p>
+<ul>
+<li>Topic(第 7 章):单向广播,不等谁</li>
+<li>Service(第 8 章):一请求一响应,短</li>
+<li>Action(第 9 章):一请求 + 多反馈 + 一结果,长</li>
+</ul>
+<p>本章末尾有完整对照表,可以带着疑问往下读。</p>
+</div>
 <h2 id="_1">本章你将学到<a class="headerlink" href="#_1" title="锚点链接">&para;</a></h2>
 <ul>
 <li>看懂 <code>Nav.action</code> 里 <code>Goal / Feedback / Result</code> 三段分别表达什么</li>
@@ -2153,12 +2200,16 @@
 </ul>
 <h2 id="_3">架构总览<a class="headerlink" href="#_3" title="锚点链接">&para;</a></h2>
 <pre class="mermaid"><code>flowchart LR
-    A[go2_nav_client] --&gt;|Goal: 前进距离| B["/nav&lt;br/&gt;go2_tutorial_inter/action/Nav"]
-    B --&gt; C[go2_nav_server]
-    C --&gt;|Feedback: 剩余距离| A
-    C --&gt;|Result: 最终位置 point| A
+    A[go2_nav_client] ==&gt;|"🎯 ①Goal:目标距离"| B["/nav&lt;br/&gt;go2_tutorial_inter/action/Nav"]
+    B ==&gt; C[go2_nav_server]
+    C -.-&gt;|"②Feedback:剩余距离(持续推)"| A
+    C -.-&gt;|"③Result:最终位置 point"| A
     D["/odom&lt;br/&gt;nav_msgs/msg/Odometry"] --&gt; C
-    C --&gt; E["/api/sport/request&lt;br/&gt;unitree_api/msg/Request"]</code></pre>
+    C --&gt;|"(Topic)持续发布"| E["/api/sport/request&lt;br/&gt;unitree_api/msg/Request"]
+
+    classDef action fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    class B action</code></pre>
+<p>数一下这张图里从服务端回到客户端的箭头:<strong>一条 Feedback(会被多次推送) + 一条 Result(最后才推一次)</strong>。这就是 Action 相对 Service 的核心差异——Service 只能给一条响应,Action 能给一条"不断更新的进度"再加一条"收尾结果"。</p>
 <p>和上一章相比，最大的区别不是控制链，而是接口层级更丰富了。</p>
 <p>客户端不只是“发一次请求然后等结果”，还会在任务过程中不断收到反馈。所以它更像“盯着一个任务跑完”，而不是“打一通电话问一句”。</p>
 <h2 id="_4">环境准备<a class="headerlink" href="#_4" title="锚点链接">&para;</a></h2>
@@ -2305,8 +2356,28 @@
 </span></code></pre></div>
 <p>读这段代码时，有三件事值得重点盯住。</p>
 <p>第一，<code>goal_cb()</code> 只接受 <strong>大于 0</strong> 的目标距离。也就是说，本章 Action 不支持负数倒车，更不支持给二维坐标点。</p>
-<p>第二，真正的运动控制还是靠后台定时器 <code>on_timer()</code> 一直发 <code>Request</code>。Action 不会替代这条控制链，它只是把“什么时候开始、什么时候停、什么时候发反馈”组织起来了。</p>
-<p>第三，执行函数 <code>execute()</code> 里判断到 <code>distance &lt; 0.2</code> 才停止，这就是它当前的“到达阈值”。</p>
+<p>第二，真正的运动控制还是靠后台定时器 <code>on_timer()</code> 一直发 <code>Request</code>。Action 不会替代这条控制链，它只是把"什么时候开始、什么时候停、什么时候发反馈"组织起来了。</p>
+<p>第三，执行函数 <code>execute()</code> 里判断到 <code>distance &lt; 0.2</code> 才停止，这就是它当前的"到达阈值"。</p>
+<div class="admonition warning">
+<p class="admonition-title">🎯 本章 Action 通信的钥匙就是这一行</p>
+<p><div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">action_server</span> <span class="o">=</span> <span class="n">ActionServer</span><span class="p">(</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">Nav</span><span class="p">,</span> <span class="s2">&quot;nav&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">goal_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">goal_cb</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">cancel_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cancel_cb</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
+</span></code></pre></div>
+<code>ActionServer</code> 的构造就把 Action 的三段结构都摆出来了:</p>
+<ul>
+<li><code>goal_callback</code> → 收到新 Goal 时决定 ACCEPT/REJECT</li>
+<li><code>execute</code> → 任务真正的执行体(在里面循环 <code>publish_feedback</code>)</li>
+<li><code>cancel_callback</code> → 客户端想取消任务时的处理</li>
+</ul>
+<p>对比第 7 章 <code>create_publisher</code>(单向)、第 8 章 <code>create_service</code>(一请求一响应),这一行展示的就是 Action "一 Goal + 多 Feedback + 一 Result + 可取消"的完整骨架。</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">想改前进速度?就一个参数 <mark><code>x</code></mark></p>
+<p>服务端声明了运行参数 <mark><code>x</code></mark>(默认 0.3 m/s),启动时用 <code>--ros-args -p x:=0.2</code> 就能改。和前两章一样,本章重点是 Action 通信机制,具体速度你随意调,不影响理解。</p>
+</div>
 <h3 id="go2_nav_client">步骤三:实现 <code>go2_nav_client</code><a class="headerlink" href="#go2_nav_client" title="锚点链接">&para;</a></h3>
 <p>服务端准备好之后，客户端要做的事情就清楚多了:</p>
 <ul>
@@ -2316,76 +2387,76 @@
 <li>最后打印 <code>point</code></li>
 </ul>
 <p>把下面代码放进 <code>src/tutorial/go2_tutorial_py/go2_tutorial_py/go2_nav_client.py</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>                                <span class="c1"># 读取命令行参数</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>                             <span class="c1"># ROS2 Python 客户端库</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.action</span><span class="w"> </span><span class="kn">import</span> <span class="n">ActionClient</span>    <span class="c1"># ROS2 Action 客户端</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>     <span class="c1"># 打印日志</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>              <span class="c1"># 自定义节点基类</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">go2_tutorial_inter.action</span><span class="w"> </span><span class="kn">import</span> <span class="n">Nav</span>        <span class="c1"># 本章的 Action 定义</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">Go2NavClient</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;go2_nav_client&quot;</span><span class="p">)</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">ActionClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nav</span><span class="p">,</span> <span class="s2">&quot;nav&quot;</span><span class="p">)</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">connect_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">wait_for_server</span><span class="p">(</span><span class="mf">1.0</span><span class="p">):</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;服务连接中...&quot;</span><span class="p">)</span>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">ok</span><span class="p">():</span>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>                <span class="k">return</span> <span class="kc">False</span>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>        <span class="k">return</span> <span class="kc">True</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>        <span class="n">goal_msg</span> <span class="o">=</span> <span class="n">Nav</span><span class="o">.</span><span class="n">Goal</span><span class="p">()</span>
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>        <span class="n">goal_msg</span><span class="o">.</span><span class="n">goal</span> <span class="o">=</span> <span class="n">goal</span>
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>        <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">send_goal_async</span><span class="p">(</span><span class="n">goal_msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feedback_callback</span><span class="p">)</span>
-</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>        <span class="n">future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goal_response</span><span class="p">)</span>
-</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>
-</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">goal_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
-</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>        <span class="n">goal_handle</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
-</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>        <span class="k">if</span> <span class="n">goal_handle</span><span class="o">.</span><span class="n">accepted</span><span class="p">:</span>
-</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;目标请求被接收&quot;</span><span class="p">)</span>
-</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>            <span class="n">future</span> <span class="o">=</span> <span class="n">goal_handle</span><span class="o">.</span><span class="n">get_result_async</span><span class="p">()</span>
-</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>            <span class="n">future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result_response</span><span class="p">)</span>
-</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;目标请求被拒绝&quot;</span><span class="p">)</span>
-</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>
-</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">result_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
-</span><span id="__span-2-41"><a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">result</span>
-</span><span id="__span-2-42"><a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-</span><span id="__span-2-43"><a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>            <span class="s2">&quot;机器人到达后坐标：(</span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
-</span><span id="__span-2-44"><a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>        <span class="p">)</span>
-</span><span id="__span-2-45"><a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="__span-2-46"><a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>
-</span><span id="__span-2-47"><a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">feedback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fb_msg</span><span class="p">):</span>
-</span><span id="__span-2-48"><a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a>        <span class="n">fb</span> <span class="o">=</span> <span class="n">fb_msg</span><span class="o">.</span><span class="n">feedback</span>
-</span><span id="__span-2-49"><a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;距离目标还有 </span><span class="si">%.2f</span><span class="s2"> 米&quot;</span> <span class="o">%</span> <span class="n">fb</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
-</span><span id="__span-2-50"><a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a>
-</span><span id="__span-2-51"><a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a>
-</span><span id="__span-2-52"><a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-</span><span id="__span-2-53"><a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-</span><span id="__span-2-54"><a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a>        <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;rclpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;请提交一个浮点类型的参数！&quot;</span><span class="p">)</span>
-</span><span id="__span-2-55"><a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>        <span class="k">return</span>
-</span><span id="__span-2-56"><a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>
-</span><span id="__span-2-57"><a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
-</span><span id="__span-2-58"><a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a>    <span class="n">go2_nav_client</span> <span class="o">=</span> <span class="n">Go2NavClient</span><span class="p">()</span>
-</span><span id="__span-2-59"><a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a>
-</span><span id="__span-2-60"><a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">go2_nav_client</span><span class="o">.</span><span class="n">connect_server</span><span class="p">():</span>
-</span><span id="__span-2-61"><a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
-</span><span id="__span-2-62"><a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a>        <span class="k">return</span>
-</span><span id="__span-2-63"><a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a>
-</span><span id="__span-2-64"><a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a>    <span class="n">go2_nav_client</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-</span><span id="__span-2-65"><a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a>
-</span><span id="__span-2-66"><a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a>    <span class="k">while</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">ok</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">go2_nav_client</span><span class="o">.</span><span class="n">done</span><span class="p">:</span>
-</span><span id="__span-2-67"><a id="__codelineno-2-67" name="__codelineno-2-67" href="#__codelineno-2-67"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_once</span><span class="p">(</span><span class="n">go2_nav_client</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-</span><span id="__span-2-68"><a id="__codelineno-2-68" name="__codelineno-2-68" href="#__codelineno-2-68"></a>
-</span><span id="__span-2-69"><a id="__codelineno-2-69" name="__codelineno-2-69" href="#__codelineno-2-69"></a>    <span class="n">go2_nav_client</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
-</span><span id="__span-2-70"><a id="__codelineno-2-70" name="__codelineno-2-70" href="#__codelineno-2-70"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>                                <span class="c1"># 读取命令行参数</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">rclpy</span>                             <span class="c1"># ROS2 Python 客户端库</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.action</span><span class="w"> </span><span class="kn">import</span> <span class="n">ActionClient</span>    <span class="c1"># ROS2 Action 客户端</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>     <span class="c1"># 打印日志</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rclpy.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>              <span class="c1"># 自定义节点基类</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">go2_tutorial_inter.action</span><span class="w"> </span><span class="kn">import</span> <span class="n">Nav</span>        <span class="c1"># 本章的 Action 定义</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">Go2NavClient</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;go2_nav_client&quot;</span><span class="p">)</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">ActionClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nav</span><span class="p">,</span> <span class="s2">&quot;nav&quot;</span><span class="p">)</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">connect_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">wait_for_server</span><span class="p">(</span><span class="mf">1.0</span><span class="p">):</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;服务连接中...&quot;</span><span class="p">)</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">ok</span><span class="p">():</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>                <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>        <span class="n">goal_msg</span> <span class="o">=</span> <span class="n">Nav</span><span class="o">.</span><span class="n">Goal</span><span class="p">()</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>        <span class="n">goal_msg</span><span class="o">.</span><span class="n">goal</span> <span class="o">=</span> <span class="n">goal</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">send_goal_async</span><span class="p">(</span><span class="n">goal_msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feedback_callback</span><span class="p">)</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>        <span class="n">future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goal_response</span><span class="p">)</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">goal_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>        <span class="n">goal_handle</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        <span class="k">if</span> <span class="n">goal_handle</span><span class="o">.</span><span class="n">accepted</span><span class="p">:</span>
+</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;目标请求被接收&quot;</span><span class="p">)</span>
+</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>            <span class="n">future</span> <span class="o">=</span> <span class="n">goal_handle</span><span class="o">.</span><span class="n">get_result_async</span><span class="p">()</span>
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>            <span class="n">future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result_response</span><span class="p">)</span>
+</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;目标请求被拒绝&quot;</span><span class="p">)</span>
+</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>
+</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">result_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">):</span>
+</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">result</span>
+</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>            <span class="s2">&quot;机器人到达后坐标：(</span><span class="si">%.2f</span><span class="s2">, </span><span class="si">%.2f</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a>        <span class="p">)</span>
+</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>
+</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">feedback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fb_msg</span><span class="p">):</span>
+</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>        <span class="n">fb</span> <span class="o">=</span> <span class="n">fb_msg</span><span class="o">.</span><span class="n">feedback</span>
+</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;距离目标还有 </span><span class="si">%.2f</span><span class="s2"> 米&quot;</span> <span class="o">%</span> <span class="n">fb</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>
+</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>
+</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>        <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;rclpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;请提交一个浮点类型的参数！&quot;</span><span class="p">)</span>
+</span><span id="__span-3-55"><a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>        <span class="k">return</span>
+</span><span id="__span-3-56"><a id="__codelineno-3-56" name="__codelineno-3-56" href="#__codelineno-3-56"></a>
+</span><span id="__span-3-57"><a id="__codelineno-3-57" name="__codelineno-3-57" href="#__codelineno-3-57"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+</span><span id="__span-3-58"><a id="__codelineno-3-58" name="__codelineno-3-58" href="#__codelineno-3-58"></a>    <span class="n">go2_nav_client</span> <span class="o">=</span> <span class="n">Go2NavClient</span><span class="p">()</span>
+</span><span id="__span-3-59"><a id="__codelineno-3-59" name="__codelineno-3-59" href="#__codelineno-3-59"></a>
+</span><span id="__span-3-60"><a id="__codelineno-3-60" name="__codelineno-3-60" href="#__codelineno-3-60"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">go2_nav_client</span><span class="o">.</span><span class="n">connect_server</span><span class="p">():</span>
+</span><span id="__span-3-61"><a id="__codelineno-3-61" name="__codelineno-3-61" href="#__codelineno-3-61"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</span><span id="__span-3-62"><a id="__codelineno-3-62" name="__codelineno-3-62" href="#__codelineno-3-62"></a>        <span class="k">return</span>
+</span><span id="__span-3-63"><a id="__codelineno-3-63" name="__codelineno-3-63" href="#__codelineno-3-63"></a>
+</span><span id="__span-3-64"><a id="__codelineno-3-64" name="__codelineno-3-64" href="#__codelineno-3-64"></a>    <span class="n">go2_nav_client</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</span><span id="__span-3-65"><a id="__codelineno-3-65" name="__codelineno-3-65" href="#__codelineno-3-65"></a>
+</span><span id="__span-3-66"><a id="__codelineno-3-66" name="__codelineno-3-66" href="#__codelineno-3-66"></a>    <span class="k">while</span> <span class="n">rclpy</span><span class="o">.</span><span class="n">ok</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">go2_nav_client</span><span class="o">.</span><span class="n">done</span><span class="p">:</span>
+</span><span id="__span-3-67"><a id="__codelineno-3-67" name="__codelineno-3-67" href="#__codelineno-3-67"></a>        <span class="n">rclpy</span><span class="o">.</span><span class="n">spin_once</span><span class="p">(</span><span class="n">go2_nav_client</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</span><span id="__span-3-68"><a id="__codelineno-3-68" name="__codelineno-3-68" href="#__codelineno-3-68"></a>
+</span><span id="__span-3-69"><a id="__codelineno-3-69" name="__codelineno-3-69" href="#__codelineno-3-69"></a>    <span class="n">go2_nav_client</span><span class="o">.</span><span class="n">destroy_node</span><span class="p">()</span>
+</span><span id="__span-3-70"><a id="__codelineno-3-70" name="__codelineno-3-70" href="#__codelineno-3-70"></a>    <span class="n">rclpy</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </span></code></pre></div>
 <p>这段客户端代码的关键在于 <code>feedback_callback()</code>。</p>
 <p>Service 是“发一次、等一次”；Action 是“发一次，但中间还能不断收反馈”。所以你看到的“距离目标还有多少米”，本质上就是 Action 比 Service 多出来的那一层能力。</p>
@@ -2399,34 +2470,34 @@
 </ul>
 <h2 id="_7">编译与运行<a class="headerlink" href="#_7" title="锚点链接">&para;</a></h2>
 <p>先编译接口包和教程包:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 编译 Action 示例相关的两个包，并重新加载环境</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_tutorial_inter<span class="w"> </span>go2_tutorial_py
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 编译 Action 示例相关的两个包，并重新加载环境</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_tutorial_inter<span class="w"> </span>go2_tutorial_py
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
 </span></code></pre></div>
 <p>第一终端启动 Action 服务端:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 启动 Nav Action 服务端</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_server
-</span></code></pre></div>
-<p>第二终端启动客户端，让机器人前进 <code>1.0</code> 米:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 发送一个 1.0 米的前进目标</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 启动 Nav Action 服务端</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_client<span class="w"> </span><span class="m">1</span>.0
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_server
 </span></code></pre></div>
-<p>也可以不用客户端，直接从终端发 Action Goal:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 直接从命令行发送 Goal，并持续查看反馈</span>
+<p>第二终端启动客户端，让机器人前进 <code>1.0</code> 米:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 发送一个 1.0 米的前进目标</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>action<span class="w"> </span>send_goal<span class="w"> </span>/nav<span class="w"> </span>go2_tutorial_inter/action/Nav<span class="w"> </span><span class="s2">&quot;{goal: 1.0}&quot;</span><span class="w"> </span>--feedback
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_client<span class="w"> </span><span class="m">1</span>.0
 </span></code></pre></div>
-<p>如果你想让机器人走得慢一点，可以在服务端启动时改参数:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 把前进速度改成 0.2 m/s</span>
+<p>也可以不用客户端，直接从终端发 Action Goal:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 直接从命令行发送 Goal，并持续查看反馈</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_server<span class="w"> </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>x:<span class="o">=</span><span class="m">0</span>.2
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>ros2<span class="w"> </span>action<span class="w"> </span>send_goal<span class="w"> </span>/nav<span class="w"> </span>go2_tutorial_inter/action/Nav<span class="w"> </span><span class="s2">&quot;{goal: 1.0}&quot;</span><span class="w"> </span>--feedback
+</span></code></pre></div>
+<p>如果你想让机器人走得慢一点，可以在服务端启动时改参数:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 把前进速度改成 0.2 m/s</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_server<span class="w"> </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>x:<span class="o">=</span><span class="m">0</span>.2
 </span></code></pre></div>
 <h2 id="_8">结果验证<a class="headerlink" href="#_8" title="锚点链接">&para;</a></h2>
 <p>这一章跑通后，你应该能确认下面几件事:</p>
@@ -2437,14 +2508,14 @@
 <li>服务端在任务结束后会把动作切回 <code>STOPMOVE</code></li>
 </ol>
 <p>推荐按下面顺序自检:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 看 Action Server 是否上线</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>ros2<span class="w"> </span>action<span class="w"> </span>list<span class="w"> </span>-t
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># 查看接口定义</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>go2_tutorial_inter/action/Nav
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># 观察 Go2 控制消息</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 看 Action Server 是否上线</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>ros2<span class="w"> </span>action<span class="w"> </span>list<span class="w"> </span>-t
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># 查看接口定义</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>go2_tutorial_inter/action/Nav
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># 观察 Go2 控制消息</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
 </span></code></pre></div>
 <p>当任务执行中时，<code>/api/sport/request</code> 的 <code>api_id</code> 应该是 <code>MOVE</code>；到达终点后，它应切回 <code>STOPMOVE</code>。</p>
 <p><img alt="TODO:终端中显示 /nav feedback 与最终 point 结果" src="../assets/images/09-action-nav-feedback.png" width="600" /></p>
@@ -2466,15 +2537,26 @@
 <li>确认 Go2 高层控制环境已经就绪</li>
 <li>必要时把服务端参数 <code>x</code> 调大一点点，比如 <code>0.3</code></li>
 </ul>
-<h3 id="3">3. 剩余距离一直不变<a class="headerlink" href="#3" title="锚点链接">&para;</a></h3>
-<p><strong>现象</strong>:<code>distance</code> 每次打印都差不多，像卡住了一样。</p>
-<p><strong>原因</strong>:服务端依赖 <code>/odom</code> 来计算已经走了多远。如果 <code>/odom</code> 没更新，剩余距离当然不会变。</p>
-<p><strong>解决</strong>:</p>
-<ul>
-<li>先看 <code>ros2 topic echo /odom --once</code></li>
-<li>确认第 6 章驱动链已经跑通</li>
-<li>再检查机器人是不是实际真的在移动</li>
-</ul>
+<h3 id="3">3. 剩余距离一直不变、任务永远不结束(高频坑)<a class="headerlink" href="#3" title="锚点链接">&para;</a></h3>
+<p><strong>现象</strong>:客户端日志持续打印<code>"距离目标还有 1.00 米"</code>,数值几乎没变化,任务迟迟不自动结束;服务端也只停在<code>"提交的数据合法,机器人开始运动"</code>这一行。最后只能 <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-c">C</kbd></span> 强行中断。</p>
+<p><strong>原因</strong>:本章的"到达判定"<strong>完全依赖 <code>/odom</code> 的实时更新</strong>——<code>execute()</code> 里是用当前位姿和起始位姿相减算已走距离的。如果 <code>/odom</code> 不变(驱动没起、话题无数据、或机器人根本没动),<code>dis</code> 永远接近 0、<code>distance = goal - dis</code> 就永远卡在初始值附近,自然永远到不了 <code>&lt; 0.2</code> 的阈值,任务也就永远不会结束。</p>
+<div class="admonition danger">
+<p class="admonition-title">Action 的闭环锁在 <code>/odom</code> 上</p>
+<p><strong>这是本章最容易踩的坑,也是和 Topic/Service 最大的工程差异</strong>:Action 的"结束时机"不是靠客户端决定,而是靠服务端内部判断。而本章的判断依据就是 <code>/odom</code> 这条链。<code>/odom</code> 一旦不通,整个 Action 的生命周期就锁死。</p>
+</div>
+<p><strong>排查步骤</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># 1. /odom 到底有没有数据</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/odom<span class="w"> </span>--once
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># 2. 如果没数据,先回第 6 章把 driver 跑起来</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_driver_py<span class="w"> </span>driver.launch.py<span class="w"> </span>use_rviz:<span class="o">=</span><span class="nb">false</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># 3. 有数据的话,看服务端是不是在持续发 MOVE</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="c1"># 4. 确认机器人真的在物理上移动,而不是动作被卡住</span>
+</span></code></pre></div>
+<p>如果前三步都正常但机器人没动、<code>/odom</code> 也没变,那问题就不在本章 Action 代码,而是控制链到机器人之间断了——回到第 4/6 章先把基础链路打通,再回来跑本章。</p>
 <h3 id="4">4. 任务结束了，但机器人没有立刻停稳<a class="headerlink" href="#4" title="锚点链接">&para;</a></h3>
 <p><strong>现象</strong>:客户端已经打印最终坐标，机器人动作还有一点余量。</p>
 <p><strong>原因</strong>:当前代码用的是 <code>distance &lt; 0.2</code> 作为停止阈值，本来就留了一点工程余量，不是“距离精确到 0.000 就停”。</p>
@@ -2485,13 +2567,70 @@
 </ul>
 <h2 id="_10">本章小结<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
 <p>这一章我们把 Go2 的一个长任务封装成了标准 ROS2 Action。</p>
-<p>和上一章相比，最大的收获不是“又多了一个接口”，而是你真正看懂了 Goal、Feedback、Result 三段信息各自负责什么。对于机器人开发来说，这是一种非常常见的任务组织方式。</p>
-<p>更重要的是，你现在已经能把前三章通信主线串起来了:</p>
+<p>和上一章相比，最大的收获不是"又多了一个接口"，而是你真正看懂了 Goal、Feedback、Result 三段信息各自负责什么。对于机器人开发来说，这是一种非常常见的任务组织方式。</p>
+<h3 id="ros2-789">📊 ROS2 三大通信机制对照(第 7/8/9 章总复习)<a class="headerlink" href="#ros2-789" title="锚点链接">&para;</a></h3>
+<p>到此你已经把 ROS2 最核心的三种通信机制都实际用了一遍。下面这张表把三章的差异浓缩到一屏:</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>📡 Topic(第 7 章)</th>
+<th>📨 Service(第 8 章)</th>
+<th>🎯 Action(第 9 章)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>交互模式</strong></td>
+<td>单向广播</td>
+<td>一请求一响应</td>
+<td>一 Goal + 多 Feedback + 一 Result</td>
+</tr>
+<tr>
+<td><strong>时长特性</strong></td>
+<td>持续,高频刷</td>
+<td>瞬时短事务</td>
+<td>长任务(秒级/分钟级)</td>
+</tr>
+<tr>
+<td><strong>客户端能感知啥</strong></td>
+<td>只能订阅,收不到"处理完没"</td>
+<td>请求阻塞到响应返回</td>
+<td>能跟进进度、可取消</td>
+</tr>
+<tr>
+<td><strong>典型场景</strong></td>
+<td>持续刷控制命令 / 发传感器数据</td>
+<td>切状态 / 读一次参数</td>
+<td>跑一段时间再回结果</td>
+</tr>
+<tr>
+<td><strong>本章 API 钥匙</strong></td>
+<td><code>create_publisher(...)</code></td>
+<td><code>create_service(...)</code></td>
+<td><code>ActionServer(...)</code></td>
+</tr>
+<tr>
+<td><strong>本章对应案例</strong></td>
+<td>10 Hz 发 <code>Request</code> 驱动 Go2</td>
+<td>一次 Service 切巡航开关</td>
+<td>前进 X 米并持续回报距离</td>
+</tr>
+<tr>
+<td><strong>在本章 mermaid 里的形状</strong></td>
+<td>粗单向箭头 <code>==&gt;</code></td>
+<td>实线请求 + 虚线响应</td>
+<td>实线 Goal + 多条虚线回流</td>
+</tr>
+</tbody>
+</table>
+<p><strong>怎么选?</strong> 给一个最简口诀:</p>
 <ul>
-<li>第 7 章教你最小控制节点怎么持续发 <code>Request</code></li>
-<li>第 8 章教你怎么用 Service 做短事务控制</li>
-<li>第 9 章教你怎么用 Action 管一个会持续一段时间的任务</li>
+<li>要持续推数据 → <strong>Topic</strong></li>
+<li>要瞬时切状态、一次性问个结果 → <strong>Service</strong></li>
+<li>要跑一段时间、中间要看进度、结束要有结果 → <strong>Action</strong></li>
 </ul>
+<p>这三种机制可以混合使用(本章的 <code>go2_nav_server</code> 内部就同时在跑 ActionServer 和 Topic Publisher),实际工程里也往往是组合拳。</p>
 <h2 id="_11">下一步<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
 <p>前面三章都还停留在“通信机制怎么用”。从下一章开始，我们把视线转回感知链路，先去把 Go2 的点云数据吃明白，再慢慢往 SLAM 和导航栈推进。</p>
 

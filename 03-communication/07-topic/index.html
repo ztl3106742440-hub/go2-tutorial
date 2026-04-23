@@ -1224,10 +1224,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -1288,7 +1305,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -1299,7 +1316,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         下一步
@@ -2021,10 +2038,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="结果验证">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        结果演示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         常见问题
@@ -2085,7 +2119,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         本章小结
@@ -2096,7 +2130,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         下一步
@@ -2128,13 +2162,20 @@
 
 <h1 id="7-go2">第 7 章 用参数驱动 Go2 运动<a class="headerlink" href="#7-go2" title="锚点链接">&para;</a></h1>
 <blockquote>
-<p>上一章我们已经把 <code>Twist</code> 和 Go2 的 <code>Request</code> 接口接通了。这一章换一条更直接的路:不再走 <code>/cmd_vel</code>，而是写一个最小控制节点 <code>go2_ctrl</code>，用 ROS2 参数直接驱动 Go2。</p>
+<p>上一章我们已经把 <code>Twist</code> 和 Go2 的 <code>Request</code> 接口接通了。这一章换一条更直接的路:不再走 <code>/cmd_vel</code>，而是写一个最小控制节点 <code>go2_ctrl</code>，用 ROS2 参数驱动 Go2，底层走的是 <strong>Topic 通信</strong>。</p>
 </blockquote>
+<div class="admonition info">
+<p class="admonition-title">📡 本章通信方式:Topic(话题发布)</p>
+<p><strong>形状</strong>:单向 · 异步广播 · 持续发布<br />
+<strong>本章关键 API</strong>:<code>self.create_publisher(Request, "/api/sport/request", 10)</code><br />
+<strong>要记住的事</strong>:节点每 0.1 秒往话题上发一条 <code>Request</code>,谁订阅谁收;没人订阅它也照发不误。Topic 不关心"消息有没有被处理完",只负责把数据流源源不断推出去。</p>
+<p>这是 ROS2 三大通信机制里最基础的一种。下一章我们会看到不一样的形状——Service(请求/响应)。</p>
+</div>
 <h2 id="_1">本章你将学到<a class="headerlink" href="#_1" title="锚点链接">&para;</a></h2>
 <ul>
-<li>看懂 <code>go2_ctrl</code> 这类“参数 + 定时器 + 专有消息”的最小控制节点</li>
+<li>看懂 <code>go2_ctrl</code> 这类"参数 + 定时器 + 专有消息"的最小控制节点</li>
 <li>学会用 <code>ros2 param set</code> 在运行时切换 Go2 的动作 id 和运动参数</li>
-<li>分清“参数驱动控制”和“<code>/cmd_vel</code> 桥接控制”是两条不同的工程链路</li>
+<li>分清"参数驱动控制"和"<code>/cmd_vel</code> 桥接控制"是两条不同的工程链路</li>
 </ul>
 <h2 id="_2">背景与原理<a class="headerlink" href="#_2" title="锚点链接">&para;</a></h2>
 <p>前面几章里，我们已经见过 Go2 的高层控制入口 <code>/api/sport/request</code>。它的特点很鲜明:消息格式是 Go2 专有的 <code>unitree_api/msg/Request</code>，不是 ROS2 生态里常见的 <code>Twist</code>。</p>
@@ -2143,9 +2184,16 @@
 <h2 id="_3">架构总览<a class="headerlink" href="#_3" title="锚点链接">&para;</a></h2>
 <pre class="mermaid"><code>flowchart LR
     A["ros2 param set&lt;br/&gt;修改 sport_api_id / x / y / z"] --&gt; B[go2_ctrl]
-    B --&gt; C["/api/sport/request&lt;br/&gt;unitree_api/msg/Request"]
-    C --&gt; D[Go2 高层运动接口]</code></pre>
-<p>这张图里最关键的一点是:外部并没有直接往话题发消息，而是先改节点参数。</p>
+    B ==&gt;|"📡 Topic:持续发布 10 Hz"| C["/api/sport/request&lt;br/&gt;unitree_api/msg/Request"]
+    C --&gt; D[Go2 高层运动接口]
+
+    classDef topic fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    class C topic</code></pre>
+<p>这张图里最关键的两件事:</p>
+<ol>
+<li>外部没有直接往话题发消息,而是先改节点参数;<code>go2_ctrl</code> 把参数翻译成消息再持续推出去</li>
+<li><strong><code>go2_ctrl</code> → <code>/api/sport/request</code> 这条粗箭头就是本章的 Topic 通信</strong>:单向、持续、不等任何人回应</li>
+</ol>
 <p><code>go2_ctrl</code> 每 <code>0.1</code> 秒读一次参数，再把最新值发到 <code>/api/sport/request</code>。所以你在另一个终端里执行 <code>ros2 param set</code>，机器人动作会马上跟着变。</p>
 <h2 id="_4">环境准备<a class="headerlink" href="#_4" title="锚点链接">&para;</a></h2>
 <p>开始前先确认三件事:</p>
@@ -2247,8 +2295,15 @@
 </span><span id="__span-2-50"><a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a>    <span class="n">main</span><span class="p">()</span>
 </span></code></pre></div>
 <p>这段代码里有两个非常容易记混的点。</p>
-<p>第一，<code>sport_api_id</code> 决定“发的是什么动作”。如果你把它设成 <code>1002</code>，那就是 <code>BALANCESTAND</code>；如果设成 <code>1008</code>，那就是 <code>MOVE</code>。</p>
+<p>第一，<code>sport_api_id</code> 决定"发的是什么动作"。如果你把它设成 <code>1002</code>，那就是 <code>BALANCESTAND</code>；如果设成 <code>1008</code>，那就是 <code>MOVE</code>。</p>
 <p>第二，<code>x/y/z</code> 只有在 <code>sport_api_id == MOVE</code> 时才会真的写进 <code>request.parameter</code>。这就是为什么我们改完速度参数后，还得把动作 id 切到 <code>MOVE</code>，机器人才会动起来。</p>
+<div class="admonition info">
+<p class="admonition-title">📡 本章 Topic 通信的钥匙就是这一行</p>
+<p><div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="bp">self</span><span class="o">.</span><span class="n">req_pub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_publisher</span><span class="p">(</span><span class="n">Request</span><span class="p">,</span> <span class="s2">&quot;/api/sport/request&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</span></code></pre></div>
+<code>create_publisher</code> 就是把这个节点注册为 Topic 发布者。三个参数依次是:<strong>消息类型</strong>、<strong>话题名</strong>、<strong>队列长度</strong>。</p>
+<p>配合下一行的 <code>self.create_timer(0.1, self.on_timer)</code>,就形成了本章"10 Hz 持续往 Topic 推 Request"的控制链。下一章的 Service 会换成 <code>create_service(...)</code>,形状完全不同——那时候你回过头来对比这一行,Topic 和 Service 的分野就会非常清晰。</p>
+</div>
 <h3 id="_6">步骤三:弄清楚四个参数到底怎么配<a class="headerlink" href="#_6" title="锚点链接">&para;</a></h3>
 <p>读代码时别急着背整段逻辑，先记住这四个参数各自负责什么:</p>
 <table>
@@ -2336,31 +2391,31 @@
 <p>第 4 章更像“兼容 ROS2 通用生态”；第 7 章更像“直接操作 Go2 原生高层动作”。后面讲 Service 和 Action 时，我们会继续沿着这一章这种“直接控制 Go2 动作”的思路往上封装。</p>
 <h2 id="_7">编译与运行<a class="headerlink" href="#_7" title="锚点链接">&para;</a></h2>
 <p>先回到工作空间根目录，把教程包重新编译一遍:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 编译教程通信示例包，并重新加载环境</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_tutorial_inter
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 编译教程通信示例包，并重新加载环境</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_tutorial_inter
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
 </span></code></pre></div>
 <p>先开第一个终端，把 <code>go2_ctrl</code> 跑起来:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 启动最小控制节点</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_ctrl
-</span></code></pre></div>
-<p>然后开第二个终端，用参数直接驱动它:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 先切到平衡站立</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 启动最小控制节点</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>sport_api_id<span class="w"> </span><span class="m">1002</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># 切到 MOVE，并给一个前进速度</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>sport_api_id<span class="w"> </span><span class="m">1008</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>x<span class="w"> </span><span class="m">0</span>.3
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>y<span class="w"> </span><span class="m">0</span>.0
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>z<span class="w"> </span><span class="m">0</span>.0
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="c1"># 需要停下时，把动作切回 STOPMOVE</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>sport_api_id<span class="w"> </span><span class="m">1003</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_ctrl
+</span></code></pre></div>
+<p>然后开第二个终端，用参数直接驱动它:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 先切到平衡站立</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>sport_api_id<span class="w"> </span><span class="m">1002</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># 切到 MOVE，并给一个前进速度</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>sport_api_id<span class="w"> </span><span class="m">1008</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>x<span class="w"> </span><span class="m">0</span>.3
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>y<span class="w"> </span><span class="m">0</span>.0
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>z<span class="w"> </span><span class="m">0</span>.0
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="c1"># 需要停下时，把动作切回 STOPMOVE</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>ros2<span class="w"> </span>param<span class="w"> </span><span class="nb">set</span><span class="w"> </span>/go2_ctrl<span class="w"> </span>sport_api_id<span class="w"> </span><span class="m">1003</span>
 </span></code></pre></div>
 <p>如果你想试原地转向，可以保持 <code>sport_api_id=1008</code>，把 <code>x</code> 设为 <code>0.0</code>，再把 <code>z</code> 设成一个较小的角速度，比如 <code>0.3</code>。</p>
 <div class="admonition danger">
@@ -2370,24 +2425,45 @@
 <h2 id="_8">结果验证<a class="headerlink" href="#_8" title="锚点链接">&para;</a></h2>
 <p>这一章跑通后，你应该能看到三类现象。</p>
 <p>第一类是参数层面:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 查看节点当前参数</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>ros2<span class="w"> </span>param<span class="w"> </span>list<span class="w"> </span>/go2_ctrl
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>ros2<span class="w"> </span>param<span class="w"> </span>get<span class="w"> </span>/go2_ctrl<span class="w"> </span>sport_api_id
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>param<span class="w"> </span>get<span class="w"> </span>/go2_ctrl<span class="w"> </span>x
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 查看节点当前参数</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>ros2<span class="w"> </span>param<span class="w"> </span>list<span class="w"> </span>/go2_ctrl
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>ros2<span class="w"> </span>param<span class="w"> </span>get<span class="w"> </span>/go2_ctrl<span class="w"> </span>sport_api_id
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>ros2<span class="w"> </span>param<span class="w"> </span>get<span class="w"> </span>/go2_ctrl<span class="w"> </span>x
 </span></code></pre></div>
 <p>第二类是消息层面:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 观察 go2_ctrl 实际发出的 Request</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 观察 go2_ctrl 实际发出的 Request</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
 </span></code></pre></div>
 <p>当 <code>sport_api_id=1008</code> 时，你应该能在 <code>parameter</code> 字段里看到一段 JSON 字符串，里面包含 <code>x/y/z</code>。</p>
 <p>第三类是动作层面:</p>
 <ul>
-<li>设 <code>1002</code> 时，机器人应回到平衡站立</li>
-<li>设 <code>1008</code> 且 <code>x=0.3</code> 时，机器人应开始向前移动</li>
-<li>设 <code>1003</code> 时，机器人应停止运动</li>
+<li>设 <code>sport_api_id=1002</code> 时，机器人应回到平衡站立</li>
+<li>设 <code>sport_api_id=1008</code> 且 <mark><code>x=0.3</code></mark> 时，机器人应开始向前<strong>匀速运动</strong>，速度约 <mark>0.3 m/s</mark></li>
+<li>设 <code>sport_api_id=1003</code> 时，机器人应停止运动</li>
 </ul>
-<p><img alt="TODO:终端中显示 ros2 param set 与 /api/sport/request 对应关系" src="../assets/images/07-topic-param-control.png" width="600" /></p>
-<h2 id="_9">常见问题<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h2>
+<h3 id="_9">结果演示<a class="headerlink" href="#_9" title="锚点链接">&para;</a></h3>
+<p>下面这张图展示的是把 <code>x</code> 调到 <code>0.3</code> 后,Go2 通过 Topic 控制向前走的实机结果。它对应的是本章最核心的验证点:<code>ros2 param set</code> 改的是节点参数,节点再把参数组合成 <code>/api/sport/request</code>,最后才落到 Go2 的高层运动接口。</p>
+<p><img alt="Topic 参数控制验证: 设置 x=0.3 后 Go2 以约 0.3 m/s 向前走" src="../../assets/images/07-topic-param-control.png" width="520" /></p>
+<div class="admonition tip">
+<p class="admonition-title">想自己调着玩？高亮的就是可改的入口</p>
+<p>上面凡是用 <mark>黄底高亮</mark> 的数值，都是你可以通过 <code>ros2 param set /go2_ctrl ...</code> 现场改的参数。推荐第一次实机时的安全范围:</p>
+<ul>
+<li><mark><code>x</code></mark>(前后线速度):先从 <code>0.1</code>~<code>0.3</code> 试起,不要超过 <code>0.5</code></li>
+<li><mark><code>y</code></mark>(左右线速度):同样 <code>0.1</code>~<code>0.3</code>,想侧移再开</li>
+<li><mark><code>z</code></mark>(偏航角速度):<code>0.2</code>~<code>0.5</code> 即可观察到明显转向</li>
+</ul>
+<p>每次改参数前先确认 <code>sport_api_id=1008</code>,否则 <code>x/y/z</code> 再怎么改机器人也不会动。调完记得切回 <code>sport_api_id=1003</code> 正式停车。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">停运动 ≠ 停节点</p>
+<p>教材里"让机器人停下来"和"关掉节点"是两件不同的事,别搞混:</p>
+<ul>
+<li><strong>停止机器人运动</strong>:<code>ros2 param set /go2_ctrl sport_api_id 1003</code>(STOPMOVE,这是正式停车方式)</li>
+<li><strong>结束节点进程</strong>:在运行 <code>go2_ctrl</code> 的终端按 <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-c">C</kbd></span></li>
+</ul>
+<p>实机场景下应当优先走 <code>1003</code>——先让 Go2 正常收到停车命令,再关节点。直接 <code>Ctrl-C</code> 会让进程立即退出,最后一条控制消息可能还没发出去,机器人可能还在按上一条指令继续动作。</p>
+</div>
+<h2 id="_10">常见问题<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
 <h3 id="1-ros2-param-set">1. <code>ros2 param set</code> 成功了，但机器人完全没反应<a class="headerlink" href="#1-ros2-param-set" title="锚点链接">&para;</a></h3>
 <p><strong>现象</strong>:终端显示参数设置成功，但 Go2 没动作。</p>
 <p><strong>原因</strong>:最常见的是你只改了 <code>x/y/z</code>，却没把 <code>sport_api_id</code> 切到 <code>MOVE</code>。</p>
@@ -2423,11 +2499,11 @@
 <li>再执行一次 <code>ros2 param set</code></li>
 <li>确认 <code>go2_ctrl</code> 进程还在运行，没有被你中途退出</li>
 </ul>
-<h2 id="_10">本章小结<a class="headerlink" href="#_10" title="锚点链接">&para;</a></h2>
+<h2 id="_11">本章小结<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
 <p>这一章我们第一次写出了一个真正“直接控制 Go2”的最小 ROS2 节点。</p>
 <p>它的结构并不复杂:四个参数、一个 <code>Request</code> 发布者、一个定时器。真正值得记住的，是这种工程思路:节点自己维护控制状态，再周期性把状态刷到机器人接口上。</p>
 <p>后面你会看到，Service 和 Action 虽然接口形式不同，但它们也都离不开这种“内部有状态，外部给命令”的套路。</p>
-<h2 id="_11">下一步<a class="headerlink" href="#_11" title="锚点链接">&para;</a></h2>
+<h2 id="_12">下一步<a class="headerlink" href="#_12" title="锚点链接">&para;</a></h2>
 <p>现在我们已经能手动用参数驱动 Go2 了，但每次都敲 <code>ros2 param set</code> 还是太原始。下一章我们把它封装成一个 Service，让“开始巡航 / 停止巡航”变成一次请求、一条响应的短事务。</p>
 
 
