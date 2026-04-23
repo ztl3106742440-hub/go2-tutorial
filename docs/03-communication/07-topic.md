@@ -1,12 +1,19 @@
 # 第 7 章 用参数驱动 Go2 运动
 
-> 上一章我们已经把 `Twist` 和 Go2 的 `Request` 接口接通了。这一章换一条更直接的路:不再走 `/cmd_vel`，而是写一个最小控制节点 `go2_ctrl`，用 ROS2 参数直接驱动 Go2。
+> 上一章我们已经把 `Twist` 和 Go2 的 `Request` 接口接通了。这一章换一条更直接的路:不再走 `/cmd_vel`，而是写一个最小控制节点 `go2_ctrl`，用 ROS2 参数驱动 Go2，底层走的是 **Topic 通信**。
+
+!!! info "📡 本章通信方式:Topic(话题发布)"
+    **形状**:单向 · 异步广播 · 持续发布  
+    **本章关键 API**:`self.create_publisher(Request, "/api/sport/request", 10)`  
+    **要记住的事**:节点每 0.1 秒往话题上发一条 `Request`,谁订阅谁收;没人订阅它也照发不误。Topic 不关心"消息有没有被处理完",只负责把数据流源源不断推出去。
+    
+    这是 ROS2 三大通信机制里最基础的一种。下一章我们会看到不一样的形状——Service(请求/响应)。
 
 ## 本章你将学到
 
-- 看懂 `go2_ctrl` 这类“参数 + 定时器 + 专有消息”的最小控制节点
+- 看懂 `go2_ctrl` 这类"参数 + 定时器 + 专有消息"的最小控制节点
 - 学会用 `ros2 param set` 在运行时切换 Go2 的动作 id 和运动参数
-- 分清“参数驱动控制”和“`/cmd_vel` 桥接控制”是两条不同的工程链路
+- 分清"参数驱动控制"和"`/cmd_vel` 桥接控制"是两条不同的工程链路
 
 ## 背景与原理
 
@@ -21,11 +28,17 @@
 ```mermaid
 flowchart LR
     A["ros2 param set<br/>修改 sport_api_id / x / y / z"] --> B[go2_ctrl]
-    B --> C["/api/sport/request<br/>unitree_api/msg/Request"]
+    B ==>|"📡 Topic:持续发布 10 Hz"| C["/api/sport/request<br/>unitree_api/msg/Request"]
     C --> D[Go2 高层运动接口]
+    
+    classDef topic fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    class C topic
 ```
 
-这张图里最关键的一点是:外部并没有直接往话题发消息，而是先改节点参数。
+这张图里最关键的两件事:
+
+1. 外部没有直接往话题发消息,而是先改节点参数;`go2_ctrl` 把参数翻译成消息再持续推出去
+2. **`go2_ctrl` → `/api/sport/request` 这条粗箭头就是本章的 Topic 通信**:单向、持续、不等任何人回应
 
 `go2_ctrl` 每 `0.1` 秒读一次参数，再把最新值发到 `/api/sport/request`。所以你在另一个终端里执行 `ros2 param set`，机器人动作会马上跟着变。
 
@@ -144,9 +157,17 @@ if __name__ == "__main__":
 
 这段代码里有两个非常容易记混的点。
 
-第一，`sport_api_id` 决定“发的是什么动作”。如果你把它设成 `1002`，那就是 `BALANCESTAND`；如果设成 `1008`，那就是 `MOVE`。
+第一，`sport_api_id` 决定"发的是什么动作"。如果你把它设成 `1002`，那就是 `BALANCESTAND`；如果设成 `1008`，那就是 `MOVE`。
 
 第二，`x/y/z` 只有在 `sport_api_id == MOVE` 时才会真的写进 `request.parameter`。这就是为什么我们改完速度参数后，还得把动作 id 切到 `MOVE`，机器人才会动起来。
+
+!!! info "📡 本章 Topic 通信的钥匙就是这一行"
+    ```python
+    self.req_pub = self.create_publisher(Request, "/api/sport/request", 10)
+    ```
+    `create_publisher` 就是把这个节点注册为 Topic 发布者。三个参数依次是:**消息类型**、**话题名**、**队列长度**。
+    
+    配合下一行的 `self.create_timer(0.1, self.on_timer)`,就形成了本章"10 Hz 持续往 Topic 推 Request"的控制链。下一章的 Service 会换成 `create_service(...)`,形状完全不同——那时候你回过头来对比这一行,Topic 和 Service 的分野就会非常清晰。
 
 ### 步骤三:弄清楚四个参数到底怎么配
 
@@ -249,11 +270,28 @@ ros2 topic echo /api/sport/request --once
 
 第三类是动作层面:
 
-- 设 `1002` 时，机器人应回到平衡站立
-- 设 `1008` 且 `x=0.3` 时，机器人应开始向前移动
-- 设 `1003` 时，机器人应停止运动
+- 设 `sport_api_id=1002` 时，机器人应回到平衡站立
+- 设 `sport_api_id=1008` 且 ==`x=0.3`== 时，机器人应开始向前**匀速运动**，速度约 ==0.3 m/s==
+- 设 `sport_api_id=1003` 时，机器人应停止运动
 
 ![TODO:终端中显示 ros2 param set 与 /api/sport/request 对应关系](../assets/images/07-topic-param-control.png){ width="600" }
+
+!!! tip "想自己调着玩？高亮的就是可改的入口"
+    上面凡是用 ==黄底高亮== 的数值，都是你可以通过 `ros2 param set /go2_ctrl ...` 现场改的参数。推荐第一次实机时的安全范围:
+
+    - ==`x`==(前后线速度):先从 `0.1`~`0.3` 试起,不要超过 `0.5`
+    - ==`y`==(左右线速度):同样 `0.1`~`0.3`,想侧移再开
+    - ==`z`==(偏航角速度):`0.2`~`0.5` 即可观察到明显转向
+    
+    每次改参数前先确认 `sport_api_id=1008`,否则 `x/y/z` 再怎么改机器人也不会动。调完记得切回 `sport_api_id=1003` 正式停车。
+
+!!! warning "停运动 ≠ 停节点"
+    教材里"让机器人停下来"和"关掉节点"是两件不同的事,别搞混:
+    
+    - **停止机器人运动**:`ros2 param set /go2_ctrl sport_api_id 1003`(STOPMOVE,这是正式停车方式)
+    - **结束节点进程**:在运行 `go2_ctrl` 的终端按 ++ctrl+c++
+    
+    实机场景下应当优先走 `1003`——先让 Go2 正常收到停车命令,再关节点。直接 `Ctrl-C` 会让进程立即退出,最后一条控制消息可能还没发出去,机器人可能还在按上一条指令继续动作。
 
 ## 常见问题
 

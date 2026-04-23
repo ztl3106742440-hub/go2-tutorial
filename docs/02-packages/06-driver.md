@@ -34,9 +34,9 @@ flowchart LR
     F --> J
 ```
 
-从这张图可以看出，`go2_driver_py` 并不直接发控制命令给 Go2。控制链还是第 3/4 章那边的事情。
+从这张图可以看出，`driver` 节点本身并不直接发控制命令给 Go2，它真正做的是"把状态准备好"，让 RViz、SLAM、Nav2 这些上层模块都能直接消费标准话题。
 
-它真正做的是“把状态准备好”，让 RViz、SLAM、Nav2 这些上层模块都能直接消费标准话题。
+但**本章的 `driver.launch.py` 不只启动 `driver`，还会把第 4 章的 `twist_bridge` 并进来**，让"状态标准化层"和"控制适配层"在同一套 launch 里一起上线。这就是第六章相对第五章的核心增量——第五章的 `visualization.launch.py` 只立起状态链，本章把控制通道也补上，形成完整的驱动底座。
 
 ## 环境准备
 
@@ -176,6 +176,8 @@ def mode_cb(self, mode: SportModeState):
 - 发布 `radar -> utlidar_lidar` 静态 TF
 - 启动 `go2_twist_bridge_py/twist_bridge`
 - 启动 `go2_driver_py/driver`
+
+和第 5 章的 `visualization.launch.py` 对照着看:后者只启动前三项再加 `driver`，**本章多出来的就是 `twist_bridge` 这一层**。所以你会在同一个 launch 里同时看到"状态往外给"和"控制往里送"两条链被纳入集成。
 
 关键片段如下:
 
@@ -327,6 +329,24 @@ ros2 run tf2_tools view_frames
 
 - 把相关配置里的机器人底座坐标系统一改成 `base`
 - 别在同一套系统里混用 `base` 和 `base_link`
+
+### 5. 启动时 `robot_state_publisher` 打印 KDL 惯性警告
+
+**现象**:`driver.launch.py` 拉起后，日志里会出现类似一行:
+
+```text
+The root link base has an inertia specified in the URDF, but KDL does not support a root link with an inertia.
+```
+
+**原因**:URDF 在根链接 `base` 上声明了 `inertia`，而 KDL 对"根链接直接带 inertia"这种写法支持不完整。
+
+**判定**:这是**非阻塞警告**，不代表启动失败:
+
+- launch 仍会继续展开，`robot_state_publisher`、`rviz2`、`static_transform_publisher`、`twist_bridge`、`driver` 都会照常启动
+- `/odom`、`/joint_states`、TF 等输出不受影响
+- 本章不需要为此回退代码
+
+如果后续要做更严格的模型处理(比如 KDL 链解算、惯性参数标定)，可以在根部再套一层 dummy link 把 inertia 挪到子链上。对当前阶段来说，直接忽略这条警告即可。
 
 ## 本章小结
 

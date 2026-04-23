@@ -88,6 +88,8 @@ markdown_extensions:
       custom_checkbox: true
   # 键盘按键高亮 ++ctrl+c++
   - pymdownx.keys
+  # 文字高亮 ==like this==(用于标注"读者可调参数")
+  - pymdownx.mark
   # 其他
   - attr_list
   - md_in_html

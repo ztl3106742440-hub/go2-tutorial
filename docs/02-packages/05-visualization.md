@@ -24,7 +24,7 @@ RViz 之所以这么重要，不是因为它“看起来直观”，而是因为
 - `go2_driver_py/driver` 同时广播 `odom -> base`
 - `go2_driver_py/driver` 也直接发布 `/joint_states`
 
-也就是说，第 5 章的可视化底座和第 6 章的驱动底座，已经合并成同一个节点了。
+也就是说，原来"关节桥接"这一层独立节点，现在已经并入 `driver` 了。但这不代表第 5 章和第 6 章就该合成一步——本章只用 `driver` 产出的状态链（`/odom`、TF、`/joint_states`）把机器人在 RViz 里立起来，**还不引入 `twist_bridge` 这层控制通道**，那部分属于第 6 章完整驱动包的事。
 
 ## 架构总览
 
@@ -44,7 +44,7 @@ flowchart LR
 
 这套链路最关键的变化是:关节状态发布不再是独立节点，而是直接并进了 `driver`。
 
-好处也很直接。后面你只要启动一份 `driver.launch.py`，模型、关节、TF、里程计就能一起起来，不会再出现两个节点抢着发 `/joint_states` 的问题。
+好处也很直接。本章只需要启动 `visualization.launch.py`，模型、关节、TF、里程计就能一起起来，不会再出现两个节点抢着发 `/joint_states` 的问题。`twist_bridge` 这层控制桥留给第 6 章的 `driver.launch.py` 再并入。
 
 ## 环境准备
 
@@ -153,24 +153,27 @@ def mode_cb(self, mode: SportModeState):
 
 这段代码说明一件很关键的事:当前可视化链不是“自己积分推 odom”，而是直接用 `SportModeState` 里已有的位置和姿态字段，整理成标准 `Odometry` 和 TF。
 
-### 步骤三:用 `driver.launch.py` 一次拉起可视化底座
+### 步骤三:用 `visualization.launch.py` 一次拉起可视化底座
 
-现在看总启动文件 `src/base/go2_driver_py/launch/driver.launch.py`。这一份 launch 做了四件事:
+现在看本章专用的启动文件 `src/base/go2_driver_py/launch/visualization.launch.py`。这一份 launch 做了四件事:
 
 - 包含 `go2_description` 的模型显示 launch
 - 按需启动 RViz
 - 启动一个 `radar -> utlidar_lidar` 的静态 TF
-- 启动 `twist_bridge` 和 `driver`
+- 启动 `driver` 节点（发 `/odom`、TF、`/joint_states`）
+
+注意**这里故意不启动 `twist_bridge`**。本章目标是"把 Go2 在 RViz 里立起来"，不涉及控制链；`twist_bridge` 要到第 6 章的 `driver.launch.py` 里才会并进来。
 
 关键部分如下:
 
 ```python
 return LaunchDescription([
+    use_rviz,
     IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(go2_desc_pkg, "launch", "display.launch.py")
+            os.path.join(go2_description_pkg, "launch", "display.launch.py")
         ),
-        launch_arguments=[("use_joint_state_publisher", "false")],
+        launch_arguments={"use_joint_state_publisher": "false"}.items(),
     ),
     Node(
         package="rviz2",
@@ -184,10 +187,6 @@ return LaunchDescription([
         arguments=["--frame-id", "radar", "--child-frame-id", "utlidar_lidar"],
     ),
     Node(
-        package="go2_twist_bridge_py",
-        executable="twist_bridge",
-    ),
-    Node(
         package="go2_driver_py",
         executable="driver",
         parameters=[os.path.join(go2_driver_pkg, "params", "driver.yaml")],
@@ -197,26 +196,26 @@ return LaunchDescription([
 
 注意这里专门把 `use_joint_state_publisher` 关成了 `false`。
 
-原因很简单:默认的 `joint_state_publisher` 是给“没有真机关节数据时”用的；我们现在已经有真实的 `/joint_states` 了，再开一份假的就会跟真实数据打架。
+原因很简单:默认的 `joint_state_publisher` 是给"没有真机关节数据时"用的；我们现在已经有真实的 `/joint_states` 了，再开一份假的就会跟真实数据打架。
 
 ## 编译与运行
 
 先把相关包编译好:
 
 ```bash
-# 编译可视化底座相关的三个包
+# 编译可视化底座相关的两个包
 cd ~/unitree_go2_ws
-colcon build --packages-select go2_description go2_driver_py go2_twist_bridge_py
+colcon build --packages-select go2_description go2_driver_py
 source install/setup.bash
 ```
 
-最推荐的启动方式是一条命令直接拉起整套底座:
+最推荐的启动方式是一条命令直接拉起可视化底座:
 
 ```bash
-# 启动模型、RViz、twist_bridge 和 driver
+# 启动模型、RViz、静态 TF 和 driver
 cd ~/unitree_go2_ws
 source install/setup.bash
-ros2 launch go2_driver_py driver.launch.py
+ros2 launch go2_driver_py visualization.launch.py
 ```
 
 如果你只想先确认数据链，不想开 RViz，可以关掉它:
@@ -225,7 +224,7 @@ ros2 launch go2_driver_py driver.launch.py
 # 只起数据链，不开 RViz
 cd ~/unitree_go2_ws
 source install/setup.bash
-ros2 launch go2_driver_py driver.launch.py use_rviz:=false
+ros2 launch go2_driver_py visualization.launch.py use_rviz:=false
 ```
 
 也可以单独跑 `driver` 节点本身:
@@ -311,8 +310,40 @@ ros2 run tf2_tools view_frames
 
 **解决**:
 
-- 把“关节桥接”这件事直接理解成 `driver` 的一部分
+- 把"关节桥接"这件事直接理解成 `driver` 的一部分
 - 后面所有章节默认也都按这个新结构往下讲
+
+### 5. 节点刚起就全挂:`failed to enumerate interfaces for "udp"`
+
+**现象**:`ros2 launch` 命令看起来已经正确展开，`robot_state_publisher`、`static_transform_publisher`、`driver` 都已进入初始化阶段，但随后集体报错退出，核心信息是:
+
+```text
+failed to enumerate interfaces for "udp": -1
+rmw_create_node: failed to create domain, error Error
+rcl node's rmw handle is invalid
+```
+
+**原因**:这不是本章代码或 launch 写错，而是 CycloneDDS 运行环境没准备好——通常是 Humble 或 `cyclonedds_ws` 的环境变量没 source 进当前终端。ROS2 创建节点时无法枚举 UDP 接口，所有节点都会跟着挂掉。
+
+**解决**:
+
+- 先在当前终端重新 source 一遍环境:
+
+    ```bash
+    source /opt/ros/humble/setup.bash
+    source ~/unitree_ros2/cyclonedds_ws/install/setup.bash
+    source ~/unitree_go2_ws/install/setup.bash
+    ```
+
+- 再用最朴素的命令验证 DDS 能不能通:
+
+    ```bash
+    ros2 topic list
+    ```
+
+    如果这条都挂，说明 DDS 环境本身坏了，需要回头检查 `CYCLONEDDS_URI`、网卡状态，而不是继续调本章代码。
+
+- DDS 正常后再重新执行 `ros2 launch go2_driver_py visualization.launch.py`。
 
 ## 本章小结
 

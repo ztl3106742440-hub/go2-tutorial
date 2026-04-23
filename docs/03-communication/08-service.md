@@ -1,6 +1,13 @@
 # 第 8 章 用 Service 控制巡航开关
 
-> 上一章我们已经能用参数直接驱动 Go2 了，但每次都手敲 `ros2 param set` 还是很粗糙。这一章我们把“开始巡航 / 停止巡航”封装成一个 Service，让控制动作变成一次请求、一条响应。
+> 上一章我们用 **Topic** 持续推送控制命令。这一章换一种通信形状:把"开始巡航 / 停止巡航"封装成一个 **Service**,让控制动作变成一次请求、一条响应——一问一答,事毕即止。
+
+!!! success "📨 本章通信方式:Service(服务)"
+    **形状**:双向 · 一请求一响应 · 短事务  
+    **本章关键 API**:`self.create_service(Cruising, "cruising", self.cru_cb)`  
+    **要记住的事**:客户端说"帮我做这件事",服务端立刻处理并回一条结果,通信到此结束。Service 不适合持续控制数据流(那是 Topic 的活),更适合"切状态""触发一次动作""读一次结果"这种短事务。
+    
+    和第 7 章的 Topic 对比看——Topic 是单向广播、不关心谁在听;Service 是双向握手、每次请求都一定有一条响应。下一章的 Action 又会换一种形状(长任务 + 反馈)。
 
 ## 本章你将学到
 
@@ -26,12 +33,17 @@ Service 的核心气质是一问一答。
 
 ```mermaid
 flowchart LR
-    A[go2_cruising_client] -->|请求 flag| B["/cruising<br/>go2_tutorial_inter/srv/Cruising"]
-    B --> C[go2_cruising_service]
-    C --> D["/api/sport/request<br/>unitree_api/msg/Request"]
+    A[go2_cruising_client] ==>|"📨 请求 flag"| B["/cruising<br/>go2_tutorial_inter/srv/Cruising"]
+    B ==> C[go2_cruising_service]
+    C -.->|"📨 响应 point"| A
+    C -->|"(Topic)持续发布"| D["/api/sport/request<br/>unitree_api/msg/Request"]
     E["/odom<br/>nav_msgs/msg/Odometry"] --> C
-    C -->|响应当前位置 point| A
+    
+    classDef service fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    class B service
 ```
+
+对照着第 7 章的 mermaid 看,本章增加的那条 `-.->` 虚线箭头(响应 `point` 回到客户端)就是 Service 相对 Topic 多出来的"握手环节":客户端发请求必须拿到一条响应才算完。内部节点依然用 Topic 持续刷 `/api/sport/request`——这说明**在同一个节点里,Topic 和 Service 完全可以并存,各负责不同的事**。
 
 这里最容易看错的是响应方向。
 
@@ -149,7 +161,15 @@ class Go2CruisingService(Node):
 
 这段代码的关键不在语法，而在分工。
 
-Service 回调 `cru_cb()` 只负责“切状态”和“回结果”。真正持续发控制消息的，还是 `on_timer()` 这个定时器。所以你要把它理解成“Service 改内部状态，定时器负责持续执行”。
+Service 回调 `cru_cb()` 只负责"切状态"和"回结果"。真正持续发控制消息的，还是 `on_timer()` 这个定时器。所以你要把它理解成"Service 改内部状态，定时器负责持续执行"。
+
+!!! success "📨 本章 Service 通信的钥匙就是这一行"
+    ```python
+    self.service = self.create_service(Cruising, "cruising", self.cru_cb)
+    ```
+    `create_service` 把节点注册成 Service 服务端。三个参数依次是:**接口类型**(`Cruising.srv` 生成)、**服务名**、**处理请求的回调函数**。
+    
+    对比第 7 章的 `create_publisher`:那一行只是"我会往这个话题发东西";这一行是"我会收别人的请求、处理、并一定回一条响应"。一旦理解了这对调用的差异,Topic 与 Service 的分野就彻底清晰了。
 
 ### 步骤三:实现 `go2_cruising_client`
 
@@ -241,11 +261,20 @@ source install/setup.bash
 第一终端启动服务端:
 
 ```bash
-# 启动巡航服务端，并给一个默认角速度
+# 启动巡航服务端:同时给一个前进速度和一个角速度
 cd ~/unitree_go2_ws
 source install/setup.bash
-ros2 run go2_tutorial_py go2_cruising_service --ros-args -p z:=0.5
+ros2 run go2_tutorial_py go2_cruising_service --ros-args -p x:=0.1 -p z:=0.5
 ```
+
+!!! tip "想调不同的巡航轨迹?改 ==`x`== / ==`y`== / ==`z`== 这三个参数就行"
+    服务端节点里声明了三个运行参数,都是你可以自由修改的入口:
+    
+    - ==`x`== 前后线速度(m/s):决定机器人往前走多快
+    - ==`y`== 左右线速度(m/s):非零时会侧移
+    - ==`z`== 偏航角速度(rad/s):决定转向快慢
+    
+    启动时用 `--ros-args -p 名字:=值` 覆盖默认值即可。**三者都为 0 时机器人不动;只有 `z` 非零会原地转圈;`x` 和 `z` 同时非零才是弧线巡航**。本章重点是 Service 通信机制,具体巡航轨迹你随意调,不影响理解。
 
 第二终端启动客户端，让它发送开始巡航请求:
 

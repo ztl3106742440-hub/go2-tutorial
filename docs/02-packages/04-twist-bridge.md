@@ -527,11 +527,18 @@ if __name__ == "__main__":
 
 ## 编译与运行
 
+!!! warning "桥接节点自己不会产生速度命令"
+    `go2_twist_bridge_py` 只是中间适配层，职责就是把 `/cmd_vel` 翻译成 `/api/sport/request`。如果系统里没有别的节点往 `/cmd_vel` 发消息，它虽然挂着，但既没有输入也不会产生输出，很容易让人误以为"桥接节点坏了"。
+    
+    另外，第 3 章 `go2_teleop_ctrl_keyboard` 直接发布的是 `Request`，**不走 `/cmd_vel`、不经过本章桥接**。如果同时打开第 3 章键盘节点和本章桥接节点后发现 Go2 动了，这并不能证明本章桥接生效——真正起作用的可能只是第 3 章节点。所以本章必须用 `teleop_twist_keyboard` 这类发布 `Twist` 的上游来验证。
+
 这一章最推荐的验证方式，是开三个终端：
 
 - 终端 1：跑桥接节点
-- 终端 2：跑 `teleop_twist_keyboard`
+- 终端 2：跑 `teleop_twist_keyboard`（或其他发布 `/cmd_vel` 的上游）
 - 终端 3：观察 `/api/sport/request`
+
+三者缺一不可：少了终端 2，桥接没有输入；少了终端 3，你无法区分"桥接没收到"和"Go2 没响应"这两种情况。
 
 先回到工作空间根目录，编译 `go2_twist_bridge_py`：
 

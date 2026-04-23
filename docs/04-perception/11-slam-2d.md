@@ -166,11 +166,12 @@ ros2 pkg create go2_sensors \
 ```python
 #!/usr/bin/env python3
 """
-时间戳修复节点:订阅原始点云,重写时间戳为当前系统时间后重新发布。
+时间戳修复节点:订阅原始点云,重写时间戳后重新发布。
 专治 Go2 UTlidar 点云时间戳早于系统时间的毛病。
 """
 
 import rclpy                                       # ROS2 Python 客户端库,节点的入口
+from rclpy.duration import Duration                # 用来构造"回拨 0.05 秒"的时间差
 from rclpy.node import Node                        # 所有 ROS2 节点的基类
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy  # QoS 策略,控制通信可靠性
 from sensor_msgs.msg import PointCloud2            # 标准点云消息类型
@@ -179,6 +180,10 @@ from sensor_msgs.msg import PointCloud2            # 标准点云消息类型
 class PointCloudTimestampFix(Node):
     def __init__(self):
         super().__init__("pointcloud_timestamp_fix")
+
+        # 回拨 0.05 秒:保证下游"查 TF"时不会查到未来,否则第 12 章 AMCL
+        # 会持续报 "Lookup would require extrapolation into the future"
+        self.backdate = Duration(seconds=0.05)
 
         # 订阅 QoS:BEST_EFFORT(不保证每一帧都收到,但延迟低)
         # 选 BEST_EFFORT 是因为 Go2 驱动发布时兼容这个策略
@@ -210,11 +215,11 @@ class PointCloudTimestampFix(Node):
             pub_qos,
         )
 
-        self.get_logger().info("时间戳修复节点已启动")
+        self.get_logger().info("时间戳修复节点已启动(回拨 0.05s)")
 
     def on_cloud(self, msg: PointCloud2) -> None:
-        # 用当前系统时间覆盖原来的时间戳,其他字段不动
-        msg.header.stamp = self.get_clock().now().to_msg()
+        # 用"当前时间 − 0.05s"覆盖原时间戳,其他字段不动
+        msg.header.stamp = (self.get_clock().now() - self.backdate).to_msg()
         self.pub.publish(msg)
 
 
@@ -223,14 +228,22 @@ def main():
     node = PointCloudTimestampFix()
     try:
         rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
     main()
 ```
+
+!!! info "为什么要"回拨 0.05 秒"而不是直接用当前时间"
+    Go2 的 TF 发布有几毫秒到几十毫秒的抖动。如果点云 stamp = 当前时间,下游 `pointcloud_to_laserscan` → AMCL 查 `odom→base` TF 时,**激光时刻可能比最新 TF 时刻还新几毫秒**,tf2 会报 `Lookup would require extrapolation into the future`,激光整包被丢掉。
+    
+    回拨 0.05s 等于永远用"刚才这一瞬间"的激光去对"刚才这一瞬间"的 TF,给 TF 查询留足缓冲,第 11 章建图和第 12 章 Nav2 都能直接受益。
 
 **这段代码做了三件事**:
 
@@ -258,20 +271,25 @@ entry_points={
   ros__parameters:
     # ---- 坐标系 ----
     target_frame: base               # 输出的 LaserScan 定义在 base 坐标系下
+    transform_tolerance: 0.5         # TF 查询容忍,时间戳修复后仍可能有小抖动,这个能兜住
 
     # ---- 高度过滤(相对 base 坐标系)----
     # base 原点离地面 ~0.31m,即地面在 base 中 Z ≈ -0.31
-    min_height: -0.28                # 略高于地面,防止地面反射当障碍
-    max_height: 1.0                  # 足够覆盖大部分室内障碍(桌椅/人)
+    min_height: ==-0.28==            # 略高于地面,防止地面反射当障碍
+    max_height: ==1.0==              # 足够覆盖大部分室内障碍(桌椅/人)
 
-    # ---- 距离过滤 ----
-    range_min: 0.3                   # 低于此距离的点视为自身反射或近场噪声
-    range_max: 20.0                  # L1 雷达有效测距远端
-
-    # ---- 角度分辨率 ----
+    # ---- 角度范围(全圆)----
+    angle_min: -3.14159
+    angle_max: 3.14159
     angle_increment: 0.0087          # 约 0.5°/射线,一圈 723 射线
 
+    # ---- 距离过滤 ----
+    range_min: ==0.3==               # 低于此距离的点视为自身反射或近场噪声
+    range_max: ==20.0==              # L1 雷达有效测距远端
+
     # ---- 性能 ----
+    scan_time: 0.1
+    concurrency_level: 1
     use_inf: true                    # 无返回时填 inf 而非最大距离(SLAM 更稳)
 ```
 
@@ -323,32 +341,67 @@ slam_toolbox:
 
     # ---- QoS 匹配 ----
     # /scan 上游用 BEST_EFFORT,这里必须对齐,否则订不到
+    # ⚠ slam_toolbox 只认扁平的点分 key 格式,嵌套写法会被静默忽略
     qos_overrides:
-      /scan:
-        subscription:
-          reliability: best_effort
+      "/scan.subscription.reliability": "best_effort"
+      "/scan.subscription.durability": "volatile"
+      "/scan.subscription.history": "keep_last"
+      "/scan.subscription.depth": 10
+
+    # ---- TF / 时间 ----
+    transform_publish_period: 0.02   # 50 Hz 发布 map→odom TF,默认 5 Hz 对 Nav2 偏慢
+    map_update_interval: 5.0         # 每 5 秒向 /map 话题推一次最新地图
+    transform_timeout: 0.2
+    tf_buffer_duration: 30.0
+
+    # ---- 地图参数 ----
+    resolution: ==0.05==             # 5 cm / 像素,室内场景够用;调小地图更精细但内存吃得多
 
     # ---- 建图触发条件 ----
     # 机器人移动/转动超过阈值才触发一次新的关键帧,避免同一位置刷帧
-    minimum_travel_distance: 0.2     # 移动 0.2 m 才更新
-    minimum_travel_heading: 0.2      # 转动 0.2 rad(~11.5°)才更新
+    minimum_travel_distance: ==0.2== # 移动 0.2 m 才更新
+    minimum_travel_heading: ==0.2==  # 转动 0.2 rad(~11.5°)才更新
+    scan_buffer_size: 30
+    scan_buffer_maximum_scan_distance: 15.0
 
-    # ---- 地图参数 ----
-    resolution: 0.05                 # 5 cm / 像素,室内场景够用
-    map_update_interval: 5.0         # 每 5 秒向 /map 话题推一次最新地图
+    # ---- 扫描匹配 ----
+    link_match_minimum_response_fine: 0.1
+    link_scan_maximum_distance: 2.5
+    correlation_search_space_dimension: 0.5
+    correlation_search_space_resolution: 0.01
+    correlation_search_space_smear_deviation: 0.1
 
     # ---- 回环检测 ----
     do_loop_closing: true            # 开启回环,绕一圈能对齐的话地图质量大大提升
     loop_search_maximum_distance: 3.0
     loop_match_minimum_chain_size: 10
+    loop_match_maximum_variance_coarse: 3.0
+    loop_match_minimum_response_coarse: 0.6
+    loop_match_minimum_response_fine: 0.7
+    loop_search_space_dimension: 8.0
+    loop_search_space_resolution: 0.05
+    loop_search_space_smear_deviation: 0.03
 
-    # ---- 扫描匹配参数(默认值通常够用,列出来便于调优)----
-    link_match_minimum_response_fine: 0.1
-    correlation_search_space_dimension: 0.5
-    correlation_search_space_resolution: 0.01
+    # ---- 匹配惩罚项(影响精度的关键)----
+    distance_variance_penalty: 0.5
+    angle_variance_penalty: 2.0
     fine_search_angle_offset: 0.00349
     coarse_search_angle_offset: 0.349
+    coarse_angle_resolution: 0.0349
+    minimum_angle_penalty: 0.9
+    minimum_distance_penalty: 0.5
+    use_response_expansion: true
 ```
+
+!!! info "关于这套参数是怎么来的"
+    上面这份 yaml 不是拍脑袋抄默认值 —— 是我们在 Go2 实机上反复调过的推荐值。主要关注这几组:
+    
+    - **`transform_publish_period: 0.02`** —— 默认 0.05(20 Hz),Nav2 的 local costmap 更新时经常拿不到最新 TF,调到 50 Hz 之后肉眼可见流畅
+    - **`scan_buffer_size: 30` + `scan_buffer_maximum_scan_distance: 15.0`** —— 决定"当前帧能跟多远的历史帧匹配",买断短距离鬼影
+    - **`distance_variance_penalty` / `angle_variance_penalty`** —— 越大越"相信里程计",Go2 腿式里程计打滑时容易骗人,这两个值不能调太高
+    - **`use_response_expansion: true`** —— 首次匹配失败时扩大搜索空间再试一次,对空旷场景更友好
+    
+    一句话:想让建图更精细,先调 ==`resolution`== 和 ==`minimum_travel_distance`==;其它项保持默认通常就是最优。
 
 ### 步骤六:写一键启动 launch
 
@@ -356,9 +409,10 @@ slam_toolbox:
 
 ```python
 """
-一键启动建图:驱动 + 传感器处理 + SLAM + RViz
+一键启动建图:驱动 + 传感器处理 + SLAM + RViz(SLAM 专用视图)
 """
 
+import os
 from pathlib import Path                              # 处理 launch 文件内的相对路径
 from launch import LaunchDescription                  # ROS2 launch 的顶层描述对象
 from launch_ros.actions import Node                   # 启动一个 ROS2 节点
@@ -374,13 +428,16 @@ def generate_launch_description():
 
     slam_params = str(slam_share / "config" / "slam_toolbox_params.yaml")
     scan_params = str(sensors_share / "config" / "pointcloud_to_laserscan_params.yaml")
+    rviz_cfg = str(slam_share / "config" / "slam.rviz")
 
     # 1) Go2 驱动 —— 复用第 6 章的包,提供 odom/TF
+    #    ⚠ 明确关掉 driver 自带的 rviz,否则会和下面第 5 步的 slam rviz 打架(起两个窗口)
     driver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             str(Path(get_package_share_directory("go2_driver_py"))
                 / "launch" / "driver.launch.py")
-        )
+        ),
+        launch_arguments={"use_rviz": "false"}.items(),
     )
 
     # 2) 时间戳修复 —— 第 11 章新增
@@ -414,16 +471,19 @@ def generate_launch_description():
     )
 
     # 5) RViz —— 加载 SLAM 专用配置(Fixed Frame = map)
-    rviz_cfg = str(slam_share / "config" / "slam.rviz")
+    #    如果 slam.rviz 还没保存,不带 -d,免得启动失败
     rviz = Node(
         package="rviz2",
         executable="rviz2",
-        arguments=["-d", rviz_cfg],
+        arguments=["-d", rviz_cfg] if os.path.exists(rviz_cfg) else [],
         output="screen",
     )
 
     return LaunchDescription([driver, timestamp_fix, pc_to_scan, slam, rviz])
 ```
+
+!!! warning "为什么要显式关掉 driver 的 rviz"
+    第 6 章的 `driver.launch.py` 默认会启动一个 RViz(加载 `display.rviz`,Fixed Frame=`odom`),用来看机器人模型和 TF。到了第 11 章,我们要看的是**建图视角**(Fixed Frame=`map`,带 Map 图层),两个 rviz 同时起会把屏幕占满还误导读者 "建图没在工作"。所以这里强制 `use_rviz: "false"`,统一由下面第 5 步起一个专用的 slam rviz。
 
 ### 步骤七:准备 RViz 配置
 
@@ -468,15 +528,18 @@ ros2 launch go2_slam mapping.launch.py
 
 ### 操控机器人建图
 
-**新开一个终端**,用第 3 章的键盘节点驱动 Go2 慢慢走:
+Go2 自带的**手柄本身就能走**,建图过程中直接用手柄遛狗即可,这一步不是必需的。
+
+如果你想用键盘代替手柄(比如手柄不在手边),**新开一个终端**启动第 3 章的键盘节点:
 
 ```bash
-# 记得先 source
+# 可选:仅当不想用手柄时启动
 source ~/unitree_go2_ws/install/setup.bash
-
-# 启动键盘控制
 ros2 run go2_teleop_ctrl_keyboard go2_teleop_ctrl_keyboard
 ```
+
+!!! tip "键盘只是额外输入源"
+    键盘节点和手柄底层都通过狗的运动控制接口下发速度,开或不开都不影响 slam_toolbox 建图。用哪个顺手就用哪个。
 
 建图小技巧:
 
@@ -487,12 +550,25 @@ ros2 run go2_teleop_ctrl_keyboard go2_teleop_ctrl_keyboard
 
 ### 保存地图
 
-建完满意后,**不要关终端**,新开一个终端保存地图:
+!!! danger "千万别先 Ctrl-C"
+    `slam_toolbox` 节点一关,`/map` 话题就跟着消失,再调保存服务只会得到空地图。正确顺序:
+    
+    1. **第一个终端保持建图状态不动**(不要 Ctrl-C)
+    2. 新开一个终端运行保存命令
+    3. 看到 `Map saved successfully` 再回第一个终端 Ctrl-C 结束建图
+
+**新开一个终端**:
 
 ```bash
+# ⚠ 下面这条路径替换成你自己的工作空间,本书后续以 ==~/unitree_go2_ws/maps== 为例
+mkdir -p ==~/unitree_go2_ws/maps==
+
+# 别忘了 source,新终端默认没加载工作空间
+source ==~/unitree_go2_ws==/install/setup.bash
+
 # 保存为标准 pgm + yaml 格式,给下一章 Nav2 用
 ros2 run nav2_map_server map_saver_cli \
-    -f ~/unitree_go2_ws/src/go2_slam/maps/my_map
+    -f ==~/unitree_go2_ws/maps==/my_map
 ```
 
 你会得到两个文件:
@@ -504,9 +580,10 @@ ros2 run nav2_map_server map_saver_cli \
 
 ```bash
 # 序列化保存,包含位姿图信息,可恢复
+# ⚠ filename 替换成你自己的工作空间绝对路径
 ros2 service call /slam_toolbox/serialize_map \
     slam_toolbox/srv/SerializePoseGraph \
-    "{filename: 'my_map'}"
+    "{filename: '==/home/$USER/unitree_go2_ws/maps==/my_map'}"
 ```
 
 ---
@@ -611,7 +688,36 @@ ros2 topic info /scan -v
 
 **修复**:确认 `slam_toolbox_params.yaml` 里有 `qos_overrides` 段,并重启 SLAM 节点。
 
-### Q5: 机器人不动 / 动了但 /odom 不变
+### Q5: RViz 里看不到地图,但终端里 slam_toolbox 节点明明起来了
+
+这是最容易被误判的一类问题 —— 别急着以为"建图挂了"。先分两步定位:
+
+**第一步:确认建图链路真的在工作**(跟 RViz 完全无关)
+
+```bash
+# /map 话题应该在持续推送
+ros2 topic hz /map
+# 看到 ~0.2 Hz 就是在建图,只是你 RViz 没显示而已
+
+# TF map → odom 应该存在
+ros2 run tf2_ros tf2_echo map odom
+# 能持续打印平移/旋转 = SLAM 输出正常
+```
+
+两个都通 → 建图链路没问题,接着看第二步。
+
+**第二步:RViz 配置问题**
+
+大概率是这三种情况之一:
+
+1. **Fixed Frame 没改成 `map`** —— RViz 左上角 Global Options,默认值常是 `odom` 或 `base`,不是 `map` 就看不到地图图层
+2. **没有 Map Display** —— 左下 Add → By topic → `/map` → Map
+3. **`slam.rviz` 还没保存过** —— 教材 `mapping.launch.py` 在文件不存在时会起一个**空 rviz**,需要你自己加 Map、LaserScan、RobotModel,然后 File → Save Config As 存到 `~/unitree_go2_ws/install/go2_slam/share/go2_slam/config/slam.rviz`(或 src 目录下对应位置然后重新 `colcon build`)。下次启动就自动加载了
+
+!!! tip "RViz 没显示地图 ≠ SLAM 没工作"
+    这是初学者**最容易掉的坑**。终端上每一行"slam_toolbox … started"看似一切正常,但 RViz 是另一个独立程序,它的配置文件只管显示、不管建图本身。分清这两层再排查,能省一小时。
+
+### Q6: 机器人不动 / 动了但 /odom 不变
 
 检查第 6 章的 `go2_driver_py` 有没有起来:
 

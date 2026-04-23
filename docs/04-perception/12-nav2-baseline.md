@@ -4,6 +4,10 @@
 
 ---
 
+!!! danger "本章两条硬性前提,不满足别往下做"
+    1. **RViz 必须真的弹出来**。`2D Pose Estimate` 这一步只能在 RViz 里点,没有 RViz 就没有初始位姿,AMCL 一直瞎猜 → Nav2 全部卡在 `Please set the initial pose` → 看上去"起来了,其实一步都走不动"。启动后若没看到 RViz 窗口,先排查图形环境和 launch 配置,别急着发目标点。
+    2. **`2D Pose Estimate` 必须在发 Goal 前做**。AMCL 不会读心,你没告诉它"机器人在地图哪儿",它就只能在整张图里撒粒子。没看到粒子云收敛前,发再多目标点都没意义。
+
 ## 本章你将学到
 
 - 认识 Nav2 里几块最核心的模块:地图服务、定位、全局规划、局部控制、恢复行为和生命周期管理
@@ -184,10 +188,13 @@ ros2 pkg list | grep -E "nav2_amcl|nav2_bt_navigator|twist_mux|pointcloud_to_las
 第 11 章保存地图时,推荐路径是:
 
 ```text
-~/unitree_go2_ws/src/go2_slam/maps/
+==~/unitree_go2_ws/maps==/
 ├── my_map.yaml
 └── my_map.pgm
 ```
+
+!!! tip "路径是示例,按你实际工作空间改"
+    教材里所有 ==高亮== 标注的路径都是示例。你的工作空间在哪里,就把这些路径替换成你自己的,别硬套。
 
 这里有两个小规则:
 
@@ -214,22 +221,50 @@ ros2 pkg list | grep -E "nav2_amcl|nav2_bt_navigator|twist_mux|pointcloud_to_las
 
 ```bash
 # 在 src/ 下新建一个只放配置和 launch 的包
-cd ~/unitree_go2_ws/src
+cd ==~/unitree_go2_ws==/src
 ros2 pkg create go2_navigation \
-    --build-type ament_cmake
+    --build-type ament_python
 
-mkdir -p go2_navigation/config go2_navigation/launch
+mkdir -p go2_navigation/config go2_navigation/launch go2_navigation/maps go2_navigation/rviz
 ```
 
-因为这个包主要放的是 `launch/` 和 `config/`,所以 `ament_cmake` 就够了,没必要再多套一层 Python 包壳。
+当前工作区的 `go2_navigation` 是 `ament_python` 包。它本身不写业务节点,但用 `setup.py` 把 `launch/`、`config/`、`maps/` 和 `rviz/` 都安装到 share 目录,这样 `ros2 launch` 才能在安装空间里找到配置。
 
-接着把 `go2_navigation/CMakeLists.txt` 里补上一段安装规则,不然 `ros2 launch` 在安装空间里找不到这些文件:
+接着确认 `go2_navigation/setup.py` 里的 `data_files` 包含下面几行:
 
-```cmake
-install(DIRECTORY
-  launch
-  config
-  DESTINATION share/${PROJECT_NAME}
+```python
+from glob import glob
+import os
+
+from setuptools import find_packages, setup
+
+
+package_name = "go2_navigation"
+
+
+setup(
+    name=package_name,
+    version="0.0.0",
+    packages=find_packages(exclude=["test"]),
+    data_files=[
+        (
+            "share/ament_index/resource_index/packages",
+            ["resource/" + package_name],
+        ),
+        ("share/" + package_name, ["package.xml"]),
+        (os.path.join("share", package_name, "launch"), glob("launch/*.launch.py")),
+        (os.path.join("share", package_name, "config"), glob("config/*.yaml")),
+        (os.path.join("share", package_name, "maps"), glob("maps/*")),
+        (os.path.join("share", package_name, "rviz"), glob("rviz/*.rviz")),
+    ],
+    install_requires=["setuptools"],
+    zip_safe=True,
+    maintainer="student",
+    maintainer_email="student@example.com",
+    description="Nav2 baseline launch and configuration for Go2 tutorial chapter 12.",
+    license="Apache-2.0",
+    tests_require=["pytest"],
+    entry_points={"console_scripts": []},
 )
 ```
 
@@ -237,7 +272,7 @@ install(DIRECTORY
 
 - 包能编译
 - `source install/setup.bash` 也没报错
-- 一到 `ros2 launch go2_navigation navigation.launch.py` 就说文件不存在
+- 一到 `ros2 launch go2_navigation navigation.launch.py` 就说 launch、YAML 或 `navigation.rviz` 文件不存在
 
 ### 步骤二:写 `twist_mux.yaml`
 
@@ -298,7 +333,7 @@ amcl:
     base_frame_id: base
     global_frame_id: map
     odom_frame_id: odom
-    scan_topic: /scan
+    scan_topic: scan
     tf_broadcast: true
     transform_tolerance: 1.0
 
@@ -330,14 +365,19 @@ amcl:
     recovery_alpha_fast: 0.1
     recovery_alpha_slow: 0.001
     update_min_d: 0.1
-    update_min_a: 0.1
+    update_min_a: 0.02
     max_beams: 180
     laser_likelihood_max_dist: 4.0
-    laser_max_range: 20.0
-    laser_min_range: 0.15
+    laser_max_range: 100.0
+    laser_min_range: -1.0
 
-    # ---- 让 RViz 手动给初始位姿 ----
-    set_initial_pose: false
+    # ---- 启动时给一组默认位姿,RViz 里仍建议重新 2D Pose Estimate ----
+    set_initial_pose: true
+    initial_pose:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
     save_pose_rate: 0.5
 
 bt_navigator:
@@ -348,7 +388,8 @@ bt_navigator:
     odom_topic: /odom
     bt_loop_duration: 10
     default_server_timeout: 20
-    wait_for_service_timeout: 1000
+    default_nav_to_pose_bt_xml: "/opt/ros/humble/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_only_if_path_becomes_invalid.xml"
+    default_nav_through_poses_bt_xml: "/opt/ros/humble/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_only_if_path_becomes_invalid.xml"
 
     # 这一串是 Humble 默认 BT 插件列表,先别手痒删
     plugin_lib_names:
@@ -414,14 +455,14 @@ controller_server:
 
     progress_checker:
       plugin: nav2_controller::SimpleProgressChecker
-      required_movement_radius: 0.3
+      required_movement_radius: 0.5
       movement_time_allowance: 10.0
 
     general_goal_checker:
       plugin: nav2_controller::SimpleGoalChecker
       stateful: true
-      xy_goal_tolerance: 0.20
-      yaw_goal_tolerance: 0.20
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.25
 
     FollowPath:
       plugin: dwb_core::DWBLocalPlanner
@@ -441,25 +482,25 @@ controller_server:
       decel_lim_y: 0.0
       decel_lim_theta: -1.0
       vx_samples: 20
-      vy_samples: 1
-      vtheta_samples: 30
-      sim_time: 1.5
+      vy_samples: 0               # ⚠ 必须是 0:既然 max_vel_y=0,y 方向就不要采样,否则 DWB 会 SIGABRT
+      vth_samples: 40             # DWB 在 Humble 参数里叫 vth_samples,不是 vtheta_samples
+      sim_time: 1.7
       linear_granularity: 0.05
       angular_granularity: 0.025
       transform_tolerance: 0.2
-      xy_goal_tolerance: 0.20
-      trans_stopped_velocity: 0.10
+      xy_goal_tolerance: 0.25
+      trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: true
       stateful: true
       critics: [RotateToGoal, Oscillation, BaseObstacle, GoalAlign, PathAlign, PathDist, GoalDist]
       BaseObstacle.scale: 0.02
-      PathAlign.scale: 24.0
+      PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
-      GoalAlign.scale: 18.0
+      GoalAlign.scale: 24.0
       GoalAlign.forward_point_distance: 0.1
-      PathDist.scale: 24.0
-      GoalDist.scale: 18.0
-      RotateToGoal.scale: 24.0
+      PathDist.scale: 32.0
+      GoalDist.scale: 24.0
+      RotateToGoal.scale: 32.0
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
 
@@ -467,20 +508,26 @@ local_costmap:
   local_costmap:
     ros__parameters:
       use_sim_time: false
-      update_frequency: 8.0
+      update_frequency: 5.0
       publish_frequency: 2.0
       global_frame: odom
       robot_base_frame: base
       rolling_window: true
-      width: 4.0
-      height: 4.0
+      width: 3
+      height: 3
       resolution: 0.05
-      robot_radius: 0.30
-      plugins: [obstacle_layer, inflation_layer]
+      robot_radius: 0.3
+      plugins: [voxel_layer, inflation_layer]
 
-      obstacle_layer:
-        plugin: nav2_costmap_2d::ObstacleLayer
+      voxel_layer:
+        plugin: nav2_costmap_2d::VoxelLayer
         enabled: true
+        publish_voxel_map: true
+        origin_z: 0.0
+        z_resolution: 0.05
+        z_voxels: 16
+        max_obstacle_height: 2.0
+        mark_threshold: 0
         observation_sources: scan
         scan:
           topic: /scan
@@ -491,12 +538,16 @@ local_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 2.5
           obstacle_min_range: 0.0
-          max_obstacle_height: 0.6
+          max_obstacle_height: 2.0
 
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
-        inflation_radius: 0.45
+        inflation_radius: 0.15
+
+      static_layer:
+        plugin: nav2_costmap_2d::StaticLayer
+        map_subscribe_transient_local: true
 
       always_send_full_costmap: true
 
@@ -530,23 +581,23 @@ global_costmap:
           raytrace_min_range: 0.0
           obstacle_max_range: 2.5
           obstacle_min_range: 0.0
-          max_obstacle_height: 0.6
+          max_obstacle_height: 2.0
 
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
-        inflation_radius: 0.45
+        inflation_radius: 0.15
 
       always_send_full_costmap: true
 
 planner_server:
   ros__parameters:
     use_sim_time: false
-    expected_planner_frequency: 10.0
+    expected_planner_frequency: 20.0
     planner_plugins: [GridBased]
     GridBased:
       plugin: nav2_navfn_planner/NavfnPlanner
-      tolerance: 0.3
+      tolerance: 0.5
       use_astar: false
       allow_unknown: true
 
@@ -559,17 +610,17 @@ behavior_server:
     footprint_topic: local_costmap/published_footprint
     cycle_frequency: 10.0
     transform_tolerance: 0.1
-    simulate_ahead_time: 1.0
-    max_rotational_vel: 0.5
-    min_rotational_vel: 0.2
-    rotational_acc_lim: 1.0
-    behavior_plugins: [spin, backup, wait]
-
-    spin:
-      plugin: nav2_behaviors/Spin
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.0
+    min_rotational_vel: 0.4
+    rotational_acc_lim: 3.2
+    behavior_plugins: [backup, drive_on_heading, wait]
 
     backup:
       plugin: nav2_behaviors/BackUp
+
+    drive_on_heading:
+      plugin: nav2_behaviors/DriveOnHeading
 
     wait:
       plugin: nav2_behaviors/Wait
@@ -593,9 +644,9 @@ map_server:
 
 #### `inflation_radius`
 
-膨胀半径决定“障碍物周围要留出多大安全气泡”。本章先给 `0.45 m`,是一个偏保守的室内值。
+膨胀半径决定“障碍物周围要留出多大安全气泡”。当前工作区代码先给 `0.15 m`,目的是减少地图噪声被过度膨胀后堵死局部 costmap 的概率。
 
-- 设大一点:更稳,但容易出现“明明有路,它说过不去”
+- 设大一点:更保守,但容易出现“明明有路,它说过不去”
 - 设小一点:更敢走窄路,但实机擦边风险会上来
 
 #### `max_vel_x`
@@ -607,8 +658,8 @@ map_server:
 
 第一次调参时,宁可先慢一点,也别为了图爽把 AMCL 和局部控制一起抖散了。
 
-!!! note "`laser_max_range: 20.0` 只是当前实验链的上限"
-    这里的 `20.0` 表示“本章这条点云转 `/scan` 再进 AMCL 的实验链,先按 20 米内观测来处理”。它不是在替 L1 的官方硬件标称量程背书。教材里凡是这类过滤上限,都优先按**工程可用范围**理解。
+!!! note "`laser_max_range: 100.0` 不是在宣称 L1 的有效量程"
+    当前工作区代码把 AMCL 里的 `laser_max_range` 放到 `100.0`,主要是避免 AMCL 这层过早截断第 11 章已经生成好的 `/scan`。它不是在替 L1 的官方硬件标称量程背书。教材里凡是这类过滤上限,都优先按**工程可用范围**理解。
 
 #### `acc_lim_x`
 
@@ -668,21 +719,17 @@ map_server:
 """
 
 from pathlib import Path                                      # 处理 share 目录里的配置文件路径
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription                          # ROS2 launch 的顶层描述对象
-from launch.actions import (                                  # launch 里常用的动作
-    DeclareLaunchArgument,
-    IncludeLaunchDescription,
-    TimerAction,
-)
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
 from launch.conditions import IfCondition                     # 条件启动 RViz
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node                           # 启动 ROS2 节点
-from launch_ros.substitutions import FindPackageShare         # 在安装空间里找功能包 share 目录
-from ament_index_python.packages import get_package_share_directory
 
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
     map_yaml = LaunchConfiguration("map")
     use_rviz = LaunchConfiguration("use_rviz")
 
@@ -695,9 +742,7 @@ def generate_launch_description():
     scan_params = str(sensors_share / "config" / "pointcloud_to_laserscan_params.yaml")
     driver_launch = str(driver_share / "launch" / "driver.launch.py")
 
-    rviz_config = PathJoinSubstitution(
-        [FindPackageShare("nav2_bringup"), "rviz", "nav2_default_view.rviz"]
-    )
+    rviz_config = str(nav_share / "rviz" / "navigation.rviz")
 
     # 1) 底层驱动:提供 /odom、TF、/joint_states 和最终的 /cmd_vel 桥接
     driver = IncludeLaunchDescription(
@@ -705,11 +750,19 @@ def generate_launch_description():
         launch_arguments={"use_rviz": "false"}.items(),
     )
 
-    # 2) 复用第 11 章的时间戳修复节点
+    # 2) 复用第 11 章的时间戳修复节点,并给 TF 查询留 0.10s 缓冲
     timestamp_fix = Node(
         package="go2_sensors",
         executable="pointcloud_timestamp_fix",
         name="pointcloud_timestamp_fix",
+        parameters=[
+            {
+                "input_topic": "/utlidar/cloud_deskewed",
+                "output_topic": "/utlidar/cloud_fixed",
+                # /odom 只有 20 Hz,scan 时间戳回退 0.10s,AMCL 查 odom→base 才追得上
+                "backdate_sec": 0.10,
+            }
+        ],
         output="screen",
     )
 
@@ -833,6 +886,9 @@ def generate_launch_description():
         ],
     )
 
+    # RViz:Fixed Frame=map,使用本章随包安装的 navigation.rviz
+    # 注意:第一次打开时默认 Fixed Frame 可能是 "odom"/"base_link",如果看不到地图,
+    # 先把左上角 Global Options → Fixed Frame 改成 "map" 再说
     rviz = Node(
         package="rviz2",
         executable="rviz2",
@@ -844,11 +900,19 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            # DeclareLaunchArgument 必须在使用 LaunchConfiguration 的 action 之前被 visit，
+            # 否则 IfCondition(LaunchConfiguration("use_rviz")) 拿不到默认值，rviz 会被静默跳过
             DeclareLaunchArgument(
                 "map",
-                description="第 11 章保存的地图 yaml,例如 ~/unitree_go2_ws/src/go2_slam/maps/my_map.yaml",
+                description="Path to the chapter-11 saved map yaml file.",
             ),
-            DeclareLaunchArgument("use_rviz", default_value="true"),
+            DeclareLaunchArgument(
+                "use_rviz",
+                default_value="true",
+                description="Whether to launch Nav2 RViz.",
+            ),
+            # 把 rviz 放到节点列表最前，避免被后续崩溃的节点拖累
+            rviz,
             driver,
             timestamp_fix,
             pointcloud_to_scan,
@@ -857,7 +921,6 @@ def generate_launch_description():
             amcl,
             localization_lifecycle,
             delayed_navigation,
-            rviz,
         ]
     )
 ```
@@ -888,6 +951,24 @@ def generate_launch_description():
 !!! warning "AMCL 不会读心"
     这一步不是可选项。第一次定位没收敛前,你发再多目标点也没意义。先把初始位姿对上,再谈路径规划。
 
+!!! danger "朝向必须精准,不然会出现‘路径对、狗走偏’"
+    拖箭头时务必让**箭头方向和真实狗头方向一致**。第 11 章保存地图时的 map 坐标系朝向**不一定**等于地图 x+ 方向,所以不能默认 `yaw=0`。
+    
+    如果启动后看到这种现象:
+    
+    - RViz 里全局路径 `/plan` 和局部路径 `/local_plan` 都正常
+    - 机器人模型在 RViz 里沿着路径"往前走"
+    - **实际狗却在往侧面甚至反方向乱晃**
+    
+    几乎 100% 是初始位姿的**朝向**给错了 —— 控制器按 RViz 里的"假朝向"下发 `cmd_vel`,落到真实狗身上就偏了一个角度。
+    
+    校正方法:
+    
+    1. 狗停下来,观察真实狗头朝向
+    2. 在 RViz 里再点一次 `++2D Pose Estimate++`,拖箭头**对齐真实朝向**
+    3. 看 RViz 里机器人模型是否转到了和真实狗头一致的方向
+    4. 一致后再发 `Nav2 Goal`,狗的运动方向就和路径一致了
+
 ### 步骤六:看懂哪几个话题最关键
 
 第一次跑通后,别只盯着“狗是不是走了”。更重要的是知道每一层有没有在工作:
@@ -914,7 +995,7 @@ def generate_launch_description():
 
 ```bash
 # 编译 go2_navigation 并重新加载环境
-cd ~/unitree_go2_ws
+cd ==~/unitree_go2_ws==
 colcon build --packages-select go2_navigation
 source install/setup.bash
 ```
@@ -925,7 +1006,7 @@ source install/setup.bash
 
 ```bash
 # 把第 11 章保存好的地图路径交给 launch 参数
-MAP_YAML=$HOME/unitree_go2_ws/src/go2_slam/maps/my_map.yaml
+MAP_YAML="==$HOME/unitree_go2_ws/maps/my_map.yaml=="
 ros2 launch go2_navigation navigation.launch.py map:=$MAP_YAML
 ```
 
@@ -933,7 +1014,7 @@ ros2 launch go2_navigation navigation.launch.py map:=$MAP_YAML
 
 ```bash
 # 先只看后台节点,确认 map_server / amcl / Nav2 都起稳了
-MAP_YAML=$HOME/unitree_go2_ws/src/go2_slam/maps/my_map.yaml
+MAP_YAML="==$HOME/unitree_go2_ws/maps/my_map.yaml=="
 ros2 launch go2_navigation navigation.launch.py \
     map:=$MAP_YAML \
     use_rviz:=false
@@ -945,7 +1026,7 @@ ros2 launch go2_navigation navigation.launch.py \
 
 ```bash
 # 人工接管通道,优先级高于导航输出
-source ~/unitree_go2_ws/install/setup.bash
+source ==~/unitree_go2_ws==/install/setup.bash
 ros2 run teleop_twist_keyboard teleop_twist_keyboard \
     --ros-args -r cmd_vel:=/cmd_vel_teleop
 ```
@@ -1022,6 +1103,78 @@ ros2 topic list | grep -E "/plan|/local_plan|/global_costmap|/local_costmap|/par
     5. **长走廊会让定位几何退化**。两边全是平行墙时,AMCL 粒子云很容易分裂,方向稍微错一点就越走越偏。
     6. **一旦控制频率掉到 5~10 Hz,轨迹跟踪会肉眼可见地抖**。这不是“手感不好”,而是已经在逼近实机体验的下限。
     7. **所以这章的结论只能是“能走但有限”**。第 13 章我们就来认真聊:这些问题到底能不能补,为什么很多补法最后还是会撞墙。
+
+## 本轮调参记录
+
+下面三条不是“理论最优解”,而是本章实机排障后留下来的基线修正。后续如果你复现实验,先按这里的值跑通,再考虑继续调。
+
+### 1. 地图去噪:`clean_map.py` + `min_area=6`
+
+<span style="color:#2f7d32"><strong>要解决的问题:</strong></span> SLAM 保存出来的 `my_map.pgm` 里会混进零散黑点。Nav2 会把黑点当成占用栅格,再经过 inflation 膨胀后,一个小黑点就可能变成 costmap 里的一小团“幽灵障碍”。
+
+<span style="color:#0b6bcb"><strong>本次使用的脚本:</strong></span> `/home/ztl/Desktop/claude code/clean_map.py`。脚本逻辑很直接:把黑色占用像素做 8 邻域连通域分析,保留面积 `>= min_area` 的连通块,删除面积更小的孤立黑点;未知灰色区域保持不变,自由白色区域保持自由。
+
+```bash
+# 建议先保留原图备份,再把清理结果覆盖成 Nav2 实际读取的 my_map.pgm
+python3 "/home/ztl/Desktop/claude code/clean_map.py" \
+    /home/ztl/go2_tutorial_ws/maps/my_map.pgm.bak \
+    /home/ztl/go2_tutorial_ws/maps/my_map.pgm \
+    6
+```
+
+<span style="color:#b45309"><strong>为什么是 `min_area=6`:</strong></span> 小于 6 像素的黑色连通块更像建图噪声,不是稳定墙体或家具边界。这个阈值不会大面积“修图”,只是在地图进入 Nav2 前把最脏的孤立占用点清掉。本次已经用这个阈值产出新的 `my_map.pgm`。
+
+!!! warning "别把地图去噪当成定位补药"
+    去噪只是在降低 costmap 被孤立黑点污染的概率。它不会修复里程计漂移,也不会让 AMCL 自动适配 Go2 的全向运动。地图如果本身墙体变形严重,应该回到第 11 章重新建图,别拿脚本硬洗。
+
+### 2. AMCL 跟不上 Go2 转速:`update_min_a: 0.1 → 0.02`
+
+<span style="color:#c2410c"><strong>现象:</strong></span> Go2 原地转向或小半径转弯时,机器人已经转过一截,AMCL 粒子云和 `map → odom` 更新却慢半拍。结果就是 RViz 里看着像定位被甩在后面,局部控制也容易跟着过冲。
+
+在 `go2_navigation/config/nav2_params.yaml` 里确认这一行:
+
+```yaml
+amcl:
+  ros__parameters:
+    update_min_a: 0.02
+```
+
+<span style="color:#0b6bcb"><strong>这行代码是什么意思:</strong></span> `update_min_a` 是 AMCL 触发一次定位更新所需的最小角度变化。原来的 `0.1 rad` 约等于 `5.7°`;现在的 `0.02 rad` 约等于 `1.15°`,可以理解成 Go2 每转大约 `1°` 就更积极地触发一次 scan match。
+
+<span style="color:#2f7d32"><strong>为什么这么做:</strong></span> Go2 的转向比慢速轮式底盘更容易让 `/odom` 和激光匹配错开。把角度阈值压低后,AMCL 会更频繁用 `/scan` 去校正位姿。单看阈值比例是 `0.1 / 0.02 = 5` 倍,但现场有效更新还会受 `/scan` 频率、TF 延迟、粒子重采样和 `update_min_d` 共同限制,所以实测/估算更接近频率约 `×3.7`。
+
+!!! tip "调这个值的副作用"
+    `update_min_a` 越小,AMCL 越勤快,CPU 压力也会上来。先用 `0.02` 解决“转得太快 AMCL 跟不上”的问题;如果板载负载明显升高,再结合 `max_particles`、`max_beams` 和控制速度一起调。
+
+### 3. scan 时间戳回退:`backdate_sec: 0.10`
+
+<span style="color:#c2410c"><strong>现象:</strong></span> AMCL 日志里出现 `Lookup would require extrapolation into the future` 一类警告,本质是 `/scan` 的时间戳比当前可查到的 `odom → base` TF 还“新”,AMCL 查变换时就会被 TF2 拦住。
+
+在 `go2_navigation/launch/navigation.launch.py` 里确认 `timestamp_fix` 节点这样写:
+
+```python
+timestamp_fix = Node(
+    package="go2_sensors",
+    executable="pointcloud_timestamp_fix",
+    name="pointcloud_timestamp_fix",
+    parameters=[
+        {
+            "input_topic": "/utlidar/cloud_deskewed",
+            "output_topic": "/utlidar/cloud_fixed",
+            # /odom 只有 20 Hz,scan 时间戳回退 0.10s,AMCL 查 odom→base 才追得上
+            "backdate_sec": 0.10,
+        }
+    ],
+    output="screen",
+)
+```
+
+<span style="color:#0b6bcb"><strong>这段代码在做什么:</strong></span> `pointcloud_timestamp_fix` 订阅原始去畸变点云 `/utlidar/cloud_deskewed`,发布修正后的 `/utlidar/cloud_fixed`。这里不是改点云内容,而是把消息头时间戳向过去回拨 `0.10s`,再交给 `pointcloud_to_laserscan` 生成 `/scan`。
+
+<span style="color:#2f7d32"><strong>为什么能消除外推警告:</strong></span> Go2 的 `/odom` 和 `odom → base` TF 不是无限高频发布,本章实机链路里大约按 20 Hz 理解。`/scan` 如果盖上“当前时刻”,AMCL 查询同一时刻的 TF 时可能查不到;回拨 `0.10s` 后,AMCL 查的是 TF 缓冲区里已经存在的历史变换,`odom → base` 外推警告就会明显减少或消失。
+
+!!! warning "不要把回拨调得无限大"
+    `0.10s` 是为了给 TF 留缓冲,不是为了伪造很旧的激光。回拨太小会继续外推,回拨太大又会让感知滞后。实机上先用本章这个值,只有在日志仍然刷 TF extrapolation 时再小步调整。
 
 ## 常见问题
 
@@ -1113,7 +1266,86 @@ ros2 topic list | grep -E "/plan|/local_plan|/global_costmap|/local_costmap|/par
 - 确认 `twist_mux` 的输出 remap 到了 `/cmd_vel`
 - 确认第 4 章 `go2_twist_bridge` 订阅的还是 `/cmd_vel`
 
-### 7. costmap 里总有“幽灵障碍”
+### 7. `controller_server` 启动后立刻崩溃,`exit code -6`
+
+**现象**:launch 日志里出现
+
+```text
+[controller_server-N] process has died [pid ...], exit code -6 (SIGABRT)
+```
+
+随后 `lifecycle_manager_navigation` 永远卡在 "Waiting for controller_server/configure"。
+
+**原因**(本章最容易踩的坑):`FollowPath` 里 `vy_samples` 写成了正整数,但 `max_vel_y` / `acc_lim_y` 都是 `0.0`。DWB 的 `StandardTrajectoryGenerator` 在 y 方向尝试构造空区间的采样 → 触发断言 → `std::abort`。
+
+**解决**:打开 `nav2_params.yaml`,确认下面三个值对得上:
+
+```yaml
+FollowPath:
+  vy_samples: 0      # 必须是 0
+  max_vel_y: 0.0
+  acc_lim_y: 0.0
+```
+
+改完 `colcon build --packages-select go2_navigation && source install/setup.bash`,重新 launch。
+
+!!! tip "这个坑的通用教训"
+    只要你把某个维度的 `max_vel_*` 和 `acc_lim_*` 都设成 0,就要一并把对应的 `*_samples` 也归零。DWB 不会替你做这个对齐。
+
+**另一个会导致同款 `exit -6` 的配置**:崩溃日志里带有
+
+```text
+terminate called after throwing an instance of 'rclcpp::exceptions::InvalidParameterTypeException'
+  what():  parameter 'height' has invalid type: ... is of type {integer}, setting it to {double} is not allowed.
+```
+
+`local_costmap` 的 `width` / `height` 必须是**整数**,不是小数。Nav2 Humble 以后对 int/double 类型检查变严格了:
+
+```yaml
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      width: 4        # ✅ 整数
+      height: 4       # ✅ 整数
+      # 不是 width: 4.0 / height: 4.0
+      resolution: 0.05  # resolution 仍然是 double
+```
+
+### 8. 启动后 RViz 根本没弹出来
+
+**现象**:终端日志刷过 `driver`、`map_server`、`amcl`、`lifecycle_manager` 等节点启动记录,但**没有** `rviz2: process started` 这一行,屏幕上也没有任何 RViz 窗口。
+
+**为什么要特别管这件事**:本章定位链是 AMCL + 手动 2D Pose Estimate,没有 RViz 连初始位姿都给不了,后面全部无法验证 → 本章等于白跑。
+
+**排查顺序**:
+
+```bash
+# 1. 先确认是不是根本没启动
+ps aux | grep rviz2 | grep -v grep
+#   没输出 → rviz 没被拉起来,继续往下查
+#   有输出但没窗口 → 图形环境问题(WSL / X11 / SSH 没转发)
+
+# 2. 确认 launch 里是否被 condition 跳过了
+grep -n "use_rviz" ==~/unitree_go2_ws==/src/go2_navigation/launch/navigation.launch.py
+#   检查 DeclareLaunchArgument("use_rviz", default_value="true") 是否在 LaunchDescription 的最前面
+#   LaunchConfiguration 依赖 DeclareLaunchArgument 已经被 visit 过,顺序搞反就会默默跳过
+
+# 3. 确认本章随包安装的 RViz 配置文件存在
+ls ==~/unitree_go2_ws==/install/go2_navigation/share/go2_navigation/rviz/navigation.rviz
+#   有输出 → launch 里的 rviz_config 能找到配置
+#   没输出 → 检查 setup.py 是否安装了 rviz 目录,然后重新 colcon build
+```
+
+**快速兜底**:独立开一个终端手工起 RViz,不要和 launch 绑死:
+
+```bash
+# 手工拉一个 rviz,装载本章导航视图
+rviz2 -d ==~/unitree_go2_ws==/install/go2_navigation/share/go2_navigation/rviz/navigation.rviz
+```
+
+打开后第一件事:**Global Options → Fixed Frame** 改成 `map`,然后你就能看到 `2D Pose Estimate` 按钮,接着按本章步骤五继续。
+
+### 9. costmap 里总有“幽灵障碍”
 
 **现象**:人走开了,地图上还残着一团障碍,机器人开始绕远路。
 
@@ -1140,6 +1372,11 @@ ros2 topic list | grep -E "/plan|/local_plan|/global_costmap|/local_costmap|/par
 - 它对里程计噪声和动态环境都不够从容
 
 所以本章真正的价值,不是把 Nav2 写成“终局方案”,而是把一个**诚实可复现的基线**摆在你面前。
+
+## 已知问题
+
+!!! warning "未解决,留给后续章节继续处理"
+    AMCL 现在仍然使用 `nav2_amcl::DifferentialMotionModel`,它本来是按差速/非全向底盘假设设计的,并不真正适配 Go2 的全向运动能力。当前实机里还能看到估计过冲,视觉漂移也没有被消除。这条只作为**已知问题**记录在这里,不要把它写成本章结论;本章结论仍然只是“2D Nav2 基线可作为起点,但能力有限”。
 
 ## 下一步
 

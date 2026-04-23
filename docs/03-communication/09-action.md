@@ -1,6 +1,19 @@
-# 第 9 章 用 Action 封装“前进 X 米”
+# 第 9 章 用 Action 封装"前进 X 米"
 
-> 上一章我们已经把“开始 / 停止”这种短事务封装成了 Service。这一章再往前走一步:让 Go2 接收一个“前进多少米”的长任务，在执行过程中持续回报剩余距离，结束时再给出最终位置。
+> 上一章我们用 **Service** 完成了一问一答的短事务。这一章再换一种通信形状:用 **Action** 封装"前进 X 米"这种长任务——发一次目标,中间持续拿到反馈,结束时才拿到最终结果。
+
+!!! warning "🎯 本章通信方式:Action(动作)"
+    **形状**:双向 · Goal + Feedback + Result · 长任务  
+    **本章关键 API**:`ActionServer(self, Nav, "nav", self.execute, ...)`  
+    **要记住的事**:客户端发一个 Goal,服务端在执行过程中**持续**推送 Feedback(进度信息),完成后再推送一次 Result。Action 是三大通信机制里最"重"的一种——它融合了 Service 的"请求-响应"和 Topic 的"持续发布",专为会持续一段时间的任务准备。
+    
+    至此你已经看过三种通信了:
+    
+    - Topic(第 7 章):单向广播,不等谁
+    - Service(第 8 章):一请求一响应,短
+    - Action(第 9 章):一请求 + 多反馈 + 一结果,长
+    
+    本章末尾有完整对照表,可以带着疑问往下读。
 
 ## 本章你将学到
 
@@ -29,13 +42,18 @@ Action 可以把一个长任务拆成三层信息:
 
 ```mermaid
 flowchart LR
-    A[go2_nav_client] -->|Goal: 前进距离| B["/nav<br/>go2_tutorial_inter/action/Nav"]
-    B --> C[go2_nav_server]
-    C -->|Feedback: 剩余距离| A
-    C -->|Result: 最终位置 point| A
+    A[go2_nav_client] ==>|"🎯 ①Goal:目标距离"| B["/nav<br/>go2_tutorial_inter/action/Nav"]
+    B ==> C[go2_nav_server]
+    C -.->|"②Feedback:剩余距离(持续推)"| A
+    C -.->|"③Result:最终位置 point"| A
     D["/odom<br/>nav_msgs/msg/Odometry"] --> C
-    C --> E["/api/sport/request<br/>unitree_api/msg/Request"]
+    C -->|"(Topic)持续发布"| E["/api/sport/request<br/>unitree_api/msg/Request"]
+    
+    classDef action fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    class B action
 ```
+
+数一下这张图里从服务端回到客户端的箭头:**一条 Feedback(会被多次推送) + 一条 Result(最后才推一次)**。这就是 Action 相对 Service 的核心差异——Service 只能给一条响应,Action 能给一条"不断更新的进度"再加一条"收尾结果"。
 
 和上一章相比，最大的区别不是控制链，而是接口层级更丰富了。
 
@@ -199,9 +217,28 @@ def main():
 
 第一，`goal_cb()` 只接受 **大于 0** 的目标距离。也就是说，本章 Action 不支持负数倒车，更不支持给二维坐标点。
 
-第二，真正的运动控制还是靠后台定时器 `on_timer()` 一直发 `Request`。Action 不会替代这条控制链，它只是把“什么时候开始、什么时候停、什么时候发反馈”组织起来了。
+第二，真正的运动控制还是靠后台定时器 `on_timer()` 一直发 `Request`。Action 不会替代这条控制链，它只是把"什么时候开始、什么时候停、什么时候发反馈"组织起来了。
 
-第三，执行函数 `execute()` 里判断到 `distance < 0.2` 才停止，这就是它当前的“到达阈值”。
+第三，执行函数 `execute()` 里判断到 `distance < 0.2` 才停止，这就是它当前的"到达阈值"。
+
+!!! warning "🎯 本章 Action 通信的钥匙就是这一行"
+    ```python
+    self.action_server = ActionServer(
+        self, Nav, "nav", self.execute,
+        goal_callback=self.goal_cb,
+        cancel_callback=self.cancel_cb,
+    )
+    ```
+    `ActionServer` 的构造就把 Action 的三段结构都摆出来了:
+    
+    - `goal_callback` → 收到新 Goal 时决定 ACCEPT/REJECT
+    - `execute` → 任务真正的执行体(在里面循环 `publish_feedback`)
+    - `cancel_callback` → 客户端想取消任务时的处理
+    
+    对比第 7 章 `create_publisher`(单向)、第 8 章 `create_service`(一请求一响应),这一行展示的就是 Action "一 Goal + 多 Feedback + 一 Result + 可取消"的完整骨架。
+
+!!! tip "想改前进速度?就一个参数 ==`x`=="
+    服务端声明了运行参数 ==`x`==(默认 0.3 m/s),启动时用 `--ros-args -p x:=0.2` 就能改。和前两章一样,本章重点是 Action 通信机制,具体速度你随意调,不影响理解。
 
 ### 步骤三:实现 `go2_nav_client`
 
@@ -400,17 +437,31 @@ ros2 topic echo /api/sport/request --once
 - 确认 Go2 高层控制环境已经就绪
 - 必要时把服务端参数 `x` 调大一点点，比如 `0.3`
 
-### 3. 剩余距离一直不变
+### 3. 剩余距离一直不变、任务永远不结束(高频坑)
 
-**现象**:`distance` 每次打印都差不多，像卡住了一样。
+**现象**:客户端日志持续打印`"距离目标还有 1.00 米"`,数值几乎没变化,任务迟迟不自动结束;服务端也只停在`"提交的数据合法,机器人开始运动"`这一行。最后只能 ++ctrl+c++ 强行中断。
 
-**原因**:服务端依赖 `/odom` 来计算已经走了多远。如果 `/odom` 没更新，剩余距离当然不会变。
+**原因**:本章的"到达判定"**完全依赖 `/odom` 的实时更新**——`execute()` 里是用当前位姿和起始位姿相减算已走距离的。如果 `/odom` 不变(驱动没起、话题无数据、或机器人根本没动),`dis` 永远接近 0、`distance = goal - dis` 就永远卡在初始值附近,自然永远到不了 `< 0.2` 的阈值,任务也就永远不会结束。
 
-**解决**:
+!!! danger "Action 的闭环锁在 `/odom` 上"
+    **这是本章最容易踩的坑,也是和 Topic/Service 最大的工程差异**:Action 的"结束时机"不是靠客户端决定,而是靠服务端内部判断。而本章的判断依据就是 `/odom` 这条链。`/odom` 一旦不通,整个 Action 的生命周期就锁死。
 
-- 先看 `ros2 topic echo /odom --once`
-- 确认第 6 章驱动链已经跑通
-- 再检查机器人是不是实际真的在移动
+**排查步骤**:
+
+```bash
+# 1. /odom 到底有没有数据
+ros2 topic echo /odom --once
+
+# 2. 如果没数据,先回第 6 章把 driver 跑起来
+ros2 launch go2_driver_py driver.launch.py use_rviz:=false
+
+# 3. 有数据的话,看服务端是不是在持续发 MOVE
+ros2 topic echo /api/sport/request --once
+
+# 4. 确认机器人真的在物理上移动,而不是动作被卡住
+```
+
+如果前三步都正常但机器人没动、`/odom` 也没变,那问题就不在本章 Action 代码,而是控制链到机器人之间断了——回到第 4/6 章先把基础链路打通,再回来跑本章。
 
 ### 4. 任务结束了，但机器人没有立刻停稳
 
@@ -427,13 +478,29 @@ ros2 topic echo /api/sport/request --once
 
 这一章我们把 Go2 的一个长任务封装成了标准 ROS2 Action。
 
-和上一章相比，最大的收获不是“又多了一个接口”，而是你真正看懂了 Goal、Feedback、Result 三段信息各自负责什么。对于机器人开发来说，这是一种非常常见的任务组织方式。
+和上一章相比，最大的收获不是"又多了一个接口"，而是你真正看懂了 Goal、Feedback、Result 三段信息各自负责什么。对于机器人开发来说，这是一种非常常见的任务组织方式。
 
-更重要的是，你现在已经能把前三章通信主线串起来了:
+### 📊 ROS2 三大通信机制对照(第 7/8/9 章总复习)
 
-- 第 7 章教你最小控制节点怎么持续发 `Request`
-- 第 8 章教你怎么用 Service 做短事务控制
-- 第 9 章教你怎么用 Action 管一个会持续一段时间的任务
+到此你已经把 ROS2 最核心的三种通信机制都实际用了一遍。下面这张表把三章的差异浓缩到一屏:
+
+| 维度 | 📡 Topic(第 7 章) | 📨 Service(第 8 章) | 🎯 Action(第 9 章) |
+|---|---|---|---|
+| **交互模式** | 单向广播 | 一请求一响应 | 一 Goal + 多 Feedback + 一 Result |
+| **时长特性** | 持续,高频刷 | 瞬时短事务 | 长任务(秒级/分钟级) |
+| **客户端能感知啥** | 只能订阅,收不到"处理完没" | 请求阻塞到响应返回 | 能跟进进度、可取消 |
+| **典型场景** | 持续刷控制命令 / 发传感器数据 | 切状态 / 读一次参数 | 跑一段时间再回结果 |
+| **本章 API 钥匙** | `create_publisher(...)` | `create_service(...)` | `ActionServer(...)` |
+| **本章对应案例** | 10 Hz 发 `Request` 驱动 Go2 | 一次 Service 切巡航开关 | 前进 X 米并持续回报距离 |
+| **在本章 mermaid 里的形状** | 粗单向箭头 `==>` | 实线请求 + 虚线响应 | 实线 Goal + 多条虚线回流 |
+
+**怎么选?** 给一个最简口诀:
+
+- 要持续推数据 → **Topic**
+- 要瞬时切状态、一次性问个结果 → **Service**
+- 要跑一段时间、中间要看进度、结束要有结果 → **Action**
+
+这三种机制可以混合使用(本章的 `go2_nav_server` 内部就同时在跑 ActionServer 和 Topic Publisher),实际工程里也往往是组合拳。
 
 ## 下一步
 
