@@ -274,7 +274,11 @@ ros2 topic echo /api/sport/request --once
 - 设 `sport_api_id=1008` 且 ==`x=0.3`== 时，机器人应开始向前**匀速运动**，速度约 ==0.3 m/s==
 - 设 `sport_api_id=1003` 时，机器人应停止运动
 
-![TODO:终端中显示 ros2 param set 与 /api/sport/request 对应关系](../assets/images/07-topic-param-control.png){ width="600" }
+### 结果演示
+
+下面这张图展示的是把 `x` 调到 `0.3` 后,Go2 通过 Topic 控制向前走的实机结果。它对应的是本章最核心的验证点:`ros2 param set` 改的是节点参数,节点再把参数组合成 `/api/sport/request`,最后才落到 Go2 的高层运动接口。
+
+![Topic 参数控制验证: 设置 x=0.3 后 Go2 以约 0.3 m/s 向前走](../assets/images/07-topic-param-control.png){ width="520" }
 
 !!! tip "想自己调着玩？高亮的就是可改的入口"
     上面凡是用 ==黄底高亮== 的数值，都是你可以通过 `ros2 param set /go2_ctrl ...` 现场改的参数。推荐第一次实机时的安全范围:

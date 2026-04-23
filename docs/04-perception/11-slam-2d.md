@@ -590,7 +590,16 @@ ros2 service call /slam_toolbox/serialize_map \
 
 ## 结果验证
 
-![TODO:RViz 建图中的截图,左侧显示 Displays 面板,主视图显示绿色激光扫描和白色栅格地图,机器人模型在地图中央](../assets/images/11-slam-rviz-mapping.png){ width="640" }
+### 结果演示
+
+RViz 中同时看到绿色 `/scan`、白色/灰色栅格地图和机器人模型,就说明第 11 章的主链路已经成立:点云先被转成 2D LaserScan,SLAM Toolbox 再用它增量构建 `/map`。如果只有激光没有地图,优先查 `slam_toolbox`;如果连激光都没有,回去查点云转 `/scan`。
+
+![RViz 建图结果:左侧 Displays 面板显示 map/scan,主视图显示绿色激光扫描和栅格地图](../assets/images/11-slam-rviz-mapping.png){ width="720" }
+
+<video controls width="720">
+  <source src="../assets/videos/11-slam-demo.webm" type="video/webm">
+  你的浏览器不支持 video 标签,可以直接打开 `docs/assets/videos/11-slam-demo.webm` 查看演示。
+</video>
 
 ### 命令行检查
 

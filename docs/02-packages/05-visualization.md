@@ -263,7 +263,11 @@ ros2 run tf2_tools view_frames
 - 机器人姿态会跟着真实状态变化
 - Fixed Frame 设成 `odom` 后，模型位置不再飘成一坨
 
-![TODO:RViz 中显示 RobotModel、TF 和 /odom 轨迹](../assets/images/05-visualization-driver-rviz.png){ width="600" }
+### 结果演示
+
+RViz 中能同时看到 RobotModel、TF 和 `/odom` 轨迹,就说明可视化链路已经能把第 6 章驱动发布的状态画出来。后面排查导航问题时,这张 RViz 视图就是你判断“模型姿态、里程计、坐标系有没有乱”的第一现场。
+
+![RViz 中显示 Go2 RobotModel、TF 和 /odom 轨迹](../assets/images/05-visualization-driver-rviz.png){ width="720" }
 
 ## 常见问题
 

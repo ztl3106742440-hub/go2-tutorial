@@ -327,7 +327,13 @@ ros2 interface show go2_tutorial_inter/srv/Cruising
 ros2 topic echo /api/sport/request --once
 ```
 
-![TODO:终端显示 ros2 service call /cruising 与 point 响应](../assets/images/08-service-cruising.png){ width="600" }
+### 结果演示
+
+下面两张终端截图展示了 `/cruising` Service 被调用后的关键现象:服务端收到请求后开始执行巡航/转向逻辑,客户端能拿到响应结果。Service 和 Topic 的区别也在这里很直观:Topic 是持续发控制流,Service 是“一次请求,一次响应”。
+
+![调用 /cruising 后,服务端开始处理巡航请求](../assets/images/08-service-turn-1.png){ width="620" }
+
+![Service 客户端收到 /cruising 返回结果,终端显示响应信息](../assets/images/08-service-turn-2.png){ width="620" }
 
 ## 常见问题
 

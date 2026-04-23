@@ -232,8 +232,6 @@ ros2 topic echo /scan --once
 ros2 topic hz /scan
 ```
 
-![TODO:RViz 中同时显示点云和 /scan 投影结果](../assets/images/10-lidar-scan-projection.png){ width="600" }
-
 ## 常见问题
 
 ### 1. `/scan` 一直没有数据

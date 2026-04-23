@@ -281,7 +281,11 @@ ros2 run tf2_tools view_frames
 - `/joint_states` 里有 12 个关节角度
 - TF 图里已经连上 `odom -> base`
 
-![TODO:RViz 中显示 odom、joint_states 和完整 TF 树](../assets/images/06-driver-base-stack.png){ width="600" }
+### 结果演示
+
+截图里 RViz 已经能显示 Go2 模型和底座坐标系,说明 `/joint_states`、`/odom` 和 TF 都进入了可视化链路。这里重点不是画面好不好看,而是确认 `odom -> base` 这条主链稳定存在,否则后面 SLAM 和 Nav2 都会跟着炸。
+
+![RViz 中显示 Go2 驱动发布的 odom、joint_states 和完整 TF 主链](../assets/images/06-driver-base-stack.png){ width="720" }
 
 ## 常见问题
 

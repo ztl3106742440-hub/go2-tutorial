@@ -307,7 +307,11 @@ ros2 node list
 ros2 topic echo /api/sport/request --once
 ```
 
-![TODO:终端显示九宫格遥控说明和 /api/sport/request 输出](../assets/images/03-keyboard-teleop.png){ width="600" }
+### 结果演示
+
+下面这张截图里,左侧终端是键盘控制节点打印的按键说明,右侧终端是 `/api/sport/request` 的实际输出。只要按键后右侧消息跟着刷新,就说明“键盘输入 → Go2 高层 Request”这条链路已经打通。
+
+![键盘控制节点启动后,终端显示九宫格按键说明和 /api/sport/request 输出](../assets/images/03-keyboard-teleop.png){ width="620" }
 
 ## 常见问题
 

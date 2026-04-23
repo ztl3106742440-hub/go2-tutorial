@@ -669,10 +669,11 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
 
 4. 实机表现稳定：`i` / `,` 能前后走，`j` / `l` 能原地转，`Shift + J` / `Shift + L` 能左右平移，松手后不会继续磨蹭。
 
-媒体内容先留占位，后面统一补录：
+### 结果演示
 
-<!-- TODO(媒体): 补一张 /cmd_vel 与 /api/sport/request 对照截图，显示 Twist 与 Request 的映射 -->
-<!-- TODO(媒体): 录制 04-twist-bridge-demo.gif，展示 teleop_twist_keyboard -> twist_bridge -> Go2 的完整联调过程 -->
+下面这张截图用来确认本章最关键的映射关系:上游 `/cmd_vel` 里是标准 `Twist`,桥接节点输出到 `/api/sport/request` 后变成 Go2 高层接口能识别的 `Request`。看到 `parameter` 里出现 `x/y/z` 这组 JSON,才算真的经过了桥接,不是上一章键盘节点直接在控制 Go2。
+
+![Twist 桥接验证: teleop_twist_keyboard 发布 /cmd_vel, twist_bridge 转成 /api/sport/request](../assets/images/04-twist-bridge-demo.png){ width="620" }
 
 ---
 

@@ -1033,6 +1033,16 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard \
 
 只要你开始按键盘,`twist_mux` 就会把控制权切给人工遥控。手一松,导航速度在超时后会重新接管。
 
+### 结果演示
+
+下面的视频展示了第 12 章 Nav2 基线的实机效果:RViz 中完成初始位姿设置后,Nav2 依据第 11 章保存的地图规划路径,再通过 `/cmd_vel_nav → twist_mux → /cmd_vel → go2_twist_bridge` 这条链路驱动 Go2 执行到点任务。看视频时重点盯三件事:粒子云是否收敛、路径是否稳定刷新、Go2 实际运动方向是否和 RViz 里的机器人朝向一致。
+
+<video controls width="720">
+  <source src="../assets/videos/12-nav2-demo.webm" type="video/webm">
+  <source src="../assets/videos/12-nav2-demo.mp4" type="video/mp4">
+  你的浏览器不支持 video 标签,可以直接打开 `docs/assets/videos/12-nav2-demo.mp4` 查看演示。
+</video>
+
 !!! tip "推荐的上电顺序"
     第一次跑这章,我建议你就记这一套顺序:
 
