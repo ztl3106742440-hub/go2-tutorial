@@ -410,7 +410,7 @@ ros2 topic echo /api/sport/request --once
 
 当任务执行中时，`/api/sport/request` 的 `api_id` 应该是 `MOVE`；到达终点后，它应切回 `STOPMOVE`。
 
-![TODO:终端中显示 /nav feedback 与最终 point 结果](../assets/images/09-action-nav-feedback.png){ width="600" }
+![终端中显示 /nav feedback 与最终 point 结果](../assets/images/09-action-nav-feedback.png){ width="600" }
 
 ## 常见问题
 
