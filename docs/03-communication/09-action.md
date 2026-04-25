@@ -350,7 +350,29 @@ colcon build --packages-select go2_tutorial_inter go2_tutorial_py
 source install/setup.bash
 ```
 
-第一终端启动 Action 服务端:
+!!! danger "🚨 跑之前一定要先起 driver"
+    本章 Action 的“到达判定”完全依赖 `/odom` 实时刷新（详见下方[常见问题 3](#3)）。如果不先启动 driver，`/odom` 没有数据，距离会永远卡在初始值，任务永远不会结束。
+    
+    **务必先起 driver,再跑 server / client。**
+
+第一终端启动 driver(提供 `/odom` 与控制链路):
+
+```bash
+# 启动 Go2 driver,让 /odom 和 /api/sport/request 通起来
+cd ~/unitree_go2_ws
+source install/setup.bash
+ros2 launch go2_driver_py driver.launch.py use_rviz:=false
+```
+
+启动后，可以另开一个终端确认 `/odom` 真的在出数据再继续(没数据就先回第 6 章排查):
+
+```bash
+# 看 /odom 频率（一般 10~50 Hz）以及一次实际坐标
+ros2 topic hz /odom
+ros2 topic echo /odom --once
+```
+
+第二终端启动 Action 服务端:
 
 ```bash
 # 启动 Nav Action 服务端
@@ -359,7 +381,7 @@ source install/setup.bash
 ros2 run go2_tutorial_py go2_nav_server
 ```
 
-第二终端启动客户端，让机器人前进 `1.0` 米:
+第三终端启动客户端，让机器人前进 `1.0` 米:
 
 ```bash
 # 发送一个 1.0 米的前进目标
