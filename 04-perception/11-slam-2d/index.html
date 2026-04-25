@@ -3213,11 +3213,7 @@
 <h3 id="_16">结果演示<a class="headerlink" href="#_16" title="锚点链接">&para;</a></h3>
 <p>RViz 中同时看到绿色 <code>/scan</code>、白色/灰色栅格地图和机器人模型,就说明第 11 章的主链路已经成立:点云先被转成 2D LaserScan,SLAM Toolbox 再用它增量构建 <code>/map</code>。如果只有激光没有地图,优先查 <code>slam_toolbox</code>;如果连激光都没有,回去查点云转 <code>/scan</code>。</p>
 <p><img alt="RViz 建图结果:左侧 Displays 面板显示 map/scan,主视图显示绿色激光扫描和栅格地图" src="../../assets/images/11-slam-rviz-mapping.png" width="720" /></p>
-<video controls width="720">
-  <source src="../assets/videos/11-slam-demo.webm" type="video/webm">
-  你的浏览器不支持 video 标签,可以直接打开 `docs/assets/videos/11-slam-demo.webm` 查看演示。
-</video>
-
+<p><img alt="SLAM 实机演示:RViz 中 slam_toolbox 增量构建栅格地图,右侧终端可看到 pointcloud_timestamp_fix、slam_toolbox 等节点日志" src="../../assets/images/11-slam-demo.png" width="720" /></p>
 <h3 id="_17">命令行检查<a class="headerlink" href="#_17" title="锚点链接">&para;</a></h3>
 <p>打开另一个终端,依次跑:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># 1) /scan 话题应该有数据,类型是 LaserScan</span>

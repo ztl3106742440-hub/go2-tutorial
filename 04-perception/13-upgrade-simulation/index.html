@@ -1524,7 +1524,7 @@
   <a href="#dds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        准备一个“只走回环网卡”的 DDS 配置
+        仿真开工前:清掉真机遗留的 DDS 绑定
       
     </span>
   </a>
@@ -2317,7 +2317,7 @@
   <a href="#dds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        准备一个“只走回环网卡”的 DDS 配置
+        仿真开工前:清掉真机遗留的 DDS 绑定
       
     </span>
   </a>
@@ -2962,43 +2962,53 @@
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>rosdep<span class="w"> </span>init
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>rosdep<span class="w"> </span>update
 </span></code></pre></div>
-<h3 id="dds">准备一个“只走回环网卡”的 DDS 配置<a class="headerlink" href="#dds" title="锚点链接">&para;</a></h3>
-<p>如果你前面一直在连真机,很可能已经把 <code>CYCLONEDDS_URI</code> 绑到了某块有线网卡上。真机断开后,仿真节点就容易出现莫名其妙的 DDS 报错。</p>
-<p>最稳的做法是给仿真单独准备一份只走 <code>lo</code> 的配置。</p>
-<p>比如你可以先建目录:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/go2_sim_ws/config
+<h3 id="dds">仿真开工前:清掉真机遗留的 DDS 绑定<a class="headerlink" href="#dds" title="锚点链接">&para;</a></h3>
+<p>这是本章最容易被忽视、但一旦踩到就很难定位的一步。</p>
+<p>前面 4–12 章为了连真机,我们通常会:</p>
+<ul>
+<li><code>export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp</code></li>
+<li><code>export CYCLONEDDS_URI=file://.../cyclonedds-xxx.xml</code>(把 DDS 绑到实机网段或某块有线网卡)</li>
+</ul>
+<p>到了第 13 章,场景完全反过来:所有节点(包括 Gazebo 内嵌的 ROS 节点)都只在本机互相发现、互相订阅。如果真机的 DDS 绑定还留着,你会遇到一个<strong>非常迷惑</strong>的现象:</p>
+<ul>
+<li>Gazebo 启动了</li>
+<li><code>robot_state_publisher</code> 也起来了、能看到全部 link</li>
+<li>但 <code>spawn_entity.py</code> 一直卡在 <code>Waiting for entity xml on /robot_description</code>,模型永远进不了 Gazebo</li>
+</ul>
+<p>原因是 <code>/robot_description</code> 是 <strong>latched / transient_local</strong> 话题,需要 DDS 在 QoS 握手时补发历史消息给晚加入的订阅者。真机场景下那份 CycloneDDS 配置,对 Gazebo 内嵌 ROS 节点来说并不总能完成这次握手。</p>
+<p><strong>推荐做法:仿真终端里直接 unset,让 ROS 2 回落到默认 FastDDS。</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 开每一个仿真终端前都执行这两行</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">unset</span><span class="w"> </span>CYCLONEDDS_URI
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">unset</span><span class="w"> </span>RMW_IMPLEMENTATION
 </span></code></pre></div>
-<p>然后在 <code>config/cyclonedds-lo.xml</code> 里写入:</p>
-<div class="language-xml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">&lt;CycloneDDS</span><span class="w"> </span><span class="na">xmlns=</span><span class="s">&quot;https://cdds.io/config&quot;</span><span class="nt">&gt;</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&lt;Domain</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;any&quot;</span><span class="nt">&gt;</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">&lt;General&gt;</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">      </span><span class="nt">&lt;Interfaces&gt;</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="nt">&lt;NetworkInterface</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;lo&quot;</span><span class="nt">/&gt;</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">      </span><span class="nt">&lt;/Interfaces&gt;</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">      </span><span class="nt">&lt;AllowMulticast&gt;</span>false<span class="nt">&lt;/AllowMulticast&gt;</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nt">&lt;/General&gt;</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span><span class="nt">&lt;/Domain&gt;</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="nt">&lt;/CycloneDDS&gt;</span>
+<p>这不是一条"绕过"建议,而是本书验证下来<strong>在当前机器上最稳</strong>的做法。默认 FastDDS 对 Gazebo 的 latched 话题握手很顺,spawn_entity 能在 1–2 秒内拿到 URDF。</p>
+<p>为了避免每次手抖忘记,建议在 <code>~/go2_sim_ws/</code> 根目录放一个小启动脚本:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># ~/go2_sim_ws/run_sim.sh</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1">#!/bin/bash</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># 仿真专用环境:清掉真机 DDS 绑定,用默认 FastDDS</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nb">unset</span><span class="w"> </span>CYCLONEDDS_URI
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nb">unset</span><span class="w"> </span>RMW_IMPLEMENTATION
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="nb">source</span><span class="w"> </span>/opt/ros/humble/setup.bash
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="nb">source</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/go2_sim_ws/install/setup.bash&quot;</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span>
 </span></code></pre></div>
-<p>本章运行仿真前,只要在终端里临时导出它:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 让 DDS 在仿真时只走本机回环</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CYCLONEDDS_URI</span><span class="o">=</span>file://<span class="nv">$HOME</span>/go2_sim_ws/config/cyclonedds-lo.xml
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>~/go2_sim_ws/run_sim.sh
 </span></code></pre></div>
-<p>如果你没有绑过真机 DDS,也可以简单粗暴地先执行:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 最简单的排查方式:先把旧的 DDS 绑定清掉</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">unset</span><span class="w"> </span>CYCLONEDDS_URI
-</span></code></pre></div>
+<p>之后所有仿真命令都用 <code>./run_sim.sh ros2 launch ...</code> 的形式跑,就不会再被残留环境变量咬。</p>
+<div class="admonition warning">
+<p class="admonition-title">为什么不推荐 <code>CYCLONEDDS_URI=file://.../cyclonedds-lo.xml</code> 这条路</p>
+<p>之前这一节曾写过一份"只走 <code>lo</code> 的 CycloneDDS 配置"方案,思路是让仿真和真机可以并存切换。但实测下来,这种 loopback-only 配置会让 <code>spawn_entity.py</code> 始终收不到 <code>robot_state_publisher</code> 的 latched 话题,卡在 <code>Waiting for entity xml</code>。想走这条路可以,但要额外调 <code>AllowMulticast</code>、<code>Peers</code> 等参数,不在本章射程内。<strong>本章的保底方案就是 unset</strong>。</p>
+</div>
 <h2 id="_17">实现步骤<a class="headerlink" href="#_17" title="锚点链接">&para;</a></h2>
 <h3 id="_18">步骤一:把仿真仓库拉进工作空间<a class="headerlink" href="#_18" title="锚点链接">&para;</a></h3>
 <p>现在我们正式搭环境。</p>
 <p>先创建工作空间并克隆聚合仓库:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 创建教程统一工作空间</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/go2_sim_ws/src
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws/src
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># 这一个仓库里已经打包了 CHAMP、Go2 描述包和配置包</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/anujjain-dev/unitree-go2-ros2.git
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 创建教程统一工作空间</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/go2_sim_ws/src
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws/src
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># 这一个仓库里已经打包了 CHAMP、Go2 描述包和配置包</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/anujjain-dev/unitree-go2-ros2.git
 </span></code></pre></div>
 <p>这一步为什么我推荐直接用这个聚合仓库,而不是自己手动拼 <code>champ + go2_description + go2_config</code>?</p>
 <p>原因很简单:</p>
@@ -3008,9 +3018,9 @@
 <li>你现在最缺的不是“再多控制一份仓库”,而是先把底座跑起来</li>
 </ul>
 <p>接着在工作空间根目录安装依赖:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 让 rosdep 把仓库声明过的依赖一次装齐</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>rosdep<span class="w"> </span>install<span class="w"> </span>--from-paths<span class="w"> </span>src<span class="w"> </span>--ignore-src<span class="w"> </span>-r<span class="w"> </span>-y
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 让 rosdep 把仓库声明过的依赖一次装齐</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>rosdep<span class="w"> </span>install<span class="w"> </span>--from-paths<span class="w"> </span>src<span class="w"> </span>--ignore-src<span class="w"> </span>-r<span class="w"> </span>-y
 </span></code></pre></div>
 <h3 id="_19">步骤二:先看清这套仓库里谁负责什么<a class="headerlink" href="#_19" title="锚点链接">&para;</a></h3>
 <p>别急着 <code>colcon build</code>。先看明白你后面会改到的关键位置:</p>
@@ -3033,23 +3043,23 @@
 </ol>
 <h4 id="vlp-16">先在主模型里包含 VLP-16<a class="headerlink" href="#vlp-16" title="锚点链接">&para;</a></h4>
 <p><code>robot_VLP.xacro</code> 的关键就是这一行:</p>
-<div class="language-xml highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nt">&lt;xacro:include</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;$(find go2_description)/xacro/velodyne.xacro&quot;</span><span class="nt">/&gt;</span>
+<div class="language-xml highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">&lt;xacro:include</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;$(find go2_description)/xacro/velodyne.xacro&quot;</span><span class="nt">/&gt;</span>
 </span></code></pre></div>
 <p>这意味着这份模型不再是“裸 Go2”,而是“挂了 VLP-16 的 Go2”。</p>
 <p>如果你以后想切回 2D 激光模型,也正是在这里把 <code>velodyne.xacro</code> 换成 <code>laser.xacro</code>。</p>
 <h4 id="velodynexacro">再看 <code>velodyne.xacro</code> 里真正发生了什么<a class="headerlink" href="#velodynexacro" title="锚点链接">&para;</a></h4>
 <p>下面这段是你最该看懂的部分:</p>
-<div class="language-xml highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">&lt;joint</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne_base_mount_joint&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;fixed&quot;</span><span class="nt">&gt;</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span><span class="nt">&lt;origin</span><span class="w"> </span><span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span><span class="w"> </span><span class="na">xyz=</span><span class="s">&quot;0.2 0 0.08&quot;</span><span class="nt">/&gt;</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">&lt;parent</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;base_link&quot;</span><span class="nt">/&gt;</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">&lt;child</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne_base_link&quot;</span><span class="nt">/&gt;</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nt">&lt;/joint&gt;</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="nt">&lt;joint</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne_base_scan_joint&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;fixed&quot;</span><span class="nt">&gt;</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="nt">&lt;origin</span><span class="w"> </span><span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span><span class="w"> </span><span class="na">xyz=</span><span class="s">&quot;0 0 0.0377&quot;</span><span class="nt">/&gt;</span>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="nt">&lt;parent</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne_base_link&quot;</span><span class="nt">/&gt;</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">    </span><span class="nt">&lt;child</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne&quot;</span><span class="nt">/&gt;</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="nt">&lt;/joint&gt;</span>
+<div class="language-xml highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nt">&lt;joint</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne_base_mount_joint&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;fixed&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="nt">&lt;origin</span><span class="w"> </span><span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span><span class="w"> </span><span class="na">xyz=</span><span class="s">&quot;0.2 0 0.08&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nt">&lt;parent</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;base_link&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">&lt;child</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne_base_link&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="nt">&lt;/joint&gt;</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="nt">&lt;joint</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne_base_scan_joint&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;fixed&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="nt">&lt;origin</span><span class="w"> </span><span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span><span class="w"> </span><span class="na">xyz=</span><span class="s">&quot;0 0 0.0377&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">    </span><span class="nt">&lt;parent</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne_base_link&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">    </span><span class="nt">&lt;child</span><span class="w"> </span><span class="na">link=</span><span class="s">&quot;velodyne&quot;</span><span class="nt">/&gt;</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="nt">&lt;/joint&gt;</span>
 </span></code></pre></div>
 <p>它做了两件事:</p>
 <ul>
@@ -3059,31 +3069,31 @@
 <p>也就是说,你在 RViz 里看到的 <code>/velodyne_points</code>,并不是“悬浮在世界里的一团点”,而是明确挂在机器人本体上的。</p>
 <h4 id="gazebo">最后是 Gazebo 插件<a class="headerlink" href="#gazebo" title="锚点链接">&para;</a></h4>
 <p>真正让 <code>/velodyne_points</code> 出来的,是同一个文件里的这段插件配置:</p>
-<div class="language-xml highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">&lt;gazebo</span><span class="w"> </span><span class="na">reference=</span><span class="s">&quot;velodyne&quot;</span><span class="nt">&gt;</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&lt;sensor</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne-VLP16&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;ray&quot;</span><span class="nt">&gt;</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nt">&lt;update_rate&gt;</span>10<span class="nt">&lt;/update_rate&gt;</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nt">&lt;ray&gt;</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">      </span><span class="nt">&lt;scan&gt;</span>
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">        </span><span class="nt">&lt;horizontal&gt;</span>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">          </span><span class="nt">&lt;samples&gt;</span>1800<span class="nt">&lt;/samples&gt;</span>
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">          </span><span class="nt">&lt;min_angle&gt;</span>-3.141592653589793<span class="nt">&lt;/min_angle&gt;</span>
-</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">          </span><span class="nt">&lt;max_angle&gt;</span>3.141592653589793<span class="nt">&lt;/max_angle&gt;</span>
-</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">        </span><span class="nt">&lt;/horizontal&gt;</span>
-</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">        </span><span class="nt">&lt;vertical&gt;</span>
-</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">          </span><span class="nt">&lt;samples&gt;</span>16<span class="nt">&lt;/samples&gt;</span>
-</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">          </span><span class="nt">&lt;min_angle&gt;</span>-0.2617993877991494<span class="nt">&lt;/min_angle&gt;</span>
-</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">          </span><span class="nt">&lt;max_angle&gt;</span>0.2617993877991494<span class="nt">&lt;/max_angle&gt;</span>
-</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">        </span><span class="nt">&lt;/vertical&gt;</span>
-</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">      </span><span class="nt">&lt;/scan&gt;</span>
-</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">    </span><span class="nt">&lt;/ray&gt;</span>
-</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">    </span><span class="nt">&lt;plugin</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;libgazebo_ros_velodyne_laser.so&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;gazebo_ros_laser_controller&quot;</span><span class="nt">&gt;</span>
-</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">      </span><span class="nt">&lt;ros&gt;</span>
-</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="w">        </span><span class="nt">&lt;remapping&gt;</span>~/out:=velodyne_points<span class="nt">&lt;/remapping&gt;</span>
-</span><span id="__span-12-21"><a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">      </span><span class="nt">&lt;/ros&gt;</span>
-</span><span id="__span-12-22"><a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">      </span><span class="nt">&lt;frame_name&gt;</span>velodyne<span class="nt">&lt;/frame_name&gt;</span>
-</span><span id="__span-12-23"><a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">    </span><span class="nt">&lt;/plugin&gt;</span>
-</span><span id="__span-12-24"><a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">  </span><span class="nt">&lt;/sensor&gt;</span>
-</span><span id="__span-12-25"><a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="nt">&lt;/gazebo&gt;</span>
+<div class="language-xml highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">&lt;gazebo</span><span class="w"> </span><span class="na">reference=</span><span class="s">&quot;velodyne&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&lt;sensor</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;velodyne-VLP16&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;ray&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">&lt;update_rate&gt;</span>10<span class="nt">&lt;/update_rate&gt;</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">&lt;ray&gt;</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">      </span><span class="nt">&lt;scan&gt;</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">        </span><span class="nt">&lt;horizontal&gt;</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">          </span><span class="nt">&lt;samples&gt;</span>1800<span class="nt">&lt;/samples&gt;</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">          </span><span class="nt">&lt;min_angle&gt;</span>-3.141592653589793<span class="nt">&lt;/min_angle&gt;</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">          </span><span class="nt">&lt;max_angle&gt;</span>3.141592653589793<span class="nt">&lt;/max_angle&gt;</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">        </span><span class="nt">&lt;/horizontal&gt;</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">        </span><span class="nt">&lt;vertical&gt;</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">          </span><span class="nt">&lt;samples&gt;</span>16<span class="nt">&lt;/samples&gt;</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">          </span><span class="nt">&lt;min_angle&gt;</span>-0.2617993877991494<span class="nt">&lt;/min_angle&gt;</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">          </span><span class="nt">&lt;max_angle&gt;</span>0.2617993877991494<span class="nt">&lt;/max_angle&gt;</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">        </span><span class="nt">&lt;/vertical&gt;</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="w">      </span><span class="nt">&lt;/scan&gt;</span>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="w">    </span><span class="nt">&lt;/ray&gt;</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="w">    </span><span class="nt">&lt;plugin</span><span class="w"> </span><span class="na">filename=</span><span class="s">&quot;libgazebo_ros_velodyne_laser.so&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;gazebo_ros_laser_controller&quot;</span><span class="nt">&gt;</span>
+</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="w">      </span><span class="nt">&lt;ros&gt;</span>
+</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="w">        </span><span class="nt">&lt;remapping&gt;</span>~/out:=velodyne_points<span class="nt">&lt;/remapping&gt;</span>
+</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a><span class="w">      </span><span class="nt">&lt;/ros&gt;</span>
+</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a><span class="w">      </span><span class="nt">&lt;frame_name&gt;</span>velodyne<span class="nt">&lt;/frame_name&gt;</span>
+</span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="w">    </span><span class="nt">&lt;/plugin&gt;</span>
+</span><span id="__span-11-24"><a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="w">  </span><span class="nt">&lt;/sensor&gt;</span>
+</span><span id="__span-11-25"><a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a><span class="nt">&lt;/gazebo&gt;</span>
 </span></code></pre></div>
 <p>这里最关键的不是每个数字本身,而是你要知道:</p>
 <ul>
@@ -3114,19 +3124,19 @@
 <p><strong><code>controller_manager</code> 还没准备好,你就抢着去加载控制器了。</strong></p>
 <p>这里本书沿用的修法是 <code>RegisterEventHandler + OnProcessExit</code>。</p>
 <p><code>champ_gazebo/launch/gazebo.launch.py</code> 里的关键逻辑长这样:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">load_joint_state_after_spawn</span> <span class="o">=</span> <span class="n">RegisterEventHandler</span><span class="p">(</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">event_handler</span><span class="o">=</span><span class="n">OnProcessExit</span><span class="p">(</span>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>        <span class="n">target_action</span><span class="o">=</span><span class="n">start_gazebo_spawner_cmd</span><span class="p">,</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>        <span class="n">on_exit</span><span class="o">=</span><span class="p">[</span><span class="n">load_joint_state_controller</span><span class="p">],</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="p">)</span>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="p">)</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="n">load_effort_after_joint_state</span> <span class="o">=</span> <span class="n">RegisterEventHandler</span><span class="p">(</span>
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="n">event_handler</span><span class="o">=</span><span class="n">OnProcessExit</span><span class="p">(</span>
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>        <span class="n">target_action</span><span class="o">=</span><span class="n">load_joint_state_controller</span><span class="p">,</span>
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>        <span class="n">on_exit</span><span class="o">=</span><span class="p">[</span><span class="n">load_joint_trajectory_effort_controller</span><span class="p">],</span>
-</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>    <span class="p">)</span>
-</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">load_joint_state_after_spawn</span> <span class="o">=</span> <span class="n">RegisterEventHandler</span><span class="p">(</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="n">event_handler</span><span class="o">=</span><span class="n">OnProcessExit</span><span class="p">(</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>        <span class="n">target_action</span><span class="o">=</span><span class="n">start_gazebo_spawner_cmd</span><span class="p">,</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>        <span class="n">on_exit</span><span class="o">=</span><span class="p">[</span><span class="n">load_joint_state_controller</span><span class="p">],</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="p">)</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="p">)</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="n">load_effort_after_joint_state</span> <span class="o">=</span> <span class="n">RegisterEventHandler</span><span class="p">(</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="n">event_handler</span><span class="o">=</span><span class="n">OnProcessExit</span><span class="p">(</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>        <span class="n">target_action</span><span class="o">=</span><span class="n">load_joint_state_controller</span><span class="p">,</span>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>        <span class="n">on_exit</span><span class="o">=</span><span class="p">[</span><span class="n">load_joint_trajectory_effort_controller</span><span class="p">],</span>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>    <span class="p">)</span>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>意思是:</p>
 <ol>
@@ -3135,7 +3145,7 @@
 <li><code>joint_states_controller</code> 激活后,再加载 <code>joint_group_effort_controller</code></li>
 </ol>
 <p>这几步顺序不能乱。乱了以后,你最容易看到的报错就是:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Controller &#39;xxx&#39; not found
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Controller &#39;xxx&#39; not found
 </span></code></pre></div>
 <p>或者更讨厌一点,表面没报错,但机器人就是不站。</p>
 <h3 id="_21">步骤五:编译整个仿真工作空间<a class="headerlink" href="#_21" title="锚点链接">&para;</a></h3>
@@ -3146,20 +3156,20 @@
 <li><code>-DCMAKE_POLICY_VERSION_MINIMUM=3.5</code></li>
 </ul>
 <p>命令如下:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># 编译整个仿真工作空间</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--symlink-install<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span>--cmake-args<span class="w"> </span>-DCMAKE_POLICY_VERSION_MINIMUM<span class="o">=</span><span class="m">3</span>.5
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>
-</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># 编译整个仿真工作空间</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--symlink-install<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span>--cmake-args<span class="w"> </span>-DCMAKE_POLICY_VERSION_MINIMUM<span class="o">=</span><span class="m">3</span>.5
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
 </span></code></pre></div>
 <p>这条命令里的 <code>-DCMAKE_POLICY_VERSION_MINIMUM=3.5</code> 看着像个小怪招,其实是当时排掉 CMake 兼容问题后留下来的保险丝。</p>
 <p>如果你只编这一章的 Gazebo 基础盘,它未必每次都救场;但后面一旦你把更多第三方包拉进同一个工作区,这个参数很容易省你一轮莫名其妙的构建报错。</p>
 <h3 id="gazebo-go2-vlp-16-rviz">步骤六:启动 Gazebo + Go2 + VLP-16 + RViz<a class="headerlink" href="#gazebo-go2-vlp-16-rviz" title="锚点链接">&para;</a></h3>
 <p>本章的主入口就是:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># 启动 Go2 + VLP-16 仿真,并顺手打开 RViz</span>
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_config<span class="w"> </span>gazebo_velodyne.launch.py<span class="w"> </span>rviz:<span class="o">=</span><span class="nb">true</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># 启动 Go2 + VLP-16 仿真,并顺手打开 RViz</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>launch<span class="w"> </span>go2_config<span class="w"> </span>gazebo_velodyne.launch.py<span class="w"> </span>rviz:<span class="o">=</span><span class="nb">true</span>
 </span></code></pre></div>
 <p>默认情况下,这个 launch 会做三件事:</p>
 <ol>
@@ -3181,10 +3191,10 @@
 <li>雷达和点云会跟着动</li>
 </ul>
 <p>如果你想尽量贴近当前代码,我建议直接用仓库里的 <code>champ_teleop.py</code>,并把它的输出话题改到 <code>/cmd_vel</code>:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># 用仓库里的键盘遥控节点控制仿真中的 Go2</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>ros2<span class="w"> </span>run<span class="w"> </span>champ_teleop<span class="w"> </span>champ_teleop.py<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>cmd_vel_topic:<span class="o">=</span>/cmd_vel
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># 用仓库里的键盘遥控节点控制仿真中的 Go2</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>run<span class="w"> </span>champ_teleop<span class="w"> </span>champ_teleop.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>cmd_vel_topic:<span class="o">=</span>/cmd_vel
 </span></code></pre></div>
 <p>它的好处是:</p>
 <ul>
@@ -3192,10 +3202,10 @@
 <li>后面你如果想顺手试身体姿态控制,它也已经留好了接口</li>
 </ul>
 <p>如果你只想最快验证“能不能走”,也可以直接用标准键盘工具:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># 最小可用方案:标准 Twist 键盘控制</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>ros2<span class="w"> </span>run<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-r<span class="w"> </span>cmd_vel:<span class="o">=</span>/cmd_vel
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># 最小可用方案:标准 Twist 键盘控制</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>run<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-r<span class="w"> </span>cmd_vel:<span class="o">=</span>/cmd_vel
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">这一章先别急着开 use_slam</p>
@@ -3204,27 +3214,30 @@
 <h2 id="_22">编译与运行<a class="headerlink" href="#_22" title="锚点链接">&para;</a></h2>
 <p>这一节把前面零散的动作收成一套可直接照抄的顺序。</p>
 <h3 id="1">终端 1:启动仿真<a class="headerlink" href="#1" title="锚点链接">&para;</a></h3>
-<p>如果你之前配置过真机 DDS,先切回回环网卡:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># 仿真时优先走本机回环,别让旧的真机 DDS 配置捣乱</span>
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CYCLONEDDS_URI</span><span class="o">=</span>file://<span class="nv">$HOME</span>/go2_sim_ws/config/cyclonedds-lo.xml
+<p>直接走本章前面准备好的 <code>run_sim.sh</code>,它会在同一行里把真机 DDS 绑定清掉、再 source 仿真工作空间:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># 启动 Gazebo + Go2 + VLP-16 + RViz</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>launch<span class="w"> </span>go2_config<span class="w"> </span>gazebo_velodyne.launch.py<span class="w"> </span>rviz:<span class="o">=</span><span class="nb">true</span>
 </span></code></pre></div>
-<p>然后启动 Gazebo:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># 启动 Gazebo + Go2 + VLP-16 + RViz</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_config<span class="w"> </span>gazebo_velodyne.launch.py<span class="w"> </span>rviz:<span class="o">=</span><span class="nb">true</span>
+<p>没准备 <code>run_sim.sh</code>?那就每次手动清一次:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># 手动版:每个仿真终端前都要执行</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nb">unset</span><span class="w"> </span>CYCLONEDDS_URI
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nb">unset</span><span class="w"> </span>RMW_IMPLEMENTATION
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_config<span class="w"> </span>gazebo_velodyne.launch.py<span class="w"> </span>rviz:<span class="o">=</span><span class="nb">true</span>
 </span></code></pre></div>
 <h3 id="2">终端 2:启动键盘控制<a class="headerlink" href="#2" title="锚点链接">&para;</a></h3>
-<p>等 Gazebo 完全加载、Go2 站稳以后,再开第二个终端:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># 键盘控制,让 Go2 在室内世界里走起来</span>
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>ros2<span class="w"> </span>run<span class="w"> </span>champ_teleop<span class="w"> </span>champ_teleop.py<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>cmd_vel_topic:<span class="o">=</span>/cmd_vel
+<p>等 Gazebo 完全加载、Go2 站稳以后,再开第二个终端(同样用 <code>run_sim.sh</code> 包一层):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># 键盘控制,让 Go2 在室内世界里走起来</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>run<span class="w"> </span>champ_teleop<span class="w"> </span>champ_teleop.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>cmd_vel_topic:<span class="o">=</span>/cmd_vel
 </span></code></pre></div>
 <p>如果你不想用仓库里的 teleop,就改成:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># 只用标准 Twist 键盘也可以</span>
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
-</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>ros2<span class="w"> </span>run<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-r<span class="w"> </span>cmd_vel:<span class="o">=</span>/cmd_vel
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># 只用标准 Twist 键盘也可以</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>run<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span>teleop_twist_keyboard<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span>--ros-args<span class="w"> </span>-r<span class="w"> </span>cmd_vel:<span class="o">=</span>/cmd_vel
 </span></code></pre></div>
 <h3 id="_23">一次性回顾启动顺序<a class="headerlink" href="#_23" title="锚点链接">&para;</a></h3>
 <p>第一次上手时,请强迫自己按这个顺序来:</p>
@@ -3258,17 +3271,17 @@
 <p>如果你一开场就看到 Go2 像失去灵魂一样瘫着,不要继续往下按键。先回去查控制器加载时序。</p>
 <h3 id="imu">验证二:点云和 IMU 是否都在出<a class="headerlink" href="#imu" title="锚点链接">&para;</a></h3>
 <p>打开新终端,抽查两个核心传感器:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># 看 VLP-16 点云有没有在发</span>
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
-</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/velodyne_points<span class="w"> </span>--once
-</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>
-</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="c1"># 看 IMU 有没有在发</span>
-</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/imu/data<span class="w"> </span>--once
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># 看 VLP-16 点云有没有在发</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/velodyne_points<span class="w"> </span>--once
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="c1"># 看 IMU 有没有在发</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/imu/data<span class="w"> </span>--once
 </span></code></pre></div>
 <p>你还可以进一步确认点云频率:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># VLP-16 仿真插件默认是 10 Hz</span>
-</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nb">source</span><span class="w"> </span>~/go2_sim_ws/install/setup.bash
-</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>ros2<span class="w"> </span>topic<span class="w"> </span>hz<span class="w"> </span>/velodyne_points
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># VLP-16 仿真插件默认是 10 Hz</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>./run_sim.sh<span class="w"> </span>ros2<span class="w"> </span>topic<span class="w"> </span>hz<span class="w"> </span>/velodyne_points
 </span></code></pre></div>
 <h3 id="_26">验证三:键盘控制是否真的生效<a class="headerlink" href="#_26" title="锚点链接">&para;</a></h3>
 <p>按一次前进或转向键,你应该同时看到三件事:</p>
@@ -3288,19 +3301,19 @@
 <p><strong>现象</strong>:你把后续的 <code>liorf</code>、<code>sc_pgo</code> 之类包也一起拉进工作区后,<code>colcon build</code> 在 CMake 配置阶段直接炸掉,日志里能看到 <code>jsoncpp</code>、策略版本或查找模块相关错误。</p>
 <p><strong>原因</strong>:这通常不是 Gazebo 本体坏了,而是某些第三方包的 CMake 写法比较老,在你当前系统上的 CMake 策略版本下不够稳。</p>
 <p><strong>解决</strong>:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># 先用更保守的 CMake 策略版本重跑</span>
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
-</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--symlink-install<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">    </span>--cmake-args<span class="w"> </span>-DCMAKE_POLICY_VERSION_MINIMUM<span class="o">=</span><span class="m">3</span>.5
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># 先用更保守的 CMake 策略版本重跑</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nb">cd</span><span class="w"> </span>~/go2_sim_ws
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--symlink-install<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">    </span>--cmake-args<span class="w"> </span>-DCMAKE_POLICY_VERSION_MINIMUM<span class="o">=</span><span class="m">3</span>.5
 </span></code></pre></div>
 <p>如果还是卡在 <code>jsoncpp</code>,再补系统依赖:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>libjsoncpp-dev<span class="w"> </span>pkg-config
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>libjsoncpp-dev<span class="w"> </span>pkg-config
 </span></code></pre></div>
 <p>对那种老 CMakeLists,可以显式改成:</p>
-<div class="language-cmake highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nb">find_package</span><span class="p">(</span><span class="s">PkgConfig</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
-</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nb">pkg_check_modules</span><span class="p">(</span><span class="s">JSONCPP</span><span class="w"> </span><span class="s">jsoncpp</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
-</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nb">include_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">JSONCPP_INCLUDE_DIRS</span><span class="o">}</span><span class="p">)</span>
-</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="nb">link_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">JSONCPP_LIBRARY_DIRS</span><span class="o">}</span><span class="p">)</span>
+<div class="language-cmake highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nb">find_package</span><span class="p">(</span><span class="s">PkgConfig</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nb">pkg_check_modules</span><span class="p">(</span><span class="s">JSONCPP</span><span class="w"> </span><span class="s">jsoncpp</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nb">include_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">JSONCPP_INCLUDE_DIRS</span><span class="o">}</span><span class="p">)</span>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="nb">link_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">JSONCPP_LIBRARY_DIRS</span><span class="o">}</span><span class="p">)</span>
 </span></code></pre></div>
 </div>
 <div class="admonition bug">
@@ -3319,20 +3332,31 @@
 <p><strong>现象</strong>:你不止 <code>xacro</code> 报错,连 mesh 加载、<code>file://</code> URI、RViz 模型显示都开始抽风。</p>
 <p><strong>原因</strong>:<code>xacro</code> 只是第一层。后面 mesh URI、Gazebo 资源路径也会继续被空格污染。</p>
 <p><strong>解决</strong>:最实用的补救不是全仓搜改,而是给工作区做一层无空格软链接:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># 给带空格的工作区做一层干净入口</span>
-</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>ln<span class="w"> </span>-sfn<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/我的原始路径/项目目录&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/go2_sim_ws_alias&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># 给带空格的工作区做一层干净入口</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>ln<span class="w"> </span>-sfn<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/我的原始路径/项目目录&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/go2_sim_ws_alias&quot;</span>
 </span></code></pre></div>
 <p>然后后续统一从这个无空格路径 <code>source install/setup.bash</code>。这招很土,但真有用。</p>
 </div>
 <div class="admonition bug">
-<p class="admonition-title">坑 4: Gazebo 起了,ROS2 节点却集体失联</p>
-<p><strong>现象</strong>:<code>ros2 topic list</code> 看起来怪怪的,节点发现不稳定,或者一开仿真就出现 DDS 通信异常。</p>
-<p><strong>原因</strong>:你之前为了连真机把 <code>CYCLONEDDS_URI</code> 绑到了某块有线网卡上,现在那块网卡没在用,但环境变量还在。</p>
-<p><strong>解决</strong>:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># 最快的排查办法</span>
-</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="nb">unset</span><span class="w"> </span>CYCLONEDDS_URI
+<p class="admonition-title">坑 4: spawn_entity.py 卡在 <code>Waiting for entity xml on /robot_description</code></p>
+<p><strong>现象</strong>:Gazebo 起来了、<code>robot_state_publisher</code> 也把所有 link 打出来了,但 <code>spawn_entity.py-7</code> 这一节的日志永远停在:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>[spawn_entity]: Loading entity published on topic /robot_description
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>[spawn_entity]: Waiting for entity xml on /robot_description
 </span></code></pre></div>
-<p>如果你希望仿真和真机来回切更稳,就用本章前面的 <code>cyclonedds-lo.xml</code>,让仿真显式走 <code>lo</code>。</p>
+<p>模型一直不出现,后续 <code>controller_manager</code> 也没法建立,整条链从这里死。</p>
+<p><strong>原因</strong>:真机章节里为了连 Go2 实体,通常会设置 <code>RMW_IMPLEMENTATION=rmw_cyclonedds_cpp</code> + 一份绑网卡的 <code>CYCLONEDDS_URI</code>。仿真里 <code>/robot_description</code> 是 latched(<code>transient_local</code>)话题,Gazebo 内嵌的 ROS 节点在当前 CycloneDDS 配置下<strong>完不成 QoS 握手</strong>,订阅者拿不到已经发布的 URDF。</p>
+<p><strong>解决</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># 仿真终端里显式清掉真机 DDS 绑定</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="nb">unset</span><span class="w"> </span>CYCLONEDDS_URI
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="nb">unset</span><span class="w"> </span>RMW_IMPLEMENTATION
+</span></code></pre></div>
+<p>然后重新 <code>source install/setup.bash</code> 再 launch。细节见本章"仿真开工前:清掉真机遗留的 DDS 绑定"一节,建议直接用那里的 <code>run_sim.sh</code> 包一层。</p>
+</div>
+<div class="admonition bug">
+<p class="admonition-title">坑 4.5: Gazebo 起了,ROS2 节点发现整体发抽</p>
+<p><strong>现象</strong>:不限于 spawn_entity,<code>ros2 topic list</code> 看起来怪怪的、节点偶发失联、topic 订阅率莫名其妙地低。</p>
+<p><strong>原因</strong>:和坑 4 是同一根源——残留的真机 DDS 配置干扰了仿真节点的发现/QoS。</p>
+<p><strong>解决</strong>:先按坑 4 的 unset 方式清干净再判断。如果清完还抽,才继续去查防火墙、domain id、多 ROS 版本混装这些方向。</p>
 </div>
 <div class="admonition bug">
 <p class="admonition-title">坑 5: 控制器没加载,Go2 软趴趴地躺地上</p>
