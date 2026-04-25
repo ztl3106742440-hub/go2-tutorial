@@ -2475,29 +2475,45 @@
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>colcon<span class="w"> </span>build<span class="w"> </span>--packages-select<span class="w"> </span>go2_tutorial_inter<span class="w"> </span>go2_tutorial_py
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
 </span></code></pre></div>
-<p>第一终端启动 Action 服务端:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 启动 Nav Action 服务端</span>
+<div class="admonition danger">
+<p class="admonition-title">🚨 跑之前一定要先起 driver</p>
+<p>本章 Action 的“到达判定”完全依赖 <code>/odom</code> 实时刷新（详见下方<a href="#3">常见问题 3</a>）。如果不先启动 driver，<code>/odom</code> 没有数据，距离会永远卡在初始值，任务永远不会结束。</p>
+<p><strong>务必先起 driver,再跑 server / client。</strong></p>
+</div>
+<p>第一终端启动 driver(提供 <code>/odom</code> 与控制链路):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 启动 Go2 driver,让 /odom 和 /api/sport/request 通起来</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_server
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_driver_py<span class="w"> </span>driver.launch.py<span class="w"> </span>use_rviz:<span class="o">=</span><span class="nb">false</span>
 </span></code></pre></div>
-<p>第二终端启动客户端，让机器人前进 <code>1.0</code> 米:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 发送一个 1.0 米的前进目标</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_client<span class="w"> </span><span class="m">1</span>.0
+<p>启动后，可以另开一个终端确认 <code>/odom</code> 真的在出数据再继续(没数据就先回第 6 章排查):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 看 /odom 频率（一般 10~50 Hz）以及一次实际坐标</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span>hz<span class="w"> </span>/odom
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/odom<span class="w"> </span>--once
 </span></code></pre></div>
-<p>也可以不用客户端，直接从终端发 Action Goal:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 直接从命令行发送 Goal，并持续查看反馈</span>
+<p>第二终端启动 Action 服务端:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 启动 Nav Action 服务端</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>ros2<span class="w"> </span>action<span class="w"> </span>send_goal<span class="w"> </span>/nav<span class="w"> </span>go2_tutorial_inter/action/Nav<span class="w"> </span><span class="s2">&quot;{goal: 1.0}&quot;</span><span class="w"> </span>--feedback
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_server
 </span></code></pre></div>
-<p>如果你想让机器人走得慢一点，可以在服务端启动时改参数:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 把前进速度改成 0.2 m/s</span>
+<p>第三终端启动客户端，让机器人前进 <code>1.0</code> 米:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 发送一个 1.0 米的前进目标</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_server<span class="w"> </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>x:<span class="o">=</span><span class="m">0</span>.2
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_client<span class="w"> </span><span class="m">1</span>.0
+</span></code></pre></div>
+<p>也可以不用客户端，直接从终端发 Action Goal:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 直接从命令行发送 Goal，并持续查看反馈</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>ros2<span class="w"> </span>action<span class="w"> </span>send_goal<span class="w"> </span>/nav<span class="w"> </span>go2_tutorial_inter/action/Nav<span class="w"> </span><span class="s2">&quot;{goal: 1.0}&quot;</span><span class="w"> </span>--feedback
+</span></code></pre></div>
+<p>如果你想让机器人走得慢一点，可以在服务端启动时改参数:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># 把前进速度改成 0.2 m/s</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nb">cd</span><span class="w"> </span>~/unitree_go2_ws
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nb">source</span><span class="w"> </span>install/setup.bash
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>go2_tutorial_py<span class="w"> </span>go2_nav_server<span class="w"> </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>x:<span class="o">=</span><span class="m">0</span>.2
 </span></code></pre></div>
 <h2 id="_8">结果验证<a class="headerlink" href="#_8" title="锚点链接">&para;</a></h2>
 <p>这一章跑通后，你应该能确认下面几件事:</p>
@@ -2508,14 +2524,14 @@
 <li>服务端在任务结束后会把动作切回 <code>STOPMOVE</code></li>
 </ol>
 <p>推荐按下面顺序自检:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 看 Action Server 是否上线</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>ros2<span class="w"> </span>action<span class="w"> </span>list<span class="w"> </span>-t
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># 查看接口定义</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>go2_tutorial_inter/action/Nav
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># 观察 Go2 控制消息</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># 看 Action Server 是否上线</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>ros2<span class="w"> </span>action<span class="w"> </span>list<span class="w"> </span>-t
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># 查看接口定义</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>ros2<span class="w"> </span>interface<span class="w"> </span>show<span class="w"> </span>go2_tutorial_inter/action/Nav
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1"># 观察 Go2 控制消息</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
 </span></code></pre></div>
 <p>当任务执行中时，<code>/api/sport/request</code> 的 <code>api_id</code> 应该是 <code>MOVE</code>；到达终点后，它应切回 <code>STOPMOVE</code>。</p>
 <p><img alt="终端中显示 /nav feedback 与最终 point 结果" src="../../assets/images/09-action-nav-feedback.png" width="600" /></p>
@@ -2545,16 +2561,16 @@
 <p><strong>这是本章最容易踩的坑,也是和 Topic/Service 最大的工程差异</strong>:Action 的"结束时机"不是靠客户端决定,而是靠服务端内部判断。而本章的判断依据就是 <code>/odom</code> 这条链。<code>/odom</code> 一旦不通,整个 Action 的生命周期就锁死。</p>
 </div>
 <p><strong>排查步骤</strong>:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># 1. /odom 到底有没有数据</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/odom<span class="w"> </span>--once
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># 2. 如果没数据,先回第 6 章把 driver 跑起来</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_driver_py<span class="w"> </span>driver.launch.py<span class="w"> </span>use_rviz:<span class="o">=</span><span class="nb">false</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># 3. 有数据的话,看服务端是不是在持续发 MOVE</span>
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="c1"># 4. 确认机器人真的在物理上移动,而不是动作被卡住</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># 1. /odom 到底有没有数据</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/odom<span class="w"> </span>--once
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># 2. 如果没数据,先回第 6 章把 driver 跑起来</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>ros2<span class="w"> </span>launch<span class="w"> </span>go2_driver_py<span class="w"> </span>driver.launch.py<span class="w"> </span>use_rviz:<span class="o">=</span><span class="nb">false</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1"># 3. 有数据的话,看服务端是不是在持续发 MOVE</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/api/sport/request<span class="w"> </span>--once
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="c1"># 4. 确认机器人真的在物理上移动,而不是动作被卡住</span>
 </span></code></pre></div>
 <p>如果前三步都正常但机器人没动、<code>/odom</code> 也没变,那问题就不在本章 Action 代码,而是控制链到机器人之间断了——回到第 4/6 章先把基础链路打通,再回来跑本章。</p>
 <h3 id="4">4. 任务结束了，但机器人没有立刻停稳<a class="headerlink" href="#4" title="锚点链接">&para;</a></h3>
