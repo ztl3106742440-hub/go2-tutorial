@@ -983,10 +983,6 @@ def generate_launch_description() -> LaunchDescription:
 | `/cmd_vel_behavior` | 只有触发恢复动作时才会有明显输出 |
 | `/cmd_vel` | `twist_mux` 仲裁后的最终速度,也是第 4 章桥接真正订阅的输入 |
 
-这张图应该是你最终想看到的 RViz 画面:
-
-![TODO:RViz 中同时显示 map、particlecloud、全局路径、局部路径和 Nav2 Goal 标记](../assets/images/12-nav2-rviz-goal.png){ width="600" }
-
 ## 编译与运行
 
 ### 编译 `go2_navigation`
@@ -1037,11 +1033,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard \
 
 下面的视频展示了第 12 章 Nav2 基线的实机效果:RViz 中完成初始位姿设置后,Nav2 依据第 11 章保存的地图规划路径,再通过 `/cmd_vel_nav → twist_mux → /cmd_vel → go2_twist_bridge` 这条链路驱动 Go2 执行到点任务。看视频时重点盯三件事:粒子云是否收敛、路径是否稳定刷新、Go2 实际运动方向是否和 RViz 里的机器人朝向一致。
 
-<video controls width="720">
-  <source src="../assets/videos/12-nav2-demo.webm" type="video/webm">
-  <source src="../assets/videos/12-nav2-demo.mp4" type="video/mp4">
-  你的浏览器不支持 video 标签,可以直接打开 `docs/assets/videos/12-nav2-demo.mp4` 查看演示。
-</video>
+![Nav2 基线实机演示:RViz 中显示全局路径、局部代价地图和 Go2 当前位姿,右侧终端显示 planner_server、controller_server、behavior_server、bt_navigator 等 Nav2 生命周期节点激活日志](../assets/images/12-nav2-demo.png){ width="720" }
 
 !!! tip "推荐的上电顺序"
     第一次跑这章,我建议你就记这一套顺序:

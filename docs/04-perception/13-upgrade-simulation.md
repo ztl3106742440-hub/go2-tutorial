@@ -350,47 +350,54 @@ sudo rosdep init
 rosdep update
 ```
 
-### 准备一个“只走回环网卡”的 DDS 配置
+### 仿真开工前:清掉真机遗留的 DDS 绑定
 
-如果你前面一直在连真机,很可能已经把 `CYCLONEDDS_URI` 绑到了某块有线网卡上。真机断开后,仿真节点就容易出现莫名其妙的 DDS 报错。
+这是本章最容易被忽视、但一旦踩到就很难定位的一步。
 
-最稳的做法是给仿真单独准备一份只走 `lo` 的配置。
+前面 4–12 章为了连真机,我们通常会:
 
-比如你可以先建目录:
+- `export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp`
+- `export CYCLONEDDS_URI=file://.../cyclonedds-xxx.xml`(把 DDS 绑到实机网段或某块有线网卡)
 
-```bash
-mkdir -p ~/go2_sim_ws/config
-```
+到了第 13 章,场景完全反过来:所有节点(包括 Gazebo 内嵌的 ROS 节点)都只在本机互相发现、互相订阅。如果真机的 DDS 绑定还留着,你会遇到一个**非常迷惑**的现象:
 
-然后在 `config/cyclonedds-lo.xml` 里写入:
+- Gazebo 启动了
+- `robot_state_publisher` 也起来了、能看到全部 link
+- 但 `spawn_entity.py` 一直卡在 `Waiting for entity xml on /robot_description`,模型永远进不了 Gazebo
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<CycloneDDS xmlns="https://cdds.io/config">
-  <Domain id="any">
-    <General>
-      <Interfaces>
-        <NetworkInterface name="lo"/>
-      </Interfaces>
-      <AllowMulticast>false</AllowMulticast>
-    </General>
-  </Domain>
-</CycloneDDS>
-```
+原因是 `/robot_description` 是 **latched / transient_local** 话题,需要 DDS 在 QoS 握手时补发历史消息给晚加入的订阅者。真机场景下那份 CycloneDDS 配置,对 Gazebo 内嵌 ROS 节点来说并不总能完成这次握手。
 
-本章运行仿真前,只要在终端里临时导出它:
+**推荐做法:仿真终端里直接 unset,让 ROS 2 回落到默认 FastDDS。**
 
 ```bash
-# 让 DDS 在仿真时只走本机回环
-export CYCLONEDDS_URI=file://$HOME/go2_sim_ws/config/cyclonedds-lo.xml
-```
-
-如果你没有绑过真机 DDS,也可以简单粗暴地先执行:
-
-```bash
-# 最简单的排查方式:先把旧的 DDS 绑定清掉
+# 开每一个仿真终端前都执行这两行
 unset CYCLONEDDS_URI
+unset RMW_IMPLEMENTATION
 ```
+
+这不是一条"绕过"建议,而是本书验证下来**在当前机器上最稳**的做法。默认 FastDDS 对 Gazebo 的 latched 话题握手很顺,spawn_entity 能在 1–2 秒内拿到 URDF。
+
+为了避免每次手抖忘记,建议在 `~/go2_sim_ws/` 根目录放一个小启动脚本:
+
+```bash
+# ~/go2_sim_ws/run_sim.sh
+#!/bin/bash
+# 仿真专用环境:清掉真机 DDS 绑定,用默认 FastDDS
+unset CYCLONEDDS_URI
+unset RMW_IMPLEMENTATION
+source /opt/ros/humble/setup.bash
+source "$HOME/go2_sim_ws/install/setup.bash"
+exec "$@"
+```
+
+```bash
+chmod +x ~/go2_sim_ws/run_sim.sh
+```
+
+之后所有仿真命令都用 `./run_sim.sh ros2 launch ...` 的形式跑,就不会再被残留环境变量咬。
+
+!!! warning "为什么不推荐 `CYCLONEDDS_URI=file://.../cyclonedds-lo.xml` 这条路"
+    之前这一节曾写过一份"只走 `lo` 的 CycloneDDS 配置"方案,思路是让仿真和真机可以并存切换。但实测下来,这种 loopback-only 配置会让 `spawn_entity.py` 始终收不到 `robot_state_publisher` 的 latched 话题,卡在 `Waiting for entity xml`。想走这条路可以,但要额外调 `AllowMulticast`、`Peers` 等参数,不在本章射程内。**本章的保底方案就是 unset**。
 
 ## 实现步骤
 
@@ -612,8 +619,8 @@ source install/setup.bash
 
 ```bash
 # 启动 Go2 + VLP-16 仿真,并顺手打开 RViz
-source ~/go2_sim_ws/install/setup.bash
-ros2 launch go2_config gazebo_velodyne.launch.py rviz:=true
+cd ~/go2_sim_ws
+./run_sim.sh ros2 launch go2_config gazebo_velodyne.launch.py rviz:=true
 ```
 
 默认情况下,这个 launch 会做三件事:
@@ -640,8 +647,8 @@ ros2 launch go2_config gazebo_velodyne.launch.py rviz:=true
 
 ```bash
 # 用仓库里的键盘遥控节点控制仿真中的 Go2
-source ~/go2_sim_ws/install/setup.bash
-ros2 run champ_teleop champ_teleop.py \
+cd ~/go2_sim_ws
+./run_sim.sh ros2 run champ_teleop champ_teleop.py \
     --ros-args -p cmd_vel_topic:=/cmd_vel
 ```
 
@@ -654,8 +661,8 @@ ros2 run champ_teleop champ_teleop.py \
 
 ```bash
 # 最小可用方案:标准 Twist 键盘控制
-source ~/go2_sim_ws/install/setup.bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard \
+cd ~/go2_sim_ws
+./run_sim.sh ros2 run teleop_twist_keyboard teleop_twist_keyboard \
     --ros-args -r cmd_vel:=/cmd_vel
 ```
 
@@ -668,29 +675,32 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard \
 
 ### 终端 1:启动仿真
 
-如果你之前配置过真机 DDS,先切回回环网卡:
-
-```bash
-# 仿真时优先走本机回环,别让旧的真机 DDS 配置捣乱
-export CYCLONEDDS_URI=file://$HOME/go2_sim_ws/config/cyclonedds-lo.xml
-```
-
-然后启动 Gazebo:
+直接走本章前面准备好的 `run_sim.sh`,它会在同一行里把真机 DDS 绑定清掉、再 source 仿真工作空间:
 
 ```bash
 # 启动 Gazebo + Go2 + VLP-16 + RViz
+cd ~/go2_sim_ws
+./run_sim.sh ros2 launch go2_config gazebo_velodyne.launch.py rviz:=true
+```
+
+没准备 `run_sim.sh`?那就每次手动清一次:
+
+```bash
+# 手动版:每个仿真终端前都要执行
+unset CYCLONEDDS_URI
+unset RMW_IMPLEMENTATION
 source ~/go2_sim_ws/install/setup.bash
 ros2 launch go2_config gazebo_velodyne.launch.py rviz:=true
 ```
 
 ### 终端 2:启动键盘控制
 
-等 Gazebo 完全加载、Go2 站稳以后,再开第二个终端:
+等 Gazebo 完全加载、Go2 站稳以后,再开第二个终端(同样用 `run_sim.sh` 包一层):
 
 ```bash
 # 键盘控制,让 Go2 在室内世界里走起来
-source ~/go2_sim_ws/install/setup.bash
-ros2 run champ_teleop champ_teleop.py \
+cd ~/go2_sim_ws
+./run_sim.sh ros2 run champ_teleop champ_teleop.py \
     --ros-args -p cmd_vel_topic:=/cmd_vel
 ```
 
@@ -698,8 +708,8 @@ ros2 run champ_teleop champ_teleop.py \
 
 ```bash
 # 只用标准 Twist 键盘也可以
-source ~/go2_sim_ws/install/setup.bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard \
+cd ~/go2_sim_ws
+./run_sim.sh ros2 run teleop_twist_keyboard teleop_twist_keyboard \
     --ros-args -r cmd_vel:=/cmd_vel
 ```
 
@@ -743,19 +753,19 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard \
 
 ```bash
 # 看 VLP-16 点云有没有在发
-source ~/go2_sim_ws/install/setup.bash
-ros2 topic echo /velodyne_points --once
+cd ~/go2_sim_ws
+./run_sim.sh ros2 topic echo /velodyne_points --once
 
 # 看 IMU 有没有在发
-ros2 topic echo /imu/data --once
+./run_sim.sh ros2 topic echo /imu/data --once
 ```
 
 你还可以进一步确认点云频率:
 
 ```bash
 # VLP-16 仿真插件默认是 10 Hz
-source ~/go2_sim_ws/install/setup.bash
-ros2 topic hz /velodyne_points
+cd ~/go2_sim_ws
+./run_sim.sh ros2 topic hz /velodyne_points
 ```
 
 ### 验证三:键盘控制是否真的生效
@@ -833,19 +843,34 @@ ros2 topic hz /velodyne_points
 
     然后后续统一从这个无空格路径 `source install/setup.bash`。这招很土,但真有用。
 
-!!! bug "坑 4: Gazebo 起了,ROS2 节点却集体失联"
-    **现象**:`ros2 topic list` 看起来怪怪的,节点发现不稳定,或者一开仿真就出现 DDS 通信异常。
+!!! bug "坑 4: spawn_entity.py 卡在 `Waiting for entity xml on /robot_description`"
+    **现象**:Gazebo 起来了、`robot_state_publisher` 也把所有 link 打出来了,但 `spawn_entity.py-7` 这一节的日志永远停在:
 
-    **原因**:你之前为了连真机把 `CYCLONEDDS_URI` 绑到了某块有线网卡上,现在那块网卡没在用,但环境变量还在。
+    ```text
+    [spawn_entity]: Loading entity published on topic /robot_description
+    [spawn_entity]: Waiting for entity xml on /robot_description
+    ```
+
+    模型一直不出现,后续 `controller_manager` 也没法建立,整条链从这里死。
+
+    **原因**:真机章节里为了连 Go2 实体,通常会设置 `RMW_IMPLEMENTATION=rmw_cyclonedds_cpp` + 一份绑网卡的 `CYCLONEDDS_URI`。仿真里 `/robot_description` 是 latched(`transient_local`)话题,Gazebo 内嵌的 ROS 节点在当前 CycloneDDS 配置下**完不成 QoS 握手**,订阅者拿不到已经发布的 URDF。
 
     **解决**:
 
     ```bash
-    # 最快的排查办法
+    # 仿真终端里显式清掉真机 DDS 绑定
     unset CYCLONEDDS_URI
+    unset RMW_IMPLEMENTATION
     ```
 
-    如果你希望仿真和真机来回切更稳,就用本章前面的 `cyclonedds-lo.xml`,让仿真显式走 `lo`。
+    然后重新 `source install/setup.bash` 再 launch。细节见本章"仿真开工前:清掉真机遗留的 DDS 绑定"一节,建议直接用那里的 `run_sim.sh` 包一层。
+
+!!! bug "坑 4.5: Gazebo 起了,ROS2 节点发现整体发抽"
+    **现象**:不限于 spawn_entity,`ros2 topic list` 看起来怪怪的、节点偶发失联、topic 订阅率莫名其妙地低。
+
+    **原因**:和坑 4 是同一根源——残留的真机 DDS 配置干扰了仿真节点的发现/QoS。
+
+    **解决**:先按坑 4 的 unset 方式清干净再判断。如果清完还抽,才继续去查防火墙、domain id、多 ROS 版本混装这些方向。
 
 !!! bug "坑 5: 控制器没加载,Go2 软趴趴地躺地上"
     **现象**:Gazebo 里机器人 spawn 出来了,但腿不受控,或者日志里有 `Controller 'xxx' not found`。

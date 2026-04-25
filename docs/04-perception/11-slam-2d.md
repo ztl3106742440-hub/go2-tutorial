@@ -596,10 +596,7 @@ RViz 中同时看到绿色 `/scan`、白色/灰色栅格地图和机器人模型
 
 ![RViz 建图结果:左侧 Displays 面板显示 map/scan,主视图显示绿色激光扫描和栅格地图](../assets/images/11-slam-rviz-mapping.png){ width="720" }
 
-<video controls width="720">
-  <source src="../assets/videos/11-slam-demo.webm" type="video/webm">
-  你的浏览器不支持 video 标签,可以直接打开 `docs/assets/videos/11-slam-demo.webm` 查看演示。
-</video>
+![SLAM 实机演示:RViz 中 slam_toolbox 增量构建栅格地图,右侧终端可看到 pointcloud_timestamp_fix、slam_toolbox 等节点日志](../assets/images/11-slam-demo.png){ width="720" }
 
 ### 命令行检查
 
