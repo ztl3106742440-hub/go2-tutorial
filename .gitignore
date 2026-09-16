@@ -5,3 +5,12 @@ __pycache__/
 .venv/
 venv/
 node_modules/
+
+# Repository organization: generated files and local credentials
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.local
+site/
+*.egg-info/

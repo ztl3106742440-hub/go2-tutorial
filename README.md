@@ -1,66 +1,53 @@
-# Go2 机器狗实验指导书
-教材仓库：https://ztl3106742440-hub.github.io/go2-tutorial/
-面向本科小白的 Unitree Go2 + ROS2 二次开发实验教程。源文件为 Markdown，通过 [MkDocs-Material](https://squidfunk.github.io/mkdocs-material/) 构建为可交互的静态网站。
+<!-- 小co改动 2026-09-16：按用户要求整理仓库定位、功能、克隆运行说明和合作入口。 -->
+# Go2 ROS2 Tutorial · 机器狗开发教程与项目导航
 
----
+Unitree Go2 + ROS 2 中文实验教程，涵盖环境通信、运动接口、传感器、SLAM、导航、语音与视觉，并提供机器人项目分类导航。
+
+[在线阅读](https://ztl3106742440-hub.github.io/go2-tutorial/) · [项目分类与合作](docs/projects/index.md)
+
+## 从哪里开始
+
+| 需求 | 入口 |
+| --- | --- |
+| 学习 Go2 / ROS 2 二次开发 | `docs/00-overview/` 与教材章节 |
+| 获取二维建图导航代码 | [go2-ros2-navigation](https://github.com/ztl3106742440-hub/go2-ros2-navigation) |
+| 获取实机接口与 Python SDK 示例 | [go2-ros2-sdk](https://github.com/ztl3106742440-hub/go2-ros2-sdk) |
+| 了解巡检、视觉、语音和移动端 | [项目分类](docs/projects/index.md) |
 
 ## 本地预览
 
-```bash
-# 1. 装依赖(只需一次)
-pip install -r requirements.txt
-
-# 2. 启动预览(每次)
-./serve.sh
-# 浏览器打开 http://127.0.0.1:8000,改动 Markdown 会自动热重载
-```
-
-构建成静态站点:
+完成下方克隆命令后执行：
 
 ```bash
-./build.sh
-# 产物在 ./site/,可直接扔服务器 / 打压缩包分享
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m mkdocs serve
+# 构建静态站点
+python -m mkdocs build
 ```
 
----
+浏览器打开终端显示的本地地址，默认 http://127.0.0.1:8000 。
 
-## 目录结构
+## 内容边界
 
-```
-go2实验指导书/
-├── mkdocs.yml              # MkDocs 配置(主题/导航树/插件)
-├── requirements.txt        # Python 依赖
-├── serve.sh                # 本地预览
-├── build.sh                # 构建静态站
-├── README.md               # 本文件
-├── docs/                   # ★ 教材源文件(Markdown)
-│   ├── index.md            # 首页
-│   ├── assets/             # 图片/视频/CSS
-│   ├── 00-overview/        # 开篇
-│   ├── 01-foundation/      # 基础篇:环境与通信
-│   ├── 02-packages/        # 功能包开发
-│   ├── 03-communication/   # ROS2 通信机制
-│   ├── 04-perception/      # 感知与建图
-│   ├── 05-interaction/     # 交互(语音/视觉)
-│   └── 06-integration/     # 综合篇
-└── meta/                   # ★ 编写规范(不参与构建)
-    ├── 编写指南.md           # 所有章节的元规范,写/改章节前必读
-    ├── 命名约定.md           # 工作空间/包/节点命名规范
-    └── 章节大纲.md           # 总章节规划与进度
+教材源文件位于 `docs/`，配置为 `mkdocs.yml`。项目介绍明确区分公开源码、私有系统、历史验证和待实现能力。内部设备配置、凭据、原始采集数据与完整商业/课程交付资料不在此公开。
+
+## 获取与更新
+
+安装 Git 后执行：
+
+```bash
+git clone https://github.com/ztl3106742440-hub/go2-tutorial.git
+cd go2-tutorial
+# 在没有本地未提交改动时获取更新
+git pull --ff-only
 ```
 
----
+保留自己的修改：先 `git switch -c my-experiment`，再 `git add <修改的文件>`、`git commit -m "说明修改目的"`。没有本仓库写权限时先 Fork，再向自己的仓库推送分支。
 
-## 命名/路径约定(给所有协作者)
+## 交流与合作
 
-- **顶层目录**用中文:`go2实验指导书/`
-- **内部目录**用英文:`docs/04-perception/` → URL 干净
-- **章节文件名**用数字前缀 + 英文短名:`11-slam-2d.md`
-- **侧边栏标题**在 `mkdocs.yml` 的 `nav` 里用中文指定
-- **教材正文不出现任何本地路径**(代码路径只存在于 Codex 交接文件中)
+有 **Go2 机器狗二次开发、ROS 2 集成、导航与感知实验、机器人教学或项目合作** 需求，欢迎通过 [GitHub Issues](https://github.com/ztl3106742440-hub/go2-tutorial/issues) 联系，说明需求目标、硬件、系统版本和期望交付内容。
 
----
-
-## 给 Codex 的指引
-
-所有填充章节的任务,**先读 `meta/编写指南.md` 和 `meta/命名约定.md`**,再对照样章 `docs/04-perception/11-slam-2d.md` 的结构复刻。
+涉及项目私有资料时，请先在公开 Issue 留下不敏感的需求概要，约定联系渠道后再交流。项目维护者：[TIlor](https://github.com/ztl3106742440-hub)。

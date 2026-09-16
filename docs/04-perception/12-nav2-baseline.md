@@ -1119,8 +1119,8 @@ ros2 topic list | grep -E "/plan|/local_plan|/global_costmap|/local_costmap|/par
 ```bash
 # 建议先保留原图备份,再把清理结果覆盖成 Nav2 实际读取的 my_map.pgm
 python3 "/home/ztl/Desktop/claude code/clean_map.py" \
-    /home/ztl/go2_tutorial_ws/maps/my_map.pgm.bak \
-    /home/ztl/go2_tutorial_ws/maps/my_map.pgm \
+    "/home/ztl/Obsidian/go2实验指导书/验证代码归档_2026-06-12/地图/my_map.pgm.bak" \
+    "/home/ztl/Obsidian/go2实验指导书/验证代码归档_2026-06-12/地图/my_map.pgm" \
     6
 ```
 

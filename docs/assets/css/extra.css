@@ -25,3 +25,9 @@
 .md-typeset .admonition {
   font-size: 0.95em;
 }
+
+/* 页脚版权信息轻量化，别喧宾夺主 */
+.md-copyright {
+  font-size: 0.72rem;
+  opacity: 0.78;
+}
